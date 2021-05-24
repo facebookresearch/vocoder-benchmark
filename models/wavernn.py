@@ -114,6 +114,24 @@ class WaveRNN(Vocoder):
         Called after model creation.
         """
 
+    def loss(self, spectrograms: Tensor, waveforms: Tensor) -> Tensor:
+        """
+        Compute loss on a batch.
+
+        Returns:
+          The negative log likelihood loss.
+        """
+        target = self.compand(waveforms[:, 1:]).long()
+
+        # Forward pass.
+        output = self.model(  # pyre-ignore
+            waveforms.unsqueeze(1), spectrograms.unsqueeze(1)
+        )
+        output = output.squeeze(1)[:, :-1, :]
+        loss = self.criterion(output.transpose(1, 2), target)
+
+        return loss
+
     def train_step(
         self, spectrograms: Tensor, waveforms: Tensor
     ) -> Tuple[Tensor, Dict[str, Tensor]]:
@@ -125,14 +143,8 @@ class WaveRNN(Vocoder):
           to Tensorboard. The first loss is printed to the console and logged
           to Tensorboard.
         """
-        target = self.compand(waveforms[:, 1:]).long()
-
         # Forward pass.
-        output = self.model(  # pyre-ignore
-            waveforms.unsqueeze(1), spectrograms.unsqueeze(1)
-        )
-        output = output.squeeze(1)[:, :-1, :]
-        loss = self.criterion(output.transpose(1, 2), target)
+        loss = self.loss(spectrograms, waveforms)
 
         # Backward pass.
         self.optimizer.zero_grad()
@@ -150,17 +162,8 @@ class WaveRNN(Vocoder):
         Returns:
           A dictionary mapping loss name (e.g. 'nll_loss') to the validation value.
         """
-        target = self.compand(waveforms[:, 1:]).long()
-
-        # Forward pass.
-        output = self.model(  # pyre-ignore
-            waveforms.unsqueeze(1), spectrograms.unsqueeze(1)
-        )
-        output = output[:, :-1].squeeze(1)
-        loss = self.criterion(output.transpose(1, 2), target)
-
         return {
-            "nll_loss": loss.item(),
+            "nll_loss": self.loss(spectrograms, waveforms),
         }
 
     def generate(self, _spectrograms: Tensor) -> Tensor:
