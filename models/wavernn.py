@@ -166,7 +166,7 @@ class WaveRNN(Vocoder):
             "nll_loss": self.loss(spectrograms, waveforms),
         }
 
-    def generate(self, _spectrograms: Tensor) -> Tensor:
+    def generate(self, _spectrograms: Tensor, _training: bool = False) -> Tensor:
         """
         Generate a sample from this model.
 

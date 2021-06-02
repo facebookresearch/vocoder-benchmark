@@ -12,6 +12,8 @@ from typing import Type, List, Union, Dict, Any, Optional, Iterator, Tuple
 
 import click
 import langtech.tts.vocoders.datasets as datasets
+import librosa
+import soundfile
 import torch
 from langtech.tts.vocoders.path_utils import get_default_config_path
 from langtech.tts.vocoders.utils import die_if, hard_exit
@@ -35,7 +37,7 @@ CHECKPOINT_DIR = "checkpoints"
 TENSORBOARD_DIR = "logs"
 
 # How often to run validation set.
-EVAL_FREQUENCY: int = 5_000
+EVAL_FREQUENCY: int = 10_000
 
 # How often to generate samples to put in Tensorboard.
 GENERATE_FREQUENCY: int = 100_000
@@ -165,7 +167,7 @@ class Vocoder(torch.nn.Module):
         """
         raise NotImplementedError("Vocoder subclass must implement validation_losses()")
 
-    def generate(self, _spectrograms: Tensor) -> Tensor:
+    def generate(self, _spectrograms: Tensor, _training: bool = False) -> Tensor:
         """
         Generate a sample from this model.
 
@@ -207,7 +209,7 @@ def create_model_commands(model: Type[Vocoder]) -> click.Group:
         """
         Synthesize with the model.
         """
-        cli_synthesize(name, path, input_file, output_file)
+        cli_synthesize(name, model, path, input_file, output_file)
 
     return group
 
@@ -233,8 +235,8 @@ def cli_train(
     print(f"Training {model_name} model located at {path}.")
 
     model = load_model(model_class, path, eval_mode=False)
-    train_dataloader, valid_dataloader = datasets.load_dataset(
-        dataset_name, model.config.dataset
+    train_dataloader, valid_dataloader, gen_dataloader = datasets.load_dataset(
+        dataset_name, model.config.dataset, GENERATE_NUM_SAMPLES
     )
     train_loop(
         model=model,
@@ -242,6 +244,7 @@ def cli_train(
         log_dir=os.path.join(path, TENSORBOARD_DIR),
         train_set=train_dataloader,
         valid_set=valid_dataloader,
+        generate_set=gen_dataloader,
     )
 
 
@@ -343,13 +346,18 @@ def create_if_missing(
 
 
 def cli_synthesize(
-    model_name: str, path: str, input_file: str, output_file: str
+    model_name: str,
+    model_class: Type[Vocoder],
+    path: str,
+    input_file: str,
+    output_file: str,
 ) -> None:
     """
     Synthesize with the model.
 
     Args:
       model_name: The model type, e.g. 'wavernn'.
+      model_class: The class for the model.
       path: Path to the model directory.
       input_file: Path to an input WAV file.
       output_file: Path where to place output WAV file.
@@ -366,7 +374,22 @@ def cli_synthesize(
     print(f"Synthesizing with {model_name} model located at {path}.")
     print(f"Loading audio features from {input_file}.")
     print(f"Synthesizing waveform into {output_file}.")
-    print("Not implemented yet.")
+
+    # Load the model from disk.
+    model = load_model(model_class, path, eval_mode=True)
+
+    # Load waveform and convert to spectrogram.
+    waveform, sample_rate = librosa.core.load(input_file, sr=None)
+    audio2mel = datasets.Audio2Mel()
+    waveform = torch.from_numpy(waveform).float().unsqueeze(0)
+    spectrogram = audio2mel(waveform)
+
+    if torch.cuda.is_available():
+        spectrogram = spectrogram.cuda()
+
+    # Run the model and write its output.
+    generated = model.generate(spectrogram, False).squeeze(0).cpu().numpy()
+    soundfile.write(output_file, generated, samplerate=sample_rate)
 
 
 # Linter complains that this function is too complex, but it's a bit tricky to
@@ -377,6 +400,7 @@ def train_loop(  # noqa
     log_dir: str,
     train_set: torch.utils.data.DataLoader,
     valid_set: torch.utils.data.DataLoader,
+    generate_set: torch.utils.data.DataLoader,
 ) -> None:
     """
     Run the training loop.
@@ -387,6 +411,7 @@ def train_loop(  # noqa
       log_dir: Where to put the logs.
       train_set: A DataLoader for loading training data.
       valid_set: A DataLoader for loading validation data.
+      generate_set: A DataLoader for loading data to generate audio from.
     """
     writer = SummaryWriter(log_dir=log_dir)
 
@@ -471,7 +496,7 @@ def train_loop(  # noqa
             save_model(model, checkpoint_dir)
 
         if model.global_step % GENERATE_FREQUENCY == 0:
-            generate_tensorboard_samples(model, valid_set, writer)
+            generate_tensorboard_samples(model, generate_set, writer)
 
     print("Completed training.")
     save_model(model, checkpoint_dir)
@@ -601,7 +626,6 @@ def generate_tensorboard_samples(
     model: Vocoder,
     dataloader: torch.utils.data.DataLoader,
     writer: SummaryWriter,
-    n_samples: int = GENERATE_NUM_SAMPLES,
 ) -> None:
     """
     Generate audio samples for a model.
@@ -610,22 +634,24 @@ def generate_tensorboard_samples(
       model: The model for which to compute validation metrics.
       dataloader: The validation data DataLoader.
       writer: Tensorboard to write to.
-      n_samples: How many samples to generate.
     """
-    # Grab needed samples from the dataloader.
-    data_iter = iter(dataloader)
-    data = [next(data_iter) for _ in range(n_samples)]
-
     # Generate the samples from the model.
     with torch.no_grad():
-        wavs = [model.generate(spec) for spec, _wav in data]
+        ground_truth = []
+        generated = []
+        for spec, wav in dataloader:
+            ground_truth.append(wav)
+
+            if torch.cuda.is_available():
+                spec = spec.cuda()
+            generated.append(model.generate(spec, True))
 
     # Write samples, including original if needed, to Tensorboard.
-    for idx, wav in enumerate(wavs):
-        if model.global_step == 0:
+    for idx, wav in enumerate(generated):
+        if model.global_step == GENERATE_FREQUENCY:
             writer.add_audio(
                 f"audio/{idx}_real",
-                data[idx][1],
+                ground_truth[idx],
                 global_step=model.global_step,
                 sample_rate=datasets.AUDIO_SAMPLE_RATE,
             )
@@ -637,6 +663,7 @@ def generate_tensorboard_samples(
         )
 
 
+@torch.no_grad()  # pyre-ignore
 def compute_validation_metrics(
     model: Vocoder, dataloader: torch.utils.data.DataLoader, writer: SummaryWriter
 ) -> None:
@@ -648,22 +675,24 @@ def compute_validation_metrics(
       dataloader: The validation data DataLoader.
       writer: Tensorboard to write to.
     """
+    # Make random number sampling during validation deterministic.
+    torch.manual_seed(0)
+
     losses = []
-    with torch.no_grad():
-        print("Computing validation loss...", flush=True)
+    print("Computing validation loss...", flush=True)
 
-        for spectrograms, waveforms in dataloader:
-            if torch.cuda.is_available():
-                spectrograms = spectrograms.cuda()
-                waveforms = waveforms.cuda()
-            losses.append(model.validation_losses(spectrograms, waveforms))
+    for spectrograms, waveforms in dataloader:
+        if torch.cuda.is_available():
+            spectrograms = spectrograms.cuda()
+            waveforms = waveforms.cuda()
+        losses.append(model.validation_losses(spectrograms, waveforms))
 
-        if not losses:
-            print("No validation data available!")
-            return
+    if not losses:
+        print("No validation data available!")
+        return
 
-        for key in sorted(losses[0].keys()):
-            key_losses = [batch_losses[key] for batch_losses in losses]
-            mean_loss = torch.mean(torch.stack(key_losses)).cpu().numpy().item()
-            print(f"Validation {key}: {mean_loss:.3f}", flush=True)
-            writer.add_scalar("valid/" + key, mean_loss, global_step=model.global_step)
+    for key in sorted(losses[0].keys()):
+        key_losses = [batch_losses[key] for batch_losses in losses]
+        mean_loss = torch.mean(torch.stack(key_losses)).cpu().numpy().item()
+        print(f"Validation {key}: {mean_loss:.3f}", flush=True)
+        writer.add_scalar("valid/" + key, mean_loss, global_step=model.global_step)

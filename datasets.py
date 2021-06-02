@@ -111,6 +111,7 @@ class Audio2Mel(torch.nn.Module):
         Returns:
           Mel spectrograms of shape [batch_size, n_mels, timesteps / hop_length].
         """
+        assert audio.ndim == 2, "Expecting input of shape [batch_size, num_samples]"
         audio = torch.nn.functional.pad(
             audio.unsqueeze(1), (self.padding, self.padding), "reflect"
         ).squeeze(1)
@@ -166,6 +167,7 @@ class VocoderDataset(torch.utils.data.IterableDataset):
         indices: List[Union[str, int]],
         config: DatasetConfig,
         validation: bool,
+        generate: bool,
     ) -> None:
         """
         Create the dataset.
@@ -175,12 +177,14 @@ class VocoderDataset(torch.utils.data.IterableDataset):
           indices: The list of indices.
           config: Configuration for this dataset from the model.
           validation: Whether loading for validation or training.
+          generate: Whether loading for audio generation.
         """
         self.dataset = dataset
         self.indices = indices
         self.config = config
         self.mel = Audio2Mel()
         self.validation = validation
+        self.generate = generate
 
     def __iter__(self) -> Iterator[Tuple[torch.Tensor, torch.Tensor]]:
         """
@@ -192,6 +196,10 @@ class VocoderDataset(torch.utils.data.IterableDataset):
         """
         shuffle_buffer = []
         for clip_spec, clip_wave in self.raw_iter():
+            if self.generate:
+                yield clip_spec, clip_wave
+                continue
+
             clips = self.extract_clips(clip_spec, clip_wave)
             if self.validation:
                 # When validation, any order is fine.
@@ -302,6 +310,7 @@ def create_dataloader(
     indices: List[Union[str, int]],
     config: DatasetConfig,
     validation: bool,
+    generate: bool = False,
 ) -> torch.utils.data.DataLoader:
     """
     Create a data loader given a dataset and a list of samples.
@@ -311,28 +320,37 @@ def create_dataloader(
       indices: The list of indices.
       config: Configuration for the dataset from the model.
       validation: Whether loading for validation or training.
+      generate: Whether to use for audio generation.
+        If so, includes the entire sample with batch size one.
     """
-    dataset = VocoderDataset(dataset, indices, config, validation)
+    dataset = VocoderDataset(dataset, indices, config, validation, generate)
     return torch.utils.data.DataLoader(
         dataset=dataset,
-        batch_size=config.batch_size,
+        batch_size=1 if generate else config.batch_size,
         num_workers=config.dataloader_num_workers,
         prefetch_factor=config.dataloader_prefetch_factor,
     )
 
 
 def load_dataset(
-    path: str, config: DatasetConfig
-) -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+    path: str, config: DatasetConfig, num_generate_samples: int
+) -> Tuple[
+    torch.utils.data.DataLoader,
+    torch.utils.data.DataLoader,
+    torch.utils.data.DataLoader,
+]:
     """
     Load a dataset. If it's not available, crash.
 
     Args:
       path: Path to the dataset.
       config: Configuration for the dataset from the model.
+      num_generate_samples: How many samples from validation set to include
+        in generation set.
 
     Returns:
-      A tuple containing a training data loader and a validation dataloader.
+      A tuple containing a training data loader, a validation dataloader, and
+      an audio generation data loader.
     """
     with open(os.path.join(path, SPLIT_JSON), "r") as handle:
         split = json.load(handle)
@@ -349,6 +367,13 @@ def load_dataset(
         return (
             create_dataloader(dset, split["train"], config, validation=False),
             create_dataloader(dset, split["validation"], config, validation=True),
+            create_dataloader(
+                dset,
+                split["validation"][:num_generate_samples],
+                config,
+                validation=False,
+                generate=True,
+            ),
         )
     elif name == "libritts":
         dset_train = torch.utils.data.ConcatDataset(
@@ -369,6 +394,13 @@ def load_dataset(
             create_dataloader(
                 dset_validation, split["validation"], config, validation=True
             ),
+            create_dataloader(
+                dset_validation,
+                split["validation"][:num_generate_samples],
+                config,
+                validation=False,
+                generate=True,
+            ),
         )
     elif name == "vctk":
         dset = torchaudio.datasets.VCTK_092(root=path, download=False)
@@ -376,6 +408,13 @@ def load_dataset(
         return (
             create_dataloader(dset, split["train"], config, validation=False),
             create_dataloader(dset, split["validation"], config, validation=True),
+            create_dataloader(
+                dset,
+                split["validation"][:num_generate_samples],
+                config,
+                validation=False,
+                generate=True,
+            ),
         )
 
     raise ValueError(f"Unknown dataset {name}")
