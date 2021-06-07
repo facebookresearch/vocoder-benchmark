@@ -5,12 +5,14 @@ from dataclasses import dataclass
 from typing import List, Optional, Tuple, Dict
 
 import torch
+import torch.nn.functional as F
 import torchaudio
 import torchaudio.models
 from langtech.tts.vocoders.datasets import DatasetConfig, MEL_HOP_SAMPLES, MEL_NUM_BANDS
 from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol
 from omegaconf import MISSING
 from torch import Tensor
+from tqdm import tqdm
 
 
 @dataclass
@@ -124,6 +126,11 @@ class WaveRNN(Vocoder):
         target = self.compand(waveforms[:, 1:]).long()
 
         # Forward pass.
+
+        waveforms = self.compand(waveforms)
+        waveforms = self.label_2_float(
+            waveforms, self.model.module.n_classes  # pyre-ignore
+        )
         output = self.model(  # pyre-ignore
             waveforms.unsqueeze(1), spectrograms.unsqueeze(1)
         )
@@ -166,11 +173,106 @@ class WaveRNN(Vocoder):
             "nll_loss": self.loss(spectrograms, waveforms),
         }
 
-    def generate(self, _spectrograms: Tensor, _training: bool = False) -> Tensor:
+    def generate(self, spectrograms: Tensor, training: bool = False) -> Tensor:
         """
         Generate a sample from this model.
 
         Returns:
           A 1D float tensor containing the output waveform.
         """
-        raise NotImplementedError("WaveRNN.generate() not yet implemented")
+        self.model.eval()  # pyre-ignore
+        if training:
+            spectrograms = spectrograms[:, :, :200]
+        output = []
+
+        rnn1 = self.get_gru_cell(self.model.module.rnn1)  # pyre-ignore
+        rnn2 = self.get_gru_cell(self.model.module.rnn2)
+
+        with torch.no_grad():
+            spectrograms, aux = self.model.module.upsample(spectrograms)
+            spectrograms = spectrograms.transpose(1, 2)
+            aux = aux.transpose(1, 2)
+            batch_size, seq_len, _ = spectrograms.size()
+            h1 = spectrograms.new_zeros(batch_size, self.model.module.n_rnn)
+            h2 = spectrograms.new_zeros(batch_size, self.model.module.n_rnn)
+            x = spectrograms.new_zeros(batch_size, 1)
+
+            d = self.model.module.n_aux
+            aux_split = [aux[:, :, d * i : d * (i + 1)] for i in range(4)]
+
+            for i in tqdm(range(seq_len)):
+
+                m_t = spectrograms[:, i, :]
+
+                a1_t, a2_t, a3_t, a4_t = (a[:, i, :] for a in aux_split)
+
+                x = torch.cat([x, m_t, a1_t], dim=1)
+                x = self.model.module.fc(x)
+                h1 = rnn1(x, h1)
+
+                x = x + h1
+                inp = torch.cat([x, a2_t], dim=1)
+                h2 = rnn2(inp, h2)
+
+                x = x + h2
+                x = torch.cat([x, a3_t], dim=1)
+                x = F.relu(self.model.module.fc1(x))
+
+                x = torch.cat([x, a4_t], dim=1)
+                x = F.relu(self.model.module.fc2(x))
+
+                logits = self.model.module.fc3(x)
+
+                x, output = self.get_x_from_dist("random", logits, output)
+
+        output = torch.stack(output).transpose(0, 1)
+        output = self.expand(output.flatten())
+
+        self.model.train()  # pyre-ignore
+
+        return output
+
+    def get_gru_cell(self, gru: torch.nn.Module) -> torch.nn.Module:
+        """
+        Create a GRU cell.
+
+        Args:
+          gru: The GRU Cell.
+
+        Returns:
+          The modified GRU cell.
+        """
+        gru_cell = torch.nn.GRUCell(gru.input_size, gru.hidden_size)
+        gru_cell.weight_hh.data = gru.weight_hh_l0.data
+        gru_cell.weight_ih.data = gru.weight_ih_l0.data
+        gru_cell.bias_hh.data = gru.bias_hh_l0.data
+        gru_cell.bias_ih.data = gru.bias_ih_l0.data
+        return gru_cell
+
+    def get_x_from_dist(self, distrib, logits, history=None):  # pyre-ignore
+        """
+        Sampling from a given distribution
+
+        Returns:
+            a tuple of current sample x and history of an array of previous samples
+        """
+        if history is None:
+            history = []
+        if distrib == "argmax":
+            x = torch.argmax(logits, dim=1)
+            history.append(x)
+            x = self.label_2_float(
+                x, self.model.module.n_classes  # pyre-ignore
+            ).unsqueeze(-1)
+        elif distrib == "random":
+            posterior = F.softmax(logits, dim=1)
+            distrib = torch.distributions.Categorical(posterior)
+            x = distrib.sample().float()
+            history.append(x)
+            x = self.label_2_float(x, self.model.module.n_classes).unsqueeze(-1)
+        else:
+            raise RuntimeError("Unknown sampling mode - ", distrib)
+        return x, history
+
+    def label_2_float(self, x, n_classes):  # pyre-ignore
+        return 2 * x / (n_classes - 1.0) - 1.0
