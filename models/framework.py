@@ -203,13 +203,21 @@ def create_model_commands(model: Type[Vocoder]) -> click.Group:
 
     @group.command("synthesize")
     @click.option("--path", required=True, help="Directory for the model")
+    @click.option(
+        "--length",
+        default=None,
+        help="The length of the output sample in seconds",
+    )
+    @click.option("--offset", default=0.0, help="Offset in seconds of the sample")
     @click.argument("input_file")
     @click.argument("output_file")
-    def synthesize(path: str, input_file: str, output_file: str) -> None:
+    def synthesize(
+        path: str, length: float, offset: float, input_file: str, output_file: str
+    ) -> None:
         """
         Synthesize with the model.
         """
-        cli_synthesize(name, model, path, input_file, output_file)
+        cli_synthesize(name, model, path, length, offset, input_file, output_file)
 
     return group
 
@@ -349,6 +357,8 @@ def cli_synthesize(
     model_name: str,
     model_class: Type[Vocoder],
     path: str,
+    length: float,
+    offset: float,
     input_file: str,
     output_file: str,
 ) -> None:
@@ -363,6 +373,11 @@ def cli_synthesize(
       output_file: Path where to place output WAV file.
     """
     die_if(not os.path.exists(path), f"Model path {path} does not exist")
+    die_if(
+        length is not None and float(length) <= 0,
+        f"Sample length {length} must be greater than 0",
+    )
+    die_if(offset < 0, f"Offset time {offset} must be non-negative value")
     die_if(
         not input_file.endswith(".wav"), f"Input path {input_file} must end with '.wav'"
     )
@@ -380,6 +395,10 @@ def cli_synthesize(
 
     # Load waveform and convert to spectrogram.
     waveform, sample_rate = librosa.core.load(input_file, sr=None)
+    start_sample = int(offset * sample_rate)
+    end_sample = -1 if length is None else int((offset + float(length)) * sample_rate)
+    waveform = waveform[start_sample:end_sample]
+
     audio2mel = datasets.Audio2Mel()
     waveform = torch.from_numpy(waveform).float().unsqueeze(0)
     spectrogram = audio2mel(waveform)
