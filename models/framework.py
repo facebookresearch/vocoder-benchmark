@@ -194,12 +194,15 @@ def create_model_commands(model: Type[Vocoder]) -> click.Group:
     @group.command("train")
     @click.option("--path", required=True, help="Directory for the model")
     @click.option("--dataset", required=True, help="Name of the dataset to use")
+    @click.option("--config", default=None, help="Name of the configuration file")
     @click.argument("config_updates", nargs=-1)
-    def train(path: str, dataset: str, config_updates: List[str]) -> None:
+    def train(
+        path: str, dataset: str, config_file: str, config_updates: List[str]
+    ) -> None:
         """
         Train the model.
         """
-        cli_train(name, model, path, dataset, config_updates)
+        cli_train(name, model, path, dataset, config_file, config_updates)
 
     @group.command("synthesize")
     @click.option("--path", required=True, help="Directory for the model")
@@ -227,6 +230,7 @@ def cli_train(
     model_class: Type[Vocoder],
     path: str,
     dataset_name: str,
+    config_file: str,
     config_updates: List[str],
 ) -> None:
     """
@@ -237,9 +241,10 @@ def cli_train(
       model_class: The class for the model.
       path: Path to the model directory.
       dataset_name: Name of the dataset to use.
+      config_file: Configuration file name.
       config_updates: Dotlist formatted updates to the base config.
     """
-    create_if_missing(model_name, model_class, path, config_updates)
+    create_if_missing(model_name, model_class, path, config_file, config_updates)
     print(f"Training {model_name} model located at {path}.")
 
     model = load_model(model_class, path, eval_mode=False)
@@ -304,7 +309,11 @@ def load_model(
 
 
 def create_if_missing(
-    model_name: str, model_class: Type[Vocoder], path: str, config_updates: List[str]
+    model_name: str,
+    model_class: Type[Vocoder],
+    path: str,
+    config_file: str,
+    config_updates: List[str],
 ) -> None:
     """
     If the model doesn't exist, create it. If it exists, verify that it's the
@@ -314,10 +323,12 @@ def create_if_missing(
       model_name: The model type, e.g. 'wavernn'.
       model_class: The class for the model.
       path: Path to the model directory.
+      config_file: Configuration file name.
       config_updates: Dotlist formatted updates to the base config.
     """
     # Load the config object from default config, YAML, and dotlist.
-    default_config_path = get_default_config_path(model_name)
+    config_file = model_name + ".yaml" if config_file is None else config_file
+    default_config_path = get_default_config_path(config_file)
     config = OmegaConf.structured(model_class.default_config())
     config.merge_with(OmegaConf.load(default_config_path))
     config.merge_with_dotlist(config_updates)
