@@ -6,12 +6,14 @@ from typing import List, Type
 import click
 import langtech.tts.vocoders.datasets as datasets
 import langtech.tts.vocoders.models.framework as framework
+import langtech.tts.vocoders.models.wavenet as wavenet
 import langtech.tts.vocoders.models.wavernn as wavernn
 
 
 # List the models available in this repository.
 MODELS: List[Type[framework.Vocoder]] = [
     wavernn.WaveRNN,
+    wavenet.WaveNet,
 ]
 
 # Create all the commands available for the models.

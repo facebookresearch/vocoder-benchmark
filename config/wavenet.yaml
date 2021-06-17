@@ -1,0 +1,30 @@
+dataset:
+  batch_size: 64
+  frames_per_clip: 3
+  clips_per_utterance: 10
+  padding_frames: 2
+  dataloader_num_workers: 4
+  dataloader_prefetch_factor: 4
+
+model:
+  out_channels: 256
+  layers: 24
+  stacks: 4
+  residual_channels: 128
+  gate_channels: 256
+  skip_out_channels: 128
+  cin_channels: 80
+  gin_channels: 1
+  n_speakers: 7
+  dropout: 0.0
+  kernel_size: 3
+  cin_pad: 2
+  upsample_conditional_features: True
+  input_type: "raw"
+  output_distribution: "Logistic"
+  n_iterations: 1000000
+  learning_rate: 1.0e-4
+  upsample_params:
+    upsample_scales: [4, 4, 5, 3] # should np.prod(upsample_scales) == hop_size
+    cin_channels: 80
+    cin_pad: 2
