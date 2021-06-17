@@ -1,6 +1,7 @@
 """
 WaveNet Neural Vocoder.
 """
+import math
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Dict
 
@@ -13,6 +14,8 @@ from langtech.tts.vocoders.datasets import DatasetConfig
 from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol
 from omegaconf import MISSING
 from torch import Tensor
+from torch.nn import functional as F
+from tqdm import tqdm
 
 
 @dataclass
@@ -75,9 +78,6 @@ class WaveNet(Vocoder):
         """
         super().__init__(config)
 
-        # config.model.upsample_params.cin_channels = config.model.cin_channels
-        # config.model.upsample_params.cin_pad = config.model.cin_pad
-
         self.config = config
 
         self.model = torch.nn.DataParallel(
@@ -100,6 +100,7 @@ class WaveNet(Vocoder):
                 output_distribution=config.model.output_distribution,
             )
         )
+
         self.optimizer: torch.optim.Optimizer = torch.optim.Adam(
             self.parameters(), lr=self.config.model.learning_rate
         )
@@ -157,9 +158,7 @@ class WaveNet(Vocoder):
         # Forward pass.
 
         waveforms = self.compand(waveforms)
-        waveforms = self.label_2_float(  # pyre-ignore
-            waveforms, self.config.model.out_channels
-        )
+        waveforms = self.label_2_float(waveforms, self.config.model.out_channels)
         output = self.model(waveforms.unsqueeze(1), c=spectrograms)  # pyre-ignore
         loss = self.criterion(output[:, :, :-1], target)
 
@@ -200,11 +199,74 @@ class WaveNet(Vocoder):
             "nll_loss": self.loss(spectrograms, waveforms),
         }
 
-    def generate(self, _spectrograms: Tensor, _training: bool = False) -> Tensor:
+    def generate(self, spectrograms: Tensor, training: bool = False) -> Tensor:
         """
         Generate a sample from this model.
 
         Returns:
           A 1D float tensor containing the output waveform.
         """
-        raise NotImplementedError("WaveNet.generate() not yet implemented")
+        self.model.eval()  # pyre-ignore
+        self.model.module.clear_buffer()  # pyre-ignore
+
+        with torch.no_grad():
+            spectrograms = self.model.module.upsample_net(spectrograms)
+            seq_len = (
+                22050 if training else spectrograms.size(-1)
+            )  # synthesize the first second only during training
+            batch_size = spectrograms.shape[0]
+            spectrograms = spectrograms.transpose(1, 2).contiguous()
+            x = spectrograms.new_zeros(batch_size, 1, 1)
+            output = []
+            for t in tqdm(range(seq_len)):
+                # Conditioning features for single time step
+                ct = spectrograms[:, t, :].unsqueeze(1)
+                x = self.model.module.first_conv.incremental_forward(x)
+                skips = 0
+                for f in self.model.module.conv_layers:
+                    x, h = f.incremental_forward(x, ct, None)
+                    skips += h
+                skips *= math.sqrt(1.0 / len(self.model.module.conv_layers))
+                x = skips
+                for f in self.model.module.last_conv_layers:
+                    try:
+                        x = f.incremental_forward(x)
+                    except AttributeError:
+                        x = f(x)
+                x, output = self.get_x_from_dist("random", x[:, 0], output)
+                x = x.unsqueeze(1)
+
+        output = torch.stack(output).transpose(0, 1)
+        output = self.expand(output.flatten())
+
+        self.model.module.clear_buffer()
+        self.model.train()  # pyre-ignore
+
+        return output
+
+    def get_x_from_dist(self, distrib, logits, history=None):  # pyre-ignore
+        """
+        Sampling from a given distribution
+
+        Returns:
+            a tuple of current sample x and history of an array of previous samples
+        """
+        # set_trace()
+        if history is None:
+            history = []
+        if distrib == "argmax":
+            x = torch.argmax(logits, dim=1)
+            history.append(x)
+            x = self.label_2_float(x, self.config.model.out_channels).unsqueeze(-1)
+        elif distrib == "random":
+            posterior = F.softmax(logits, dim=1)
+            distrib = torch.distributions.Categorical(posterior)
+            x = distrib.sample().float()
+            history.append(x)
+            x = self.label_2_float(x, self.config.model.out_channels).unsqueeze(-1)
+        else:
+            raise RuntimeError("Unknown sampling mode - ", distrib)
+        return x, history
+
+    def label_2_float(self, x, n_classes):  # pyre-ignore
+        return 2 * x / (n_classes - 1.0) - 1.0
