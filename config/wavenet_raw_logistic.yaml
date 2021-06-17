@@ -32,7 +32,7 @@ model:
   # discretized mixture of logistic distributions output, otherwise one-hot
   # input and softmax output are assumed.
   input_type: "raw"
-  output_distribution: "Normal" # Logistic or Normal
+  output_distribution: "Logistic" # Logistic or Normal
   n_iterations: 1000000
   learning_rate: 1.0e-4
   upsample_params:

@@ -5,13 +5,24 @@ import math
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Dict
 
-import langtech.tts.vocoders.models.wavenet_vocoder.util as util
 import langtech.tts.vocoders.models.wavenet_vocoder.wavenet as wavenet
 import torch
 import torchaudio
 import torchaudio.models
 from langtech.tts.vocoders.datasets import DatasetConfig
 from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol
+from langtech.tts.vocoders.models.wavenet_vocoder.loss import (
+    DiscretizedMixturelogisticLoss,
+    MixtureGaussianLoss,
+)
+from langtech.tts.vocoders.models.wavenet_vocoder.mixture import (
+    sample_from_discretized_mix_logistic,
+    sample_from_mix_gaussian,
+)
+from langtech.tts.vocoders.models.wavenet_vocoder.util import (
+    is_mulaw_quantize,
+    is_scalar_input,
+)
 from omegaconf import MISSING
 from torch import Tensor
 from torch.nn import functional as F
@@ -35,6 +46,7 @@ class ModelConfig:
     Configuration for the WaveNet model.
     """
 
+    quantize_channels: int = MISSING
     out_channels: int = MISSING
     layers: int = MISSING
     stacks: int = MISSING
@@ -79,6 +91,7 @@ class WaveNet(Vocoder):
         super().__init__(config)
 
         self.config = config
+        self.scalar_input: bool = is_scalar_input(config.model.input_type)
 
         self.model = torch.nn.DataParallel(
             wavenet.WaveNet(
@@ -96,7 +109,7 @@ class WaveNet(Vocoder):
                 cin_pad=config.model.cin_pad,
                 upsample_conditional_features=config.model.upsample_conditional_features,
                 upsample_params=config.model.upsample_params,
-                scalar_input=util.is_scalar_input(config.model.input_type),
+                scalar_input=self.scalar_input,
                 output_distribution=config.model.output_distribution,
             )
         )
@@ -104,9 +117,26 @@ class WaveNet(Vocoder):
         self.optimizer: torch.optim.Optimizer = torch.optim.Adam(
             self.parameters(), lr=self.config.model.learning_rate
         )
-        self.criterion: torch.nn.Module = torch.nn.CrossEntropyLoss()
-        self.compand: torch.nn.Module = torchaudio.transforms.MuLawEncoding()
-        self.expand: torch.nn.Module = torchaudio.transforms.MuLawDecoding()
+        self.compand: torch.nn.Module = torchaudio.transforms.MuLawEncoding(
+            config.model.quantize_channels
+        )
+        self.expand: torch.nn.Module = torchaudio.transforms.MuLawDecoding(
+            config.model.quantize_channels
+        )
+
+        if is_mulaw_quantize(config.model.input_type):
+            self.criterion: torch.nn.Module = torch.nn.CrossEntropyLoss()
+        else:
+            if config.model.output_distribution == "Logistic":
+                self.criterion: torch.nn.Module = DiscretizedMixturelogisticLoss(config)
+            elif config.model.output_distribution == "Normal":
+                self.criterion: torch.nn.Module = MixtureGaussianLoss(config)
+            else:
+                raise RuntimeError(
+                    "Not supported output distribution type: {}".format(
+                        config.model.output_distribution
+                    )
+                )
 
     @staticmethod
     def default_config() -> ConfigProtocol:
@@ -153,13 +183,36 @@ class WaveNet(Vocoder):
         Returns:
           The negative log likelihood loss.
         """
-        target = self.compand(waveforms[:, 1:]).long()
 
         # Forward pass.
 
-        waveforms = self.compand(waveforms)
-        waveforms = self.label_2_float(waveforms, self.config.model.out_channels)
-        output = self.model(waveforms.unsqueeze(1), c=spectrograms)  # pyre-ignore
+        target = waveforms[:, 1:]  # [batch_size, n_samples-1]
+
+        if self.config.model.input_type in ["mulaw", "mulaw-quantize"]:
+            waveforms = self.compand(waveforms)  # [batch_size, n_samples]
+            target = self.compand(target)
+
+            if self.config.model.input_type == "mulaw":
+                waveforms = self.label_2_float(
+                    waveforms, self.config.model.quantize_channels
+                )
+                waveforms = waveforms.unsqueeze(1)
+
+                target = self.label_2_float(target, self.config.model.quantize_channels)
+            else:
+                waveforms = F.one_hot(waveforms, self.config.model.quantize_channels)
+                waveforms = waveforms.transpose(1, 2).float()
+
+        elif self.config.model.input_type == "raw":
+            waveforms = waveforms.unsqueeze(1)
+        else:
+            raise RuntimeError(
+                "Not supported input type: {}".format(self.config.model.input_type)
+            )
+
+        output = self.model(waveforms, c=spectrograms)  # pyre-ignore
+        if self.config.model.input_type in ["mulaw", "raw"]:
+            target = target.unsqueeze(2)  # [batch_size, n_samples-1, 1]
         loss = self.criterion(output[:, :, :-1], target)
 
         return loss
@@ -216,7 +269,12 @@ class WaveNet(Vocoder):
             )  # synthesize the first second only during training
             batch_size = spectrograms.shape[0]
             spectrograms = spectrograms.transpose(1, 2).contiguous()
-            x = spectrograms.new_zeros(batch_size, 1, 1)
+
+            if self.scalar_input:
+                x = torch.zeros(batch_size, 1, 1)
+            else:
+                x = torch.zeros(batch_size, 1, self.config.model.out_channels)
+
             output = []
             for t in tqdm(range(seq_len)):
                 # Conditioning features for single time step
@@ -233,40 +291,63 @@ class WaveNet(Vocoder):
                         x = f.incremental_forward(x)
                     except AttributeError:
                         x = f(x)
-                x, output = self.get_x_from_dist("random", x[:, 0], output)
-                x = x.unsqueeze(1)
-
+                x, output = self.get_x_from_dist(
+                    self.config.model.output_distribution,
+                    x,
+                    history=output,
+                    B=batch_size,
+                )
         output = torch.stack(output).transpose(0, 1)
-        output = self.expand(output.flatten())
 
+        if self.config.model.input_type in ["mulaw", "mulaw-quantize"]:
+            if self.config.model.input_type == "mulaw-quantize":
+                output = torch.argmax(output, dim=2)
+            else:
+                output = self.float_2_label(output, self.config.model.quantize_channels)
+            output = self.expand(output.long())
+        elif self.config.model.input_type != "raw":
+            raise RuntimeError(
+                "Not supported input type: {}".format(self.config.model.input_type)
+            )
         self.model.module.clear_buffer()
         self.model.train()  # pyre-ignore
 
-        return output
+        return output.flatten()
 
-    def get_x_from_dist(self, distrib, logits, history=None):  # pyre-ignore
+    def get_x_from_dist(
+        self,
+        distrib: str,
+        logits: Tensor,
+        history: List[Tensor],
+        B: int,
+        softmax: bool = True,
+        quantize: bool = True,
+    ) -> Tuple[Tensor, List[Tensor]]:
         """
         Sampling from a given distribution
 
         Returns:
             a tuple of current sample x and history of an array of previous samples
         """
-        # set_trace()
-        if history is None:
-            history = []
-        if distrib == "argmax":
-            x = torch.argmax(logits, dim=1)
-            history.append(x)
-            x = self.label_2_float(x, self.config.model.out_channels).unsqueeze(-1)
-        elif distrib == "random":
-            posterior = F.softmax(logits, dim=1)
-            distrib = torch.distributions.Categorical(posterior)
-            x = distrib.sample().float()
-            history.append(x)
-            x = self.label_2_float(x, self.config.model.out_channels).unsqueeze(-1)
+        # Generate next input by sampling
+        if self.scalar_input:
+            if distrib == "Logistic":
+                x = sample_from_discretized_mix_logistic(logits.view(B, -1, 1))
+            elif distrib == "Normal":
+                x = sample_from_mix_gaussian(logits.view(B, -1, 1))
+            else:
+                raise AssertionError()
         else:
-            raise RuntimeError("Unknown sampling mode - ", distrib)
-        return x, history
+            x = F.softmax(logits.view(B, -1), dim=1) if softmax else logits.view(B, -1)
+            if quantize:
+                dist = torch.distributions.OneHotCategorical(x)
+                x = dist.sample()
+
+        history.append(x.data)
+        return history[-1], history
 
     def label_2_float(self, x, n_classes):  # pyre-ignore
         return 2 * x / (n_classes - 1.0) - 1.0
+
+    def float_2_label(self, x, n_classes):  # pyre-ignore
+        return (x + 1.0) * (n_classes - 1) / 2

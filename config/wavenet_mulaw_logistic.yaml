@@ -7,7 +7,7 @@ dataset:
   dataloader_prefetch_factor: 4
 
 model:
-  quantize_channels: 256  # 65536 or 256
+  quantize_channels: 65536  # 65536 or 256
   # This should equal to `quantize_channels` if mu-law quantize enabled
   # otherwise num_mixture * 3 (pi, mean, log_scale)
   # single mixture case: 2
@@ -31,8 +31,8 @@ model:
   # If input_type is raw or mulaw, network assumes scalar input and
   # discretized mixture of logistic distributions output, otherwise one-hot
   # input and softmax output are assumed.
-  input_type: "raw"
-  output_distribution: "Normal" # Logistic or Normal
+  input_type: "mulaw"
+  output_distribution: "Logistic" # Logistic or Normal
   n_iterations: 1000000
   learning_rate: 1.0e-4
   upsample_params:

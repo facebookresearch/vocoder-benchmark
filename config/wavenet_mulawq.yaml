@@ -11,7 +11,7 @@ model:
   # This should equal to `quantize_channels` if mu-law quantize enabled
   # otherwise num_mixture * 3 (pi, mean, log_scale)
   # single mixture case: 2
-  out_channels: 30
+  out_channels: 256
   layers: 24
   stacks: 4
   residual_channels: 128
@@ -31,7 +31,7 @@ model:
   # If input_type is raw or mulaw, network assumes scalar input and
   # discretized mixture of logistic distributions output, otherwise one-hot
   # input and softmax output are assumed.
-  input_type: "raw"
+  input_type: "mulaw-quantize"
   output_distribution: "Normal" # Logistic or Normal
   n_iterations: 1000000
   learning_rate: 1.0e-4

@@ -194,7 +194,9 @@ def create_model_commands(model: Type[Vocoder]) -> click.Group:
     @group.command("train")
     @click.option("--path", required=True, help="Directory for the model")
     @click.option("--dataset", required=True, help="Name of the dataset to use")
-    @click.option("--config", default=None, help="Name of the configuration file")
+    @click.option(
+        "--config", "config_file", default=None, help="Name of the configuration file"
+    )
     @click.argument("config_updates", nargs=-1)
     def train(
         path: str, dataset: str, config_file: str, config_updates: List[str]
