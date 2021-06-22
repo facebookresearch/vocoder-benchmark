@@ -6,6 +6,7 @@ from typing import List, Type
 import click
 import langtech.tts.vocoders.datasets as datasets
 import langtech.tts.vocoders.models.framework as framework
+import langtech.tts.vocoders.models.parallel_wavegan as parallel_wavegan
 import langtech.tts.vocoders.models.wavenet as wavenet
 import langtech.tts.vocoders.models.wavernn as wavernn
 
@@ -14,7 +15,9 @@ import langtech.tts.vocoders.models.wavernn as wavernn
 MODELS: List[Type[framework.Vocoder]] = [
     wavernn.WaveRNN,
     wavenet.WaveNet,
+    parallel_wavegan.ParallelWaveGAN,
 ]
+
 
 # Create all the commands available for the models.
 MODEL_COMMANDS: List[click.Group] = [

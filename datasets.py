@@ -55,7 +55,7 @@ MEL_NUM_BANDS: int = 80
 MEL_F_MIN: int = 0
 MEL_F_MAX: int = 12000
 MEL_N_FFT: int = 1024
-MEL_HOP_SAMPLES: int = 240
+MEL_HOP_SAMPLES: int = 256
 MEL_WIN_SAMPLES: int = 960
 
 # How many clips to shuffle between during data loading.
