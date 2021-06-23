@@ -2,7 +2,7 @@
 # pylint: skip-file
 
 import torch
-from langtech.tts.vocoders.models.wavenet_vocoder.mixture import (
+from langtech.tts.vocoders.models.src.wavenet_vocoder.mixture import (
     discretized_mix_logistic_loss,
     mix_gaussian_loss,
 )

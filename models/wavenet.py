@@ -5,21 +5,21 @@ import math
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Dict
 
-import langtech.tts.vocoders.models.wavenet_vocoder.wavenet as wavenet
+import langtech.tts.vocoders.models.src.wavenet_vocoder.wavenet as wavenet
 import torch
 import torchaudio
 import torchaudio.models
 from langtech.tts.vocoders.datasets import DatasetConfig
 from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol
-from langtech.tts.vocoders.models.wavenet_vocoder.loss import (
+from langtech.tts.vocoders.models.src.wavenet_vocoder.loss import (
     DiscretizedMixturelogisticLoss,
     MixtureGaussianLoss,
 )
-from langtech.tts.vocoders.models.wavenet_vocoder.mixture import (
+from langtech.tts.vocoders.models.src.wavenet_vocoder.mixture import (
     sample_from_discretized_mix_logistic,
     sample_from_mix_gaussian,
 )
-from langtech.tts.vocoders.models.wavenet_vocoder.util import (
+from langtech.tts.vocoders.models.src.wavenet_vocoder.util import (
     is_mulaw_quantize,
     is_scalar_input,
 )

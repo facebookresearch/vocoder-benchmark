@@ -36,6 +36,6 @@ model:
   n_iterations: 1000000
   learning_rate: 1.0e-4
   upsample_params:
-    upsample_scales: [4, 4, 5, 3] # should np.prod(upsample_scales) == hop_size
+    upsample_scales: [4, 4, 4, 4] # should np.prod(upsample_scales) == hop_size
     cin_channels: 80
     cin_pad: 2
