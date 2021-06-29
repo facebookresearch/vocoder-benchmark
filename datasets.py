@@ -526,4 +526,5 @@ def split_command(dataset: str, path: str) -> None:
         }
 
     with open(os.path.join(path, SPLIT_JSON), "w") as handle:
+        # pyre-fixme[61]: `split` may not be initialized here.
         json.dump(split, handle)
