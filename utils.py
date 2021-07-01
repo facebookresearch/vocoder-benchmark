@@ -8,6 +8,7 @@ from typing import Union
 import numpy as np
 import soundfile
 import torch
+from omegaconf import OmegaConf
 
 
 def die_if(condition: bool, message: str) -> None:
@@ -65,3 +66,20 @@ def write_audio(
         )
 
     soundfile.write(filename, data, sample_rate)
+
+
+def remove_none_values_from_dict(config_dict):  # pyre-ignore
+    """
+    Iterate over input configuration and remove None-value params
+
+    Returns:
+        dictionary of valid configuration params
+    """
+    if isinstance(config_dict, dict):
+        config = {}
+        for k in config_dict:
+            if config_dict[k] is not None:
+                config[k] = remove_none_values_from_dict(config_dict[k])
+        return OmegaConf.create(config)
+
+    return config_dict

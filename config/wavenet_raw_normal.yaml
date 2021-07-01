@@ -1,6 +1,6 @@
 dataset:
-  batch_size: 64
-  frames_per_clip: 3
+  batch_size: 8
+  frames_per_clip: 40
   clips_per_utterance: 10
   padding_frames: 2
   dataloader_num_workers: 4
@@ -33,9 +33,14 @@ model:
   # input and softmax output are assumed.
   input_type: "raw"
   output_distribution: "Normal" # Logistic or Normal
-  n_iterations: 1000000
-  learning_rate: 1.0e-4
+  n_iterations: 1500000
+  learning_rate: 1.0e-3
   upsample_params:
     upsample_scales: [4, 4, 4, 4] # should np.prod(upsample_scales) == hop_size
     cin_channels: 80
     cin_pad: 2
+  # see models/src/wavenet_vocoder/lrschedule.py for available lr_schedule
+  lr_schedule: "step_learning_rate_decay"
+  lr_schedule_kwargs:
+    anneal_rate: 0.5
+    anneal_interval: 200000

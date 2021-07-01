@@ -16,6 +16,7 @@ from langtech.tts.vocoders.models.src.parallel_wavegan.layers.pqmf import PQMF
 from langtech.tts.vocoders.models.src.parallel_wavegan.losses.stft_loss import (
     MultiResolutionSTFTLoss,
 )
+from langtech.tts.vocoders.utils import remove_none_values_from_dict
 from omegaconf import MISSING, OmegaConf
 from torch import Tensor
 
@@ -41,6 +42,7 @@ class OptimizerConfig:
     lr: float = MISSING
     eps: float = MISSING
     weight_decay: float = MISSING
+    amsgrad: Optional[bool] = None
 
 
 @dataclass
@@ -191,7 +193,7 @@ class ParallelWaveGAN(Vocoder):
         super().__init__(config)
 
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"  # fix-me
-        self.config: Config = self.remove_none_values_from_dict(
+        self.config: Config = remove_none_values_from_dict(
             OmegaConf.to_container(config)
         )
 
@@ -612,19 +614,3 @@ class ParallelWaveGAN(Vocoder):
             output = self.model["generator"].module.inference(spectrograms).flatten()
         self.model["generator"].train()
         return output
-
-    def remove_none_values_from_dict(self, config_dict):  # pyre-ignore
-        """
-        Iterate over input configuration and remove None-value params
-
-        Returns:
-            dictionary of valid configuration params
-        """
-        if isinstance(config_dict, dict):
-            config = {}
-            for k in config_dict:
-                if config_dict[k] is not None:
-                    config[k] = self.remove_none_values_from_dict(config_dict[k])
-            return OmegaConf.create(config)
-
-        return config_dict

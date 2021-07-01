@@ -11,6 +11,7 @@ import torchaudio
 import torchaudio.models
 from langtech.tts.vocoders.datasets import DatasetConfig
 from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol
+from langtech.tts.vocoders.models.src.wavenet_vocoder import lrschedule
 from langtech.tts.vocoders.models.src.wavenet_vocoder.loss import (
     DiscretizedMixturelogisticLoss,
     MixtureGaussianLoss,
@@ -23,10 +24,24 @@ from langtech.tts.vocoders.models.src.wavenet_vocoder.util import (
     is_mulaw_quantize,
     is_scalar_input,
 )
-from omegaconf import MISSING
+from langtech.tts.vocoders.utils import remove_none_values_from_dict
+from omegaconf import MISSING, OmegaConf
 from torch import Tensor
 from torch.nn import functional as F
 from tqdm import tqdm
+
+
+@dataclass
+class SchedulerConfig:
+    """
+    Configuration for the WaveNet scheduler.
+    """
+
+    anneal_rate: Optional[float] = None
+    anneal_interval: Optional[int] = None
+    warmup_steps: Optional[int] = None
+    T: Optional[int] = None
+    M: Optional[int] = None
 
 
 @dataclass
@@ -65,6 +80,8 @@ class ModelConfig:
     n_iterations: int = MISSING
     learning_rate: float = MISSING
     upsample_params: UpsampleConfig = MISSING
+    lr_schedule: Optional[str] = None
+    lr_schedule_kwargs: Optional[SchedulerConfig] = None
 
 
 @dataclass
@@ -232,11 +249,25 @@ class WaveNet(Vocoder):
         # Forward pass.
         loss = self.loss(spectrograms, waveforms)
 
+        # Learning rate schedule
+        if self.config.model.lr_schedule:
+            current_lr = self.config.model.learning_rate
+            lr_schedule_fn = getattr(
+                lrschedule, self.config.model.lr_schedule  # pyre-ignore
+            )
+            lr_schedule_kwargs = remove_none_values_from_dict(
+                OmegaConf.to_container(self.config.model.lr_schedule_kwargs)
+            )
+            current_lr = lr_schedule_fn(
+                current_lr, self.global_step, **lr_schedule_kwargs
+            )
+            for param_group in self.optimizer.param_groups:
+                param_group["lr"] = current_lr  # pyre-ignore
+
         # Backward pass.
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-
         return loss, {}
 
     def validation_losses(
