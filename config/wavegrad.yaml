@@ -7,7 +7,7 @@ dataset:
   dataloader_prefetch_factor: 4
 
 model:
-  factors: [4, 4, 4 , 2, 2]
+  factors: [5, 5, 3, 2, 2]
   upsampling_preconv_out_channels: 768
   upsampling_out_channels: [512, 512, 256, 128, 128]
   upsampling_dilations:

@@ -407,7 +407,7 @@ def cli_synthesize(
     model = load_model(model_class, path, eval_mode=True)
 
     # Load waveform and convert to spectrogram.
-    waveform, sample_rate = librosa.core.load(input_file, sr=None)
+    waveform, sample_rate = librosa.core.load(input_file, sr=datasets.AUDIO_SAMPLE_RATE)
     start_sample = int(offset * sample_rate)
     end_sample = -1 if length is None else int((offset + float(length)) * sample_rate)
     waveform = waveform[start_sample:end_sample]

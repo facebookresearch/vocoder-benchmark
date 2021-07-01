@@ -15,10 +15,10 @@ model:
     kernel_size: 7
     channels: 512
     upsample_scales:
-    - 8
-    - 8
-    - 2
-    - 2
+    - 4
+    - 5
+    - 3
+    - 5
     stack_kernel_size: 3
     stacks: 3
     use_weight_norm: true

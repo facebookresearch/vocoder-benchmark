@@ -55,7 +55,7 @@ MEL_NUM_BANDS: int = 80
 MEL_F_MIN: int = 0
 MEL_F_MAX: int = 12000
 MEL_N_FFT: int = 1024
-MEL_HOP_SAMPLES: int = 256
+MEL_HOP_SAMPLES: int = 300
 MEL_WIN_SAMPLES: int = 960
 MIN_LEVEL_DB: int = -100
 
@@ -297,7 +297,12 @@ class VocoderDataset(torch.utils.data.IterableDataset):
             indices = self.indices
 
         for key in indices:
-            waveform = self.dataset[key][0]
+            waveform, sr = self.dataset[key][:2]
+
+            # Resample the waveform to a fixed sample rate
+            if sr != AUDIO_SAMPLE_RATE:
+                waveform = librosa.resample(waveform[0].numpy(), sr, AUDIO_SAMPLE_RATE)
+                waveform = torch.tensor([waveform])
 
             # Pad to make sure waveform is a multiple of hop length.
             padding = (

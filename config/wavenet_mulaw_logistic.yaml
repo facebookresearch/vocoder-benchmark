@@ -36,7 +36,7 @@ model:
   n_iterations: 1500000
   learning_rate: 1.0e-3
   upsample_params:
-    upsample_scales: [4, 4, 4, 4] # should np.prod(upsample_scales) == hop_size
+    upsample_scales: [4, 5, 3, 5] # should np.prod(upsample_scales) == hop_size
     cin_channels: 80
     cin_pad: 2
   # see models/src/wavenet_vocoder/lrschedule.py for available lr_schedule
