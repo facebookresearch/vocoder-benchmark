@@ -3,6 +3,7 @@
 
 import numpy as np
 import torch
+from langtech.tts.vocoders.datasets import MEL_HOP_SAMPLES
 from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule
 from langtech.tts.vocoders.models.src.wavegrad.nn import WaveGradNN
 
@@ -22,9 +23,9 @@ class WaveGrad(BaseModule):
         self.noise_schedule_is_set = False
 
         # Backbone neural network to model noise
-        self.total_factor = np.product(config.model_config.factors)
+        self.total_factor = np.product(config.model.factors)
         assert (
-            self.total_factor == config.data_config.hop_length
+            self.total_factor == MEL_HOP_SAMPLES
         ), """Total factor-product should be equal to the hop length of STFT."""
         self.nn = WaveGradNN(config)
 
@@ -122,6 +123,7 @@ class WaveGrad(BaseModule):
             continuous_sqrt_alpha_cumprod * y_0
             + (1 - continuous_sqrt_alpha_cumprod ** 2).sqrt() * eps
         )
+
         return outputs
 
     def q_posterior(self, y_start, y, t):

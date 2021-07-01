@@ -3,6 +3,7 @@
 
 import numpy as np
 import torch
+from langtech.tts.vocoders.datasets import MEL_NUM_BANDS
 from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule
 from langtech.tts.vocoders.models.src.wavegrad.downsampling import (
     DownsamplingBlock as DBlock,
@@ -29,15 +30,15 @@ class WaveGradNN(BaseModule):
         super(WaveGradNN, self).__init__()
         # Building upsampling branch (mels -> signal)
         self.ublock_preconv = Conv1dWithInitialization(
-            in_channels=config.data_config.n_mels,
-            out_channels=config.model_config.upsampling_preconv_out_channels,
+            in_channels=MEL_NUM_BANDS,
+            out_channels=config.model.upsampling_preconv_out_channels,
             kernel_size=3,
             stride=1,
             padding=1,
         )
         upsampling_in_sizes = [
-            config.model_config.upsampling_preconv_out_channels
-        ] + config.model_config.upsampling_out_channels[:-1]
+            config.model.upsampling_preconv_out_channels
+        ] + config.model.upsampling_out_channels[:-1]
         self.ublocks = torch.nn.ModuleList(
             [
                 UBlock(
@@ -48,14 +49,14 @@ class WaveGradNN(BaseModule):
                 )
                 for in_size, out_size, factor, dilations in zip(
                     upsampling_in_sizes,
-                    config.model_config.upsampling_out_channels,
-                    config.model_config.factors,
-                    config.model_config.upsampling_dilations,
+                    config.model.upsampling_out_channels,
+                    config.model.factors,
+                    config.model.upsampling_dilations,
                 )
             ]
         )
         self.ublock_postconv = Conv1dWithInitialization(
-            in_channels=config.model_config.upsampling_out_channels[-1],
+            in_channels=config.model.upsampling_out_channels[-1],
             out_channels=1,
             kernel_size=3,
             stride=1,
@@ -65,14 +66,14 @@ class WaveGradNN(BaseModule):
         # Building downsampling branch (starting from signal)
         self.dblock_preconv = Conv1dWithInitialization(
             in_channels=1,
-            out_channels=config.model_config.downsampling_preconv_out_channels,
+            out_channels=config.model.downsampling_preconv_out_channels,
             kernel_size=5,
             stride=1,
             padding=2,
         )
         downsampling_in_sizes = [
-            config.model_config.downsampling_preconv_out_channels
-        ] + config.model_config.downsampling_out_channels[:-1]
+            config.model.downsampling_preconv_out_channels
+        ] + config.model.downsampling_out_channels[:-1]
         self.dblocks = torch.nn.ModuleList(
             [
                 DBlock(
@@ -83,17 +84,16 @@ class WaveGradNN(BaseModule):
                 )
                 for in_size, out_size, factor, dilations in zip(
                     downsampling_in_sizes,
-                    config.model_config.downsampling_out_channels,
-                    config.model_config.factors[1:][::-1],
-                    config.model_config.downsampling_dilations,
+                    config.model.downsampling_out_channels,
+                    config.model.factors[1:][::-1],
+                    config.model.downsampling_dilations,
                 )
             ]
         )
-
         # Building FiLM connections (in order of downscaling stream)
-        film_in_sizes = [32] + config.model_config.downsampling_out_channels
-        film_out_sizes = config.model_config.upsampling_out_channels[::-1]
-        film_factors = [1] + config.model_config.factors[1:][::-1]
+        film_in_sizes = [32] + list(config.model.downsampling_out_channels)
+        film_out_sizes = list(config.model.upsampling_out_channels[::-1])
+        film_factors = [1] + list(config.model.factors[1:][::-1])
         self.films = torch.nn.ModuleList(
             [
                 FiLM(

@@ -7,12 +7,14 @@ import click
 import langtech.tts.vocoders.datasets as datasets
 import langtech.tts.vocoders.models.framework as framework
 import langtech.tts.vocoders.models.parallel_wavegan as parallel_wavegan
+import langtech.tts.vocoders.models.wavegrad as wavegrad
 import langtech.tts.vocoders.models.wavenet as wavenet
 import langtech.tts.vocoders.models.wavernn as wavernn
 
 
 # List the models available in this repository.
 MODELS: List[Type[framework.Vocoder]] = [
+    wavegrad.WaveGrad,
     wavernn.WaveRNN,
     wavenet.WaveNet,
     parallel_wavegan.ParallelWaveGAN,

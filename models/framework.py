@@ -613,7 +613,7 @@ def load_model_from_checkpoint(model: Vocoder, checkpoint_path: str) -> None:
             ), f"Found NaN in checkpoint tensor {key}"
 
     # All checks have passed. Load the state_dict.
-    model.load_state_dict(checkpoint["model"])
+    model.load_state_dict(checkpoint["model"], strict=False)
 
     for (opt, sched), opt_dict, sched_dict in zip(
         model.get_optimizers(), checkpoint["optimizers"], checkpoint["lr_schedulers"]
