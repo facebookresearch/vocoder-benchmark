@@ -1,6 +1,6 @@
 dataset:
-  batch_size: 64
-  frames_per_clip: 80
+  batch_size: 16
+  frames_per_clip: 32
   clips_per_utterance: 10
   padding_frames: 0
   dataloader_num_workers: 4
@@ -52,7 +52,7 @@ model:
   discriminator_optimizer_type: "RAdam"
   discriminator_grad_norm: 1        # Discriminator's gradient norm.
   discriminator_optimizer:
-    lr: 0.0001             # Discriminator's learning rate.
+    lr: 0.00005            # Discriminator's learning rate.
     eps: 1.0e-6            # Discriminator's epsilon.
     weight_decay: 0.0      # Discriminator's weight decay coefficient.
   discriminator_scheduler_type: "StepLR" # Discriminator's scheduler type.
@@ -76,5 +76,5 @@ model:
   lambda_adv: 4.0          # Loss balancing coefficient for adversarial loss.
 
   # Training
-  n_iterations: 1000000
-  discriminator_train_start_steps: 200000
+  n_iterations: 4000000
+  discriminator_train_start_steps: 100000

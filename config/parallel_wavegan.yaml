@@ -1,6 +1,6 @@
 dataset:
-  batch_size: 64
-  frames_per_clip: 16
+  batch_size: 6
+  frames_per_clip: 100
   clips_per_utterance: 10
   padding_frames: 2
   dataloader_num_workers: 4
@@ -76,5 +76,5 @@ model:
   lambda_feat_match: 25.0   # Loss balancing coefficient for feature matching loss.
   lambda_adv: 4.0          # Loss balancing coefficient for adversarial loss.
 
-  n_iterations: 1000000
-  discriminator_train_start_steps: 200000
+  n_iterations: 4000000
+  discriminator_train_start_steps: 100000

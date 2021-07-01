@@ -1,6 +1,6 @@
 dataset:
   batch_size: 64
-  frames_per_clip: 64
+  frames_per_clip: 64 # 16384
   clips_per_utterance: 10
   padding_frames: 0
   dataloader_num_workers: 4
@@ -18,13 +18,12 @@ model:
     stacks: 4                     # Number of stacks in a single residual stack module.
     use_weight_norm: True         # Whether to use weight normalization.
     use_causal_conv: False        # Whether to use causal convolution.
-  generator_optimizer_type: "Adam"
-  generator_grad_norm: -1         # Generator's gradient norm.
+  generator_optimizer_type: "RAdam"
+  generator_grad_norm: 10         # Generator's gradient norm.
   generator_optimizer:
     lr: 1.0e-3             # Generator's learning rate.
-    eps: 1.0e-7            # Generator's epsilon.
+    eps: 1.0e-6            # Generator's epsilon.
     weight_decay: 0.0      # Generator's weight decay coefficient.
-    amsgrad: true
   generator_scheduler_type: "MultiStepLR" # Generator's scheduler type.
   generator_scheduler_params:
     gamma: 0.5                          # Generator's scheduler gamma.
@@ -37,43 +36,37 @@ model:
       - 600000
 
   # Discriminator Config
-  discriminator_type: "MelGANMultiScaleDiscriminator"
+  discriminator_type: ParallelWaveGANDiscriminator
   discriminator_params:
-    in_channels: 1                    # Number of input channels.
-    out_channels: 1                   # Number of output channels.
-    scales: 3                         # Number of multi-scales.
-    downsample_pooling: "AvgPool1d"   # Pooling type for the input downsampling.
-    downsample_pooling_params:        # Parameters of the above pooling function.
-        kernel_size: 4
-        stride: 2
-        padding: 1
-        count_include_pad: False
-    kernel_sizes: [5, 3]              # List of kernel size.
-    channels: 16                      # Number of channels of the initial conv layer.
-    max_downsample_channels: 512     # Maximum number of channels of downsampling layers.
-    downsample_scales: [4, 4, 4, 4]   # List of downsampling scales.
-    nonlinear_activation: "LeakyReLU" # Nonlinear activation function.
-    nonlinear_activation_params:      # Parameters of nonlinear activation function.
-        negative_slope: 0.2
-    use_weight_norm: True             # Whether to use weight norm.
-  discriminator_optimizer_type: "Adam"
-  discriminator_grad_norm: -1        # Discriminator's gradient norm.
+    in_channels: 1
+    out_channels: 1
+    scales: null
+    layers: 10
+    downsample_pooling: null
+    downsample_pooling_params: null
+    kernel_sizes: null
+    kernel_size: 3
+    channels: null
+    max_downsample_channels: null
+    downsample_scales: null
+    nonlinear_activation: LeakyReLU
+    nonlinear_activation_params:
+      negative_slope: 0.2
+    use_weight_norm: true
+    bias: true
+    conv_channels: 64
+  discriminator_optimizer_type: RAdam
   discriminator_optimizer:
-    lr: 1.0e-3             # Discriminator's learning rate.
-    eps: 1.0e-7            # Discriminator's epsilon.
-    weight_decay: 0.0      # Discriminator's weight decay coefficient.
-    amsgrad: true
-  discriminator_scheduler_type: "MultiStepLR" # Discriminator's scheduler type.
+    lr: 5.0e-05
+    eps: 1.0e-06
+    weight_decay: 0.0
+    amsgrad: null
+  discriminator_grad_norm: 1
+  discriminator_scheduler_type: StepLR
   discriminator_scheduler_params:
-    gamma: 0.5                              # Discriminator's scheduler gamma.
-    milestones:                             # At each milestone, lr will be multiplied by gamma.
-      - 100000
-      - 200000
-      - 300000
-      - 400000
-      - 500000
-      - 600000
-
+    gamma: 0.5
+    step_size: 200000
+    milestones: null
   # Loss
   stft_loss_params:
       fft_sizes: [1024, 2048, 512]  # List of FFT size for STFT-based loss.
@@ -90,5 +83,5 @@ model:
   lambda_adv: 2.5          # Loss balancing coefficient for adversarial loss.
 
   # Training
-  n_iterations: 1000000
+  n_iterations: 4000000
   discriminator_train_start_steps: 200000

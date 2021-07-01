@@ -117,6 +117,7 @@ class DiscriminatorConfig:
     in_channels: int = MISSING
     out_channels: int = MISSING
     scales: Optional[int] = None
+    layers: Optional[int] = None
     downsample_pooling: Optional[str] = None
     downsample_pooling_params: Optional[DownsamplePoolingConfig] = None
     kernel_sizes: Optional[List[int]] = None

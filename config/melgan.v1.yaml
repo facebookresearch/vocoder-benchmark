@@ -1,0 +1,95 @@
+dataset:
+  batch_size: 8
+  frames_per_clip: 100
+  clips_per_utterance: 10
+  padding_frames: 0
+  dataloader_num_workers: 4
+  dataloader_prefetch_factor: 4
+model:
+  discriminator_train_start_steps: 100000
+  n_iterations: 4000000
+  generator_type: MelGANGenerator
+  generator_params:
+    in_channels: 80
+    out_channels: 1
+    kernel_size: 7
+    channels: 512
+    upsample_scales:
+    - 8
+    - 8
+    - 2
+    - 2
+    stack_kernel_size: 3
+    stacks: 3
+    use_weight_norm: true
+    use_causal_conv: false
+    layers: null
+    residual_channels: null
+    gate_channels: null
+    skip_channels: null
+    aux_channels: null
+    aux_context_window: null
+    dropout: null
+    upsample_net: null
+    upsample_params: null
+  generator_optimizer_type: RAdam
+  generator_optimizer:
+    lr: 0.0001
+    eps: 1.0e-06
+    weight_decay: 0.0
+    amsgrad: null
+  generator_grad_norm: 10
+  generator_scheduler_type: StepLR
+  generator_scheduler_params:
+    gamma: 0.5
+    step_size: 200000
+    milestones: null
+  discriminator_type: ParallelWaveGANDiscriminator
+  discriminator_params:
+    in_channels: 1
+    out_channels: 1
+    scales: null
+    layers: 10
+    downsample_pooling: null
+    downsample_pooling_params: null
+    kernel_sizes: null
+    kernel_size: 3
+    channels: null
+    max_downsample_channels: null
+    downsample_scales: null
+    nonlinear_activation: LeakyReLU
+    nonlinear_activation_params:
+      negative_slope: 0.2
+    use_weight_norm: true
+    bias: true
+    conv_channels: 64
+  discriminator_optimizer_type: RAdam
+  discriminator_optimizer:
+    lr: 5.0e-05
+    eps: 1.0e-06
+    weight_decay: 0.0
+    amsgrad: null
+  discriminator_grad_norm: 1
+  discriminator_scheduler_type: StepLR
+  discriminator_scheduler_params:
+    gamma: 0.5
+    step_size: 200000
+    milestones: null
+  use_feat_match_loss: false
+  stft_loss_params:
+    fft_sizes:
+    - 1024
+    - 2048
+    - 512
+    hop_sizes:
+    - 120
+    - 240
+    - 50
+    win_lengths:
+    - 600
+    - 1200
+    - 240
+    window: hann_window
+  use_subband_stft_loss: false
+  lambda_feat_match: null
+  lambda_adv: 4.0

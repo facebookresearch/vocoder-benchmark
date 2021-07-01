@@ -57,6 +57,7 @@ MEL_F_MAX: int = 12000
 MEL_N_FFT: int = 1024
 MEL_HOP_SAMPLES: int = 256
 MEL_WIN_SAMPLES: int = 960
+MIN_LEVEL_DB: int = -100
 
 # How many clips to shuffle between during data loading.
 SHUFFLE_BUFFER_SIZE: int = 250
@@ -127,8 +128,14 @@ class Audio2Mel(torch.nn.Module):
         real_part, imag_part = fft.unbind(-1)
         magnitude = torch.sqrt(real_part ** 2 + imag_part ** 2)
         mel_output = torch.matmul(self.mel_basis, magnitude)
-        log_mel_spec = torch.log10(torch.clamp(mel_output, min=1e-5))
-        return log_mel_spec
+        log_mel_spec = 20 * torch.log10(torch.clamp(mel_output, min=1e-5))
+        return self.normalize(log_mel_spec)
+
+    def normalize(self, S: torch.Tensor) -> torch.Tensor:
+        """
+        Normalize mels input.
+        """
+        return torch.clip((S - MIN_LEVEL_DB) / -MIN_LEVEL_DB, 0, 1)
 
 
 @dataclass
@@ -526,5 +533,4 @@ def split_command(dataset: str, path: str) -> None:
         }
 
     with open(os.path.join(path, SPLIT_JSON), "w") as handle:
-        # pyre-fixme[61]: `split` may not be initialized here.
-        json.dump(split, handle)
+        json.dump(split, handle)  # pyre-ignore
