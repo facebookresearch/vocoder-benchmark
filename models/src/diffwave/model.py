@@ -21,7 +21,7 @@ from math import sqrt
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from langtech.tts.vocoders.datasets import MEL_NUM_BANDS
 
 Linear = nn.Linear
 ConvTranspose2d = nn.ConvTranspose2d
@@ -76,8 +76,8 @@ class DiffusionEmbedding(nn.Module):
 class SpectrogramUpsampler(nn.Module):
     def __init__(self, n_mels):
         super().__init__()
-        self.conv1 = ConvTranspose2d(1, 1, [3, 32], stride=[1, 16], padding=[1, 8])
-        self.conv2 = ConvTranspose2d(1, 1, [3, 32], stride=[1, 16], padding=[1, 8])
+        self.conv1 = ConvTranspose2d(1, 1, [3, 20], stride=[1, 10], padding=[1, 5])
+        self.conv2 = ConvTranspose2d(1, 1, [3, 60], stride=[1, 30], padding=[1, 15])
 
     def forward(self, x):
         x = torch.unsqueeze(x, 1)
@@ -124,11 +124,11 @@ class DiffWave(nn.Module):
         self.params = params
         self.input_projection = Conv1d(1, params.residual_channels, 1)
         self.diffusion_embedding = DiffusionEmbedding(len(params.noise_schedule))
-        self.spectrogram_upsampler = SpectrogramUpsampler(params.n_mels)
+        self.spectrogram_upsampler = SpectrogramUpsampler(MEL_NUM_BANDS)
         self.residual_layers = nn.ModuleList(
             [
                 ResidualBlock(
-                    params.n_mels,
+                    MEL_NUM_BANDS,
                     params.residual_channels,
                     2 ** (i % params.dilation_cycle_length),
                 )

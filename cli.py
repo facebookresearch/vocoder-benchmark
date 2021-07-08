@@ -5,6 +5,7 @@ from typing import List, Type
 
 import click
 import langtech.tts.vocoders.datasets as datasets
+import langtech.tts.vocoders.models.diffwave as diffwave
 import langtech.tts.vocoders.models.framework as framework
 import langtech.tts.vocoders.models.parallel_wavegan as parallel_wavegan
 import langtech.tts.vocoders.models.wavegrad as wavegrad
@@ -17,6 +18,7 @@ MODELS: List[Type[framework.Vocoder]] = [
     wavegrad.WaveGrad,
     wavernn.WaveRNN,
     wavenet.WaveNet,
+    diffwave.DiffWave,
     parallel_wavegan.ParallelWaveGAN,
 ]
 
