@@ -16,7 +16,7 @@ model:
   n_hidden: 128
   n_output: 128
   n_iterations: 1500000
-  learning_rate: 1.0e-3
+  learning_rate: 1.0e-4
   # see models/src/wavenet_vocoder/lrschedule.py for available lr_schedule
   lr_schedule: "step_learning_rate_decay"
   lr_schedule_kwargs:

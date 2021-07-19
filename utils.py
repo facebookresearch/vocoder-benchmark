@@ -3,8 +3,10 @@ Vocoder utilities.
 """
 import os
 import sys
+from typing import Tuple
 from typing import Union
 
+import librosa
 import numpy as np
 import soundfile
 import torch
@@ -83,3 +85,25 @@ def remove_none_values_from_dict(config_dict):  # pyre-ignore
         return OmegaConf.create(config)
 
     return config_dict
+
+
+def read_audio(filename: str, sample_rate: int) -> Tuple[np.ndarray, int]:
+    """
+    Read audio from disk.
+
+    Args:
+      filename: The filename. Must end in .wav or .flac.
+      sample_rate: Target sample rate.
+
+    Returns:
+        waveform: A 1D data array (or multiple dimensions where all but one are one).
+
+    Raises:
+      ValueError: If filename has incorrect extension.
+    """
+
+    if not filename.endswith(".wav") and not filename.endswith(".flac"):
+        raise ValueError(f"Filename {filename} must end with .wav or .flac")
+
+    waveform, sr = soundfile.read(filename)
+    return librosa.resample(waveform, sr, sample_rate)

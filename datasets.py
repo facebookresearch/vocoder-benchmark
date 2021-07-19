@@ -300,9 +300,8 @@ class VocoderDataset(torch.utils.data.IterableDataset):
             waveform, sr = self.dataset[key][:2]
 
             # Resample the waveform to a fixed sample rate
-            if sr != AUDIO_SAMPLE_RATE:
-                waveform = librosa.resample(waveform[0].numpy(), sr, AUDIO_SAMPLE_RATE)
-                waveform = torch.tensor([waveform])
+            waveform = librosa.resample(waveform[0].numpy(), sr, AUDIO_SAMPLE_RATE)
+            waveform = torch.clip(torch.tensor([waveform]), -1, 1)
 
             # Pad to make sure waveform is a multiple of hop length.
             padding = (

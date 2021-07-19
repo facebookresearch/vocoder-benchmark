@@ -185,11 +185,15 @@ class WaveRNN(Vocoder):
             for param_group in self.optimizer.param_groups:
                 param_group["lr"] = current_lr  # pyre-ignore
 
-        # Backward pass.
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-        return loss, {}
+        # Backward pass if nan loss is not detected.
+        if not torch.isnan(loss):
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+            return loss, {}
+
+        print("Nan loss found. Back propagation step is skipped for this iteration.")
+        return loss.new_zeros([1]), {}  # pyre-ignore
 
     def validation_losses(
         self, spectrograms: Tensor, waveforms: Tensor

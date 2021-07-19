@@ -302,9 +302,11 @@ class WaveNet(Vocoder):
             spectrograms = spectrograms.transpose(1, 2).contiguous()
 
             if self.scalar_input:
-                x = torch.zeros(batch_size, 1, 1)
+                x = spectrograms.new_zeros(batch_size, 1, 1)
             else:
-                x = torch.zeros(batch_size, 1, self.config.model.out_channels)
+                x = spectrograms.new_zeros(
+                    batch_size, 1, self.config.model.out_channels
+                )
 
             output = []
             for t in tqdm(range(seq_len)):

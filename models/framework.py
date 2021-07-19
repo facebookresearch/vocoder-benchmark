@@ -12,11 +12,11 @@ from typing import Type, List, Union, Dict, Any, Optional, Iterator, Tuple
 
 import click
 import langtech.tts.vocoders.datasets as datasets
-import librosa
-import soundfile
 import torch
+from langtech.tts.vocoders.datasets import AUDIO_SAMPLE_RATE
 from langtech.tts.vocoders.path_utils import get_default_config_path
 from langtech.tts.vocoders.utils import die_if, hard_exit
+from langtech.tts.vocoders.utils import read_audio, write_audio
 from omegaconf import OmegaConf
 from torch import Tensor
 from typing_extensions import Protocol
@@ -392,10 +392,11 @@ def cli_synthesize(
     )
     die_if(offset < 0, f"Offset time {offset} must be non-negative value")
     die_if(
-        not input_file.endswith(".wav"), f"Input path {input_file} must end with '.wav'"
+        not input_file.endswith(".wav") and not input_file.endswith(".flac"),
+        f"Input path {input_file} must end with '.wav'",
     )
     die_if(
-        not output_file.endswith(".wav"),
+        not output_file.endswith(".wav") and not output_file.endswith(".flac"),
         f"Output path {output_file} must end with '.wav'",
     )
 
@@ -407,9 +408,11 @@ def cli_synthesize(
     model = load_model(model_class, path, eval_mode=True)
 
     # Load waveform and convert to spectrogram.
-    waveform, sample_rate = librosa.core.load(input_file, sr=datasets.AUDIO_SAMPLE_RATE)
-    start_sample = int(offset * sample_rate)
-    end_sample = -1 if length is None else int((offset + float(length)) * sample_rate)
+    waveform = read_audio(input_file, AUDIO_SAMPLE_RATE)
+    start_sample = int(offset * AUDIO_SAMPLE_RATE)
+    end_sample = (
+        -1 if length is None else int((offset + float(length)) * AUDIO_SAMPLE_RATE)
+    )
     waveform = waveform[start_sample:end_sample]
 
     audio2mel = datasets.Audio2Mel()
@@ -421,7 +424,7 @@ def cli_synthesize(
 
     # Run the model and write its output.
     generated = model.generate(spectrogram, False).squeeze(0).cpu().numpy()
-    soundfile.write(output_file, generated, samplerate=sample_rate)
+    write_audio(output_file, generated, AUDIO_SAMPLE_RATE)
 
 
 # Linter complains that this function is too complex, but it's a bit tricky to
