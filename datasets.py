@@ -380,7 +380,7 @@ def load_dataset(
             create_dataloader(dset, split["validation"], config, validation=True),
             create_dataloader(
                 dset,
-                split["validation"][:num_generate_samples],
+                split["test"][:num_generate_samples],
                 config,
                 validation=False,
                 generate=True,
@@ -407,7 +407,7 @@ def load_dataset(
             ),
             create_dataloader(
                 dset_validation,
-                split["validation"][:num_generate_samples],
+                split["test"][:num_generate_samples],
                 config,
                 validation=False,
                 generate=True,
@@ -421,7 +421,7 @@ def load_dataset(
             create_dataloader(dset, split["validation"], config, validation=True),
             create_dataloader(
                 dset,
-                split["validation"][:num_generate_samples],
+                split["test"][:num_generate_samples],
                 config,
                 validation=False,
                 generate=True,

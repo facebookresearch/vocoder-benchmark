@@ -3,23 +3,29 @@ Vocoder modeling framework.
 """
 import difflib
 import glob
+import json
 import math
 import os
 import signal
 import time
 import warnings
+from collections import defaultdict
 from typing import Type, List, Union, Dict, Any, Optional, Iterator, Tuple
 
 import click
 import langtech.tts.vocoders.datasets as datasets
+import numpy as np
 import torch
 from langtech.tts.vocoders.datasets import AUDIO_SAMPLE_RATE
 from langtech.tts.vocoders.path_utils import get_default_config_path
 from langtech.tts.vocoders.utils import die_if, hard_exit
 from langtech.tts.vocoders.utils import read_audio, write_audio
 from omegaconf import OmegaConf
+from pytorch_msssim import ssim
 from torch import Tensor
+from tqdm import tqdm
 from typing_extensions import Protocol
+
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -44,6 +50,12 @@ GENERATE_FREQUENCY: int = 100_000
 
 # How many samples to generate for Tensorboard.
 GENERATE_NUM_SAMPLES: int = 2
+
+# How many samples to wait on until logging evaluation results.
+EVAl_INIT_SAMPLES = 10
+
+# How many samples to generate for evaluation.
+EVAl_NUM_SAMPLES: int = 50
 
 # How often to log training samples to Tensorboard.
 LOG_FREQUENCY: int = 10
@@ -224,6 +236,20 @@ def create_model_commands(model: Type[Vocoder]) -> click.Group:
         """
         cli_synthesize(name, model, path, length, offset, input_file, output_file)
 
+    @group.command("evaluate")
+    @click.option("--path", required=True, help="Directory for the model")
+    @click.option("--dataset", required=True, help="Name of the dataset to use")
+    @click.option(
+        "--checkpoint",
+        default=None,
+        help="Checkpoint path (default: load latest checkpoint)",
+    )
+    def evaluate(path: str, dataset: str, checkpoint: str) -> None:
+        """
+        Evaluate a given vocoder.
+        """
+        cli_evaluate(name, model, path, dataset, checkpoint)
+
     return group
 
 
@@ -267,6 +293,7 @@ def load_model(
     model_class: Type[Vocoder],
     model_dir: str,
     eval_mode: Optional[bool] = None,
+    checkpoint_path: Optional[str] = None,
 ) -> Vocoder:
     """
     Load a model for evaluation.
@@ -285,6 +312,10 @@ def load_model(
     # Load model configuration.
     model_exists = os.path.exists(model_dir) and bool(os.listdir(model_dir))
     die_if(not model_exists, f"Model does not exist at {model_dir}")
+    die_if(
+        checkpoint_path is not None and not os.path.exists(checkpoint_path),
+        f"Checkpoint path {checkpoint_path} does not exist",
+    )
 
     config_path = os.path.join(model_dir, CONFIG_YAML)
     die_if(
@@ -297,7 +328,8 @@ def load_model(
     model.initialize()
 
     # Load checkpoint into model if model has been initialized.
-    checkpoint_path = last_checkpoint_path(model_dir)
+    if checkpoint_path is None:
+        checkpoint_path = last_checkpoint_path(model_dir)
     if checkpoint_path is not None:
         load_model_from_checkpoint(model, checkpoint_path)
 
@@ -425,6 +457,66 @@ def cli_synthesize(
     # Run the model and write its output.
     generated = model.generate(spectrogram, False).squeeze(0).cpu().numpy()
     write_audio(output_file, generated, AUDIO_SAMPLE_RATE)
+
+
+def cli_evaluate(
+    model_name: str,
+    model_class: Type[Vocoder],
+    path: str,
+    dataset_name: str,
+    checkpoint: str,
+) -> None:
+    """
+    Evaluate a given vocoder.
+
+    Args:
+      model_name: The model type, e.g. 'wavernn'.
+      model_class: The class for the model.
+      path: Path to the model directory.
+      dataset_name: Name of the dataset to use.
+    """
+    die_if(not os.path.exists(path), f"Model path {path} does not exist")
+
+    # Create directories if not exist to save GT and generated samples
+    os.makedirs(os.path.join(path, "eval"), exist_ok=True)
+    os.makedirs(os.path.join(path, "eval", "waveforms"), exist_ok=True)
+    wav_gen_dir = os.path.join(path, "eval", "waveforms_gen")
+
+    if checkpoint is not None:
+        checkpoint_idx = checkpoint.split("/")[-1].split(".")[0]
+        wav_gen_dir += f"_{checkpoint_idx}"
+
+    os.makedirs(wav_gen_dir, exist_ok=True)
+
+    # Load the model from disk.
+    print(f"Evaluating {model_name} model located at {path}.")
+
+    model = load_model(model_class, path, eval_mode=True, checkpoint_path=checkpoint)
+
+    # Load dataloader
+    _, _, gen_dataloader = datasets.load_dataset(
+        dataset_name, model.config.dataset, EVAl_INIT_SAMPLES + EVAl_NUM_SAMPLES
+    )
+
+    # Compute evaluation metrics
+    metrics = compute_evaluation_metrics(model, gen_dataloader, wav_gen_dir)
+    metadata = {
+        "model": model_name,
+        "checkopint": checkpoint,
+        "dataset": dataset_name,
+        "num_samples": len(metrics["mse"]),
+        "metrics": {k: "%.3f" % np.mean(metrics[k]) for k in metrics},
+    }
+    metadata_json = f"{model_name}"
+    device = "gpu" if torch.cuda.is_available() else "cpu"
+
+    if checkpoint is not None:
+        metadata_json += f"_{checkpoint_idx}"  # pyre-ignore
+
+    metadata_json = os.path.join(path, "eval", f"{metadata_json}_{device}.json")
+    print(f"writing metadata to {metadata_json}")
+    with open(metadata_json, "w") as handle:
+        json.dump(metadata, handle)
 
 
 # Linter complains that this function is too complex, but it's a bit tricky to
@@ -731,3 +823,76 @@ def compute_validation_metrics(
         mean_loss = torch.mean(torch.stack(key_losses)).cpu().numpy().item()
         print(f"Validation {key}: {mean_loss:.3f}", flush=True)
         writer.add_scalar("valid/" + key, mean_loss, global_step=model.global_step)
+
+
+@torch.no_grad()  # pyre-ignore
+def compute_evaluation_metrics(
+    model: Vocoder, dataloader: torch.utils.data.DataLoader, path: str
+) -> Dict[str, Any]:
+
+    metrics: dict[str, Any] = defaultdict(None)
+
+    metrics["ssim"] = []
+    metrics["mse"] = []
+    metrics["rtf"] = []
+    metrics["psnr"] = []
+    mel = datasets.Audio2Mel()
+    MSE = torch.nn.MSELoss()
+
+    if torch.cuda.is_available():
+        mel.cuda()
+        MSE.cuda()
+
+    progress = tqdm(
+        enumerate(dataloader), desc="", total=EVAl_INIT_SAMPLES + EVAl_NUM_SAMPLES
+    )
+
+    for i, (spectrograms, waveforms) in progress:
+        if torch.cuda.is_available():
+            spectrograms = spectrograms.cuda()
+
+        start = time.time()
+        wav_gen = model.generate(spectrograms)
+
+        if i >= EVAl_INIT_SAMPLES:
+            metrics["rtf"].append(
+                (time.time() - start) / (len(wav_gen) / AUDIO_SAMPLE_RATE)
+            )
+
+            spectrograms_gen = mel(wav_gen.unsqueeze(0))
+
+            metrics["ssim"].append(
+                ssim(
+                    spectrograms.unsqueeze(0),
+                    spectrograms_gen.unsqueeze(0),
+                    data_range=1,
+                ).item()
+            )
+            mse = MSE(spectrograms, spectrograms_gen)
+            metrics["mse"].append(mse.item())
+            metrics["psnr"].append(psnr(mse).item())
+            progress.set_description(
+                ", ".join(["%s: %0.3f" % (k, np.mean(metrics[k])) for k in metrics])
+            )
+
+            write_audio(
+                os.path.join(path, "..", "waveforms", "%05d.wav" % (i + 1)),
+                waveforms,
+                AUDIO_SAMPLE_RATE,
+            )
+            write_audio(
+                os.path.join(path, "%05d.wav" % (i + 1)), wav_gen, AUDIO_SAMPLE_RATE
+            )
+
+    metrics["num_params"] = sum(
+        p.numel() for p in model.parameters() if p.requires_grad
+    )
+
+    return metrics
+
+
+def psnr(mse: torch.nn.Module) -> torch.Tensor:
+    """
+    Compute PSNR from MSE.
+    """
+    return 20 * torch.log10(1.0 / torch.sqrt(mse))
