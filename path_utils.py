@@ -4,7 +4,7 @@ externally; this version is only for FB-internal use.
 """
 import os
 
-import libfb.py.parutil
+# @fb-only: import libfb.py.parutil 
 
 
 def get_default_config_path(config_file: str) -> str:
@@ -17,6 +17,7 @@ def get_default_config_path(config_file: str) -> str:
     Returns:
       A path to the default config YAML file.
     """
-    return libfb.py.parutil.get_file_path(
-        os.path.join("langtech", "tts", "vocoders", "config", config_file)
-    )
+    # @fb-only: return libfb.py.parutil.get_file_path( 
+        # @fb-only: os.path.join("langtech", "tts", "vocoders", "config", config_file) 
+    # @fb-only: ) 
+    return os.path.join("config", config_file) # @oss-only
