@@ -6,9 +6,15 @@ from typing import List, Optional, Tuple, Dict, Any
 
 import torch
 import torchaudio
-from langtech.tts.vocoders.datasets import DatasetConfig
-from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol
-from langtech.tts.vocoders.models.src.wavegrad import diffusion_process
+
+from datasets import DatasetConfig # @oss-only
+# @fb-only: from langtech.tts.vocoders.datasets import DatasetConfig 
+
+from models.framework import Vocoder, ConfigProtocol # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
+
+from models.src.wavegrad import diffusion_process # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavegrad import diffusion_process 
 from omegaconf import MISSING
 from torch import Tensor
 

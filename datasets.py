@@ -11,7 +11,9 @@ from typing import Tuple, Set, List, Union, Iterator
 import click
 import torch
 import torchaudio
-from langtech.tts.vocoders.utils import die_if
+
+from utils import die_if # @oss-only
+# @fb-only: from langtech.tts.vocoders.utils import die_if 
 from omegaconf import MISSING
 
 with warnings.catch_warnings():

@@ -7,7 +7,9 @@ from __future__ import with_statement, print_function, absolute_import
 import math
 
 import torch
-from langtech.tts.vocoders.models.src.wavenet_vocoder import conv
+
+from models.src.wavenet_vocoder import conv # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder import conv 
 from torch import nn
 from torch.nn import functional as F
 

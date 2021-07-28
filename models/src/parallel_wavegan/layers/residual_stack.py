@@ -9,7 +9,9 @@
 """Residual stack module in MelGAN."""
 
 import torch
-from langtech.tts.vocoders.models.src.parallel_wavegan.layers.causal_conv import (
+
+from models.src.parallel_wavegan.layers.causal_conv import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.causal_conv import ( 
     CausalConv1d,
 )
 

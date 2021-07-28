@@ -12,7 +12,9 @@ This code is modified from https://github.com/r9y9/wavenet_vocoder.
 import numpy as np
 import torch
 import torch.nn.functional as F
-from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_block import (
+
+from models.src.parallel_wavegan.layers.residual_block import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_block import ( 
     Conv1d,
 )
 

@@ -16,10 +16,18 @@ import click
 import langtech.tts.vocoders.datasets as datasets
 import numpy as np
 import torch
-from langtech.tts.vocoders.datasets import AUDIO_SAMPLE_RATE
-from langtech.tts.vocoders.path_utils import get_default_config_path
-from langtech.tts.vocoders.utils import die_if, hard_exit
-from langtech.tts.vocoders.utils import read_audio, write_audio
+
+from datasets import AUDIO_SAMPLE_RATE # @oss-only
+# @fb-only: from langtech.tts.vocoders.datasets import AUDIO_SAMPLE_RATE 
+
+from path_utils import get_default_config_path # @oss-only
+# @fb-only: from langtech.tts.vocoders.path_utils import get_default_config_path 
+
+from utils import die_if, hard_exit # @oss-only
+# @fb-only: from langtech.tts.vocoders.utils import die_if, hard_exit 
+
+from utils import read_audio, write_audio # @oss-only
+# @fb-only: from langtech.tts.vocoders.utils import read_audio, write_audio 
 from omegaconf import OmegaConf
 from pytorch_msssim import ssim
 from torch import Tensor

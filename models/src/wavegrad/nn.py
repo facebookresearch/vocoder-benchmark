@@ -3,16 +3,30 @@
 
 import numpy as np
 import torch
-from langtech.tts.vocoders.datasets import MEL_NUM_BANDS
-from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule
-from langtech.tts.vocoders.models.src.wavegrad.downsampling import (
+
+from datasets import MEL_NUM_BANDS # @oss-only
+# @fb-only: from langtech.tts.vocoders.datasets import MEL_NUM_BANDS 
+
+from models.src.wavegrad.base import BaseModule # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule 
+
+from models.src.wavegrad.downsampling import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.downsampling import ( 
     DownsamplingBlock as DBlock,
 )
-from langtech.tts.vocoders.models.src.wavegrad.layers import Conv1dWithInitialization
-from langtech.tts.vocoders.models.src.wavegrad.linear_modulation import (
+
+from models.src.wavegrad.layers import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.layers import ( 
+    Conv1dWithInitialization,
+)
+
+from models.src.wavegrad.linear_modulation import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.linear_modulation import ( 
     FeatureWiseLinearModulation as FiLM,
 )
-from langtech.tts.vocoders.models.src.wavegrad.upsampling import (
+
+from models.src.wavegrad.upsampling import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.upsampling import ( 
     UpsamplingBlock as UBlock,
 )
 

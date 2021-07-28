@@ -6,16 +6,26 @@ from __future__ import with_statement, print_function, absolute_import
 import math
 
 import torch
-from langtech.tts.vocoders.models.src.wavenet_vocoder import upsample
-from langtech.tts.vocoders.models.src.wavenet_vocoder.mixture import (
+
+from models.src.wavenet_vocoder import upsample # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder import upsample 
+
+from models.src.wavenet_vocoder.mixture import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.mixture import ( 
     sample_from_discretized_mix_logistic,
     sample_from_mix_gaussian,
 )
-from langtech.tts.vocoders.models.src.wavenet_vocoder.modules import (
+
+from models.src.wavenet_vocoder.modules import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.modules import ( 
     Conv1d1x1,
     ResidualConv1dGLU,
 )
-from langtech.tts.vocoders.models.src.wavenet_vocoder.modules import Embedding
+
+from models.src.wavenet_vocoder.modules import Embedding # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.modules import ( 
+    Embedding,
+)
 from torch import nn
 from torch.nn import functional as F
 

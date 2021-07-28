@@ -6,9 +6,15 @@ from typing import List, Optional, Tuple, Dict
 
 import numpy as np
 import torch
-from langtech.tts.vocoders.datasets import DatasetConfig, MEL_HOP_SAMPLES
-from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol
-from langtech.tts.vocoders.models.src.diffwave import model
+
+from datasets import DatasetConfig, MEL_HOP_SAMPLES # @oss-only
+# @fb-only: from langtech.tts.vocoders.datasets import DatasetConfig, MEL_HOP_SAMPLES 
+
+from models.framework import Vocoder, ConfigProtocol # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
+
+from models.src.diffwave import model # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.diffwave import model 
 from omegaconf import MISSING
 from torch import Tensor
 

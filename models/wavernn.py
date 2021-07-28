@@ -8,10 +8,22 @@ import torch
 import torch.nn.functional as F
 import torchaudio
 import torchaudio.models
-from langtech.tts.vocoders.datasets import DatasetConfig, MEL_HOP_SAMPLES, MEL_NUM_BANDS
-from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol
-from langtech.tts.vocoders.models.src.wavenet_vocoder import lrschedule
-from langtech.tts.vocoders.utils import remove_none_values_from_dict
+
+from datasets import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.datasets import ( 
+    DatasetConfig,
+    MEL_HOP_SAMPLES,
+    MEL_NUM_BANDS,
+)
+
+from models.framework import Vocoder, ConfigProtocol # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
+
+from models.src.wavenet_vocoder import lrschedule # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder import lrschedule 
+
+from utils import remove_none_values_from_dict # @oss-only
+# @fb-only: from langtech.tts.vocoders.utils import remove_none_values_from_dict 
 from omegaconf import MISSING, OmegaConf
 from torch import Tensor
 from tqdm import tqdm

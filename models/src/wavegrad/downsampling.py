@@ -2,9 +2,19 @@
 # pylint: skip-file
 
 import torch
-from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule
-from langtech.tts.vocoders.models.src.wavegrad.interpolation import InterpolationBlock
-from langtech.tts.vocoders.models.src.wavegrad.layers import Conv1dWithInitialization
+
+from models.src.wavegrad.base import BaseModule # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule 
+
+from models.src.wavegrad.interpolation import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.interpolation import ( 
+    InterpolationBlock,
+)
+
+from models.src.wavegrad.layers import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.layers import ( 
+    Conv1dWithInitialization,
+)
 
 
 class ConvolutionBlock(BaseModule):

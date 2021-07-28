@@ -2,7 +2,9 @@
 # pylint: skip-file
 
 import torch
-from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule
+
+from models.src.wavegrad.base import BaseModule # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule 
 
 
 class Conv1dWithInitialization(BaseModule):

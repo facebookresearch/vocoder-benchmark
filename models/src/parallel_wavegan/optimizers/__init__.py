@@ -1,3 +1,4 @@
-from torch.optim import *  # NOQA
+from torch.optim import *
 
-from langtech.tts.vocoders.models.src.parallel_wavegan.optimizers.radam import *  # NOQA
+from models.src.parallel_wavegan.optimizers.radam import * # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.optimizers.radam import * 

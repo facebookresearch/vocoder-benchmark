@@ -12,13 +12,19 @@ import logging
 
 import numpy as np
 import torch
-from langtech.tts.vocoders.models.src.parallel_wavegan.layers.causal_conv import (
+
+from models.src.parallel_wavegan.layers.causal_conv import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.causal_conv import ( 
     CausalConv1d,
 )
-from langtech.tts.vocoders.models.src.parallel_wavegan.layers.causal_conv import (
+
+from models.src.parallel_wavegan.layers.causal_conv import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.causal_conv import ( 
     CausalConvTranspose1d,
 )
-from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_stack import (
+
+from models.src.parallel_wavegan.layers.residual_stack import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_stack import ( 
     ResidualStack,
 )
 

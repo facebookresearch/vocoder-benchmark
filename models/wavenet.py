@@ -9,22 +9,36 @@ import langtech.tts.vocoders.models.src.wavenet_vocoder.wavenet as wavenet
 import torch
 import torchaudio
 import torchaudio.models
-from langtech.tts.vocoders.datasets import DatasetConfig
-from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol
-from langtech.tts.vocoders.models.src.wavenet_vocoder import lrschedule
-from langtech.tts.vocoders.models.src.wavenet_vocoder.loss import (
+
+from datasets import DatasetConfig # @oss-only
+# @fb-only: from langtech.tts.vocoders.datasets import DatasetConfig 
+
+from models.framework import Vocoder, ConfigProtocol # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
+
+from models.src.wavenet_vocoder import lrschedule # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder import lrschedule 
+
+from models.src.wavenet_vocoder.loss import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.loss import ( 
     DiscretizedMixturelogisticLoss,
     MixtureGaussianLoss,
 )
-from langtech.tts.vocoders.models.src.wavenet_vocoder.mixture import (
+
+from models.src.wavenet_vocoder.mixture import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.mixture import ( 
     sample_from_discretized_mix_logistic,
     sample_from_mix_gaussian,
 )
-from langtech.tts.vocoders.models.src.wavenet_vocoder.util import (
+
+from models.src.wavenet_vocoder.util import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.util import ( 
     is_mulaw_quantize,
     is_scalar_input,
 )
-from langtech.tts.vocoders.utils import remove_none_values_from_dict
+
+from utils import remove_none_values_from_dict # @oss-only
+# @fb-only: from langtech.tts.vocoders.utils import remove_none_values_from_dict 
 from omegaconf import MISSING, OmegaConf
 from torch import Tensor
 from torch.nn import functional as F

@@ -21,7 +21,9 @@ from math import sqrt
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from langtech.tts.vocoders.datasets import MEL_NUM_BANDS
+
+from datasets import MEL_NUM_BANDS # @oss-only
+# @fb-only: from langtech.tts.vocoders.datasets import MEL_NUM_BANDS 
 
 Linear = nn.Linear
 ConvTranspose2d = nn.ConvTranspose2d
