@@ -116,7 +116,7 @@ class Vocoder(torch.nn.Module):
         Args:
           value: New value to set global_step to.
         """
-        self.global_step_buffer.fill_(value)  # pyre-ignore
+        self.global_step_buffer.fill_(value)
 
     # ========================================
     # ========================================
