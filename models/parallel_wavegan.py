@@ -5,8 +5,11 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Dict
 
-import langtech.tts.vocoders.models.src.parallel_wavegan.models as models
-import langtech.tts.vocoders.models.src.parallel_wavegan.optimizers as optimizers
+import models.src.parallel_wavegan.models as models # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.src.parallel_wavegan.models as models 
+
+import models.src.parallel_wavegan.optimizers as optimizers # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.src.parallel_wavegan.optimizers as optimizers 
 import torch
 import torchaudio
 import torchaudio.models

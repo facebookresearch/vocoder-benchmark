@@ -11,7 +11,8 @@
 import logging
 import math
 
-import langtech.tts.vocoders.models.src.parallel_wavegan.models as models
+import models.src.parallel_wavegan.models as models # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.src.parallel_wavegan.models as models 
 import numpy as np
 import torch
 

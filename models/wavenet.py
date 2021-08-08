@@ -5,7 +5,8 @@ import math
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Dict
 
-import langtech.tts.vocoders.models.src.wavenet_vocoder.wavenet as wavenet
+import models.src.wavenet_vocoder.wavenet as wavenet # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.src.wavenet_vocoder.wavenet as wavenet 
 import torch
 import torchaudio
 import torchaudio.models

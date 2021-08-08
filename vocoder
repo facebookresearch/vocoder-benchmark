@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "Using entrypoint: $VOCODER_BENCHMARK/cli.py"
+
+# shellcheck disable=SC2086
+python3 $VOCODER_BENCHMARK/cli.py "$@"
+

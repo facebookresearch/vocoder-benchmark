@@ -13,7 +13,9 @@ from collections import defaultdict
 from typing import Type, List, Union, Dict, Any, Optional, Iterator, Tuple
 
 import click
-import langtech.tts.vocoders.datasets as datasets
+
+import datasets as datasets # @oss-only
+# @fb-only: import langtech.tts.vocoders.datasets as datasets 
 import numpy as np
 import torch
 
@@ -892,9 +894,17 @@ def compute_evaluation_metrics(
                 os.path.join(path, "%05d.wav" % (i + 1)), wav_gen, AUDIO_SAMPLE_RATE
             )
 
-    metrics["num_params"] = sum(
-        p.numel() for p in model.parameters() if p.requires_grad
-    )
+    # check if this is a GAN model count num_params for the generator only
+    if model.command == "parallel_wavegan":
+        metrics["num_params"] = sum(
+            p.numel()
+            for p in model.model["generator"].parameters()  # pyre-ignore
+            if p.requires_grad
+        )
+    else:
+        metrics["num_params"] = sum(
+            p.numel() for p in model.parameters() if p.requires_grad
+        )
 
     return metrics
 

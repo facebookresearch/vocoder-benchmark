@@ -4,13 +4,27 @@ Main command-line entry point for 'vocoder' command.
 from typing import List, Type
 
 import click
-import langtech.tts.vocoders.datasets as datasets
-import langtech.tts.vocoders.models.diffwave as diffwave
-import langtech.tts.vocoders.models.framework as framework
-import langtech.tts.vocoders.models.parallel_wavegan as parallel_wavegan
-import langtech.tts.vocoders.models.wavegrad as wavegrad
-import langtech.tts.vocoders.models.wavenet as wavenet
-import langtech.tts.vocoders.models.wavernn as wavernn
+
+import datasets as datasets # @oss-only
+# @fb-only: import langtech.tts.vocoders.datasets as datasets 
+
+import models.diffwave as diffwave # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.diffwave as diffwave 
+
+import models.framework as framework # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.framework as framework 
+
+import models.parallel_wavegan as parallel_wavegan # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.parallel_wavegan as parallel_wavegan 
+
+import models.wavegrad as wavegrad # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.wavegrad as wavegrad 
+
+import models.wavenet as wavenet # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.wavenet as wavenet 
+
+import models.wavernn as wavernn # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.wavernn as wavernn 
 
 
 # List the models available in this repository.
@@ -52,3 +66,6 @@ for command in DATASET_COMMANDS:
     dataset.add_command(command)
 for command in MODEL_COMMANDS:
     main.add_command(command)
+
+if __name__ == "__main__":
+    main()

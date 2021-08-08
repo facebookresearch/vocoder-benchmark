@@ -22,7 +22,7 @@ from models.src.wavenet_vocoder.modules import ( # @oss-only
     ResidualConv1dGLU,
 )
 
-from models.src.wavenet_vocoder.modules import Embedding # @oss-only
+from models.src.wavenet_vocoder.modules import ( # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.modules import ( 
     Embedding,
 )
