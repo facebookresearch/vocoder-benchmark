@@ -7,18 +7,33 @@ from typing import List, Optional, Tuple, Dict
 
 import models.src.wavenet_vocoder.wavenet as wavenet # @oss-only
 # @fb-only: import langtech.tts.vocoders.models.src.wavenet_vocoder.wavenet as wavenet 
+import numpy as np
 import torch
 import torchaudio
 import torchaudio.models
 
-from datasets import DatasetConfig # @oss-only
-# @fb-only: from langtech.tts.vocoders.datasets import DatasetConfig 
+from datasets import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.datasets import ( 
+    DatasetConfig,
+    MEL_NUM_BANDS,
+    MEL_HOP_SAMPLES,
+    AUDIO_SAMPLE_RATE,
+)
 
 from models.framework import Vocoder, ConfigProtocol # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
 
+from models.src.ptflops.flops_counter import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.ptflops.flops_counter import ( 
+    get_model_complexity_info,
+    conv_flops_counter_hook,
+)
+
 from models.src.wavenet_vocoder import lrschedule # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder import lrschedule 
+
+from models.src.wavenet_vocoder.conv import Conv1d # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.conv import Conv1d 
 
 from models.src.wavenet_vocoder.loss import ( # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.loss import ( 
@@ -399,3 +414,90 @@ class WaveNet(Vocoder):
 
     def float_2_label(self, x, n_classes):  # pyre-ignore
         return (x + 1.0) * (n_classes - 1) / 2
+
+    def get_complexity(
+        self,
+    ) -> List[float]:
+        """
+        Returns A list with the number of FLOPS and parameters used in this model.
+        """
+
+        # Prepare the input format.
+        waveforms = torch.rand(1, AUDIO_SAMPLE_RATE)
+        spectrograms = torch.rand(
+            1,
+            MEL_NUM_BANDS,
+            int(AUDIO_SAMPLE_RATE / MEL_HOP_SAMPLES)
+            + 2 * self.config.dataset.padding_frames,
+        )
+
+        if self.config.model.input_type in ["mulaw", "mulaw-quantize"]:
+            waveforms = self.compand(waveforms)  # [batch_size, n_samples]
+
+            if self.config.model.input_type == "mulaw":
+                waveforms = self.label_2_float(
+                    waveforms, self.config.model.quantize_channels
+                )
+                waveforms = waveforms.unsqueeze(1)
+            else:
+                waveforms = F.one_hot(waveforms, self.config.model.quantize_channels)
+                waveforms = waveforms.transpose(1, 2).float()
+
+        elif self.config.model.input_type == "raw":
+            waveforms = waveforms.unsqueeze(1)
+        else:
+            raise RuntimeError(
+                "Not supported input type: {}".format(self.config.model.input_type)
+            )
+
+        model = self.model.module  # pyre-ignore
+        custom_modules_hooks = {Conv1d: conv_flops_counter_hook}
+        stats = np.array([0.0, 0.0])
+
+        # Feed data to network and compute the model complexity.
+        with torch.no_grad():
+            stats += np.array(
+                get_model_complexity_info(
+                    model.upsample_net,
+                    ([spectrograms]),
+                    custom_modules_hooks=custom_modules_hooks,
+                )
+            )
+
+            spectrograms = model.upsample_net(spectrograms)
+            assert spectrograms.size(-1) == waveforms.size(-1)
+
+            stats += np.array(
+                get_model_complexity_info(
+                    model.first_conv,
+                    ([waveforms]),
+                    custom_modules_hooks=custom_modules_hooks,
+                )
+            )
+
+            waveforms = model.first_conv(waveforms)
+            skips = 0
+
+            for f in model.conv_layers:
+                stats += np.array(
+                    get_model_complexity_info(
+                        f,
+                        ([waveforms, spectrograms, None]),
+                        custom_modules_hooks=custom_modules_hooks,
+                    )
+                )
+                waveforms, h = f(waveforms, spectrograms, None)
+                skips += h
+
+            skips *= math.sqrt(1.0 / len(model.conv_layers))
+
+            waveforms = skips
+            for f in model.last_conv_layers:
+                stats += np.array(
+                    get_model_complexity_info(
+                        f, ([waveforms]), custom_modules_hooks=custom_modules_hooks
+                    )
+                )
+                waveforms = f(waveforms)
+
+        return stats

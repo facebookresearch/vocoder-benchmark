@@ -198,6 +198,14 @@ class Vocoder(torch.nn.Module):
         """
         raise NotImplementedError("Vocoder subclass must implement generate()")
 
+    def get_complexity(
+        self,
+    ) -> List[float]:
+        """
+        Returns A list with the number of FLOPS and parameters used in this model.
+        """
+        raise NotImplementedError("Vocoder subclass must implement get_complexity()")
+
 
 def create_model_commands(model: Type[Vocoder]) -> click.Group:
     """
@@ -894,17 +902,7 @@ def compute_evaluation_metrics(
                 os.path.join(path, "%05d.wav" % (i + 1)), wav_gen, AUDIO_SAMPLE_RATE
             )
 
-    # check if this is a GAN model count num_params for the generator only
-    if model.command == "parallel_wavegan":
-        metrics["num_params"] = sum(
-            p.numel()
-            for p in model.model["generator"].parameters()  # pyre-ignore
-            if p.requires_grad
-        )
-    else:
-        metrics["num_params"] = sum(
-            p.numel() for p in model.parameters() if p.requires_grad
-        )
+    metrics["flops"], metrics["n_params"] = model.get_complexity()
 
     return metrics
 

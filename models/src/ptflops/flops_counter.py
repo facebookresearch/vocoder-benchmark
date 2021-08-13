@@ -13,43 +13,28 @@ import sys
 from functools import partial
 
 import numpy as np
-import torch
 import torch.nn as nn
 
 
 def get_model_complexity_info(
     model,
-    input_res,
-    print_per_layer_stat=True,
-    as_strings=True,
+    input,
+    print_per_layer_stat=False,
+    as_strings=False,
     input_constructor=None,
     ost=sys.stdout,
     verbose=False,
     ignore_modules=[],
     custom_modules_hooks={},
 ):
-    assert type(input_res) is tuple
-    assert len(input_res) >= 1
+    assert len(input) >= 1
     assert isinstance(model, nn.Module)
     global CUSTOM_MODULES_MAPPING
     CUSTOM_MODULES_MAPPING = custom_modules_hooks
     flops_model = add_flops_counting_methods(model)
     flops_model.eval()
     flops_model.start_flops_count(ost=ost, verbose=verbose, ignore_list=ignore_modules)
-    if input_constructor:
-        input = input_constructor(input_res)
-        _ = flops_model(**input)
-    else:
-        try:
-            batch = torch.ones(()).new_empty(
-                (1, *input_res),
-                dtype=next(flops_model.parameters()).dtype,
-                device=next(flops_model.parameters()).device,
-            )
-        except StopIteration:
-            batch = torch.ones(()).new_empty((1, *input_res))
-
-        _ = flops_model(batch)
+    _ = flops_model(*input)
 
     flops_count, params_count = flops_model.compute_average_flops_cost()
     if print_per_layer_stat:
