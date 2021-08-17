@@ -61,11 +61,11 @@ GENERATE_FREQUENCY: int = 100_000
 # How many samples to generate for Tensorboard.
 GENERATE_NUM_SAMPLES: int = 2
 
-# How many samples to wait on until logging evaluation results.
-EVAl_INIT_SAMPLES = 10
-
 # How many samples to generate for evaluation.
-EVAl_NUM_SAMPLES: int = 50
+EVAl_NUM_SAMPLES: int = 20
+
+# Number of iterations required for RTF computation
+RTF_ITER = 100
 
 # How often to log training samples to Tensorboard.
 LOG_FREQUENCY: int = 10
@@ -513,7 +513,7 @@ def cli_evaluate(
 
     # Load dataloader
     _, _, gen_dataloader = datasets.load_dataset(
-        dataset_name, model.config.dataset, EVAl_INIT_SAMPLES + EVAl_NUM_SAMPLES
+        dataset_name, model.config.dataset, EVAl_NUM_SAMPLES
     )
 
     # Compute evaluation metrics
@@ -849,10 +849,8 @@ def compute_evaluation_metrics(
 ) -> Dict[str, Any]:
 
     metrics: dict[str, Any] = defaultdict(None)
-
     metrics["ssim"] = []
     metrics["mse"] = []
-    metrics["rtf"] = []
     metrics["psnr"] = []
     mel = datasets.Audio2Mel()
     MSE = torch.nn.MSELoss()
@@ -861,24 +859,28 @@ def compute_evaluation_metrics(
         mel.cuda()
         MSE.cuda()
 
-    progress = tqdm(
-        enumerate(dataloader), desc="", total=EVAl_INIT_SAMPLES + EVAl_NUM_SAMPLES
-    )
+    progress = tqdm(enumerate(dataloader), desc="", total=EVAl_NUM_SAMPLES)
 
     for i, (spectrograms, waveforms) in progress:
         if torch.cuda.is_available():
             spectrograms = spectrograms.cuda()
 
-        start = time.time()
         wav_gen = model.generate(spectrograms)
 
-        if i >= EVAl_INIT_SAMPLES:
-            metrics["rtf"].append(
-                (time.time() - start) / (len(wav_gen) / AUDIO_SAMPLE_RATE)
-            )
+        spectrograms_gen = mel(wav_gen.unsqueeze(0))
 
-            spectrograms_gen = mel(wav_gen.unsqueeze(0))
+        write_audio(
+            os.path.join(path, "..", "waveforms", "%05d.wav" % (i + 1)),
+            waveforms,
+            AUDIO_SAMPLE_RATE,
+        )
+        write_audio(
+            os.path.join(path, "%05d.wav" % (i + 1)), wav_gen, AUDIO_SAMPLE_RATE
+        )
 
+        # WaveRNN and WaveNet generate waveform with a different length than the original one.
+        # For that the following metrics should be computed separately.
+        if model.command not in ["wavernn", "wavenet"]:
             metrics["ssim"].append(
                 ssim(
                     spectrograms.unsqueeze(0),
@@ -893,16 +895,13 @@ def compute_evaluation_metrics(
                 ", ".join(["%s: %0.3f" % (k, np.mean(metrics[k])) for k in metrics])
             )
 
-            write_audio(
-                os.path.join(path, "..", "waveforms", "%05d.wav" % (i + 1)),
-                waveforms,
-                AUDIO_SAMPLE_RATE,
-            )
-            write_audio(
-                os.path.join(path, "%05d.wav" % (i + 1)), wav_gen, AUDIO_SAMPLE_RATE
-            )
-
+    print("Computing number of FLOPS and params...")
     metrics["flops"], metrics["n_params"] = model.get_complexity()
+
+    # RTF computation is excluded for WaveRNN and WaveNet
+    if model.command not in ["wavernn", "wavenet"]:
+        print("Computing RTF...")
+        metrics["rtf"] = rtf(model, RTF_ITER)
 
     return metrics
 
@@ -912,3 +911,32 @@ def psnr(mse: torch.nn.Module) -> torch.Tensor:
     Compute PSNR from MSE.
     """
     return 20 * torch.log10(1.0 / torch.sqrt(mse))
+
+
+def rtf(model: Vocoder, n_iter: int) -> float:
+    """
+    Compute RTF in mSec for a given vocoder model over n_iter
+    """
+
+    mel = datasets.Audio2Mel()
+    if torch.cuda.is_available():
+        mel.cuda()
+
+    rtfs = []
+
+    # Generate a list of random secs for each sample within [10, 110] range.
+    np.random.seed(42)
+    secs = np.random.rand(n_iter) * 100 + 10
+
+    for sec in secs:
+        waveforms = torch.rand(1, int(AUDIO_SAMPLE_RATE * sec))
+        if torch.cuda.is_available():
+            waveforms = waveforms.cuda()
+        spectrograms = mel(waveforms)
+
+        # Compute RTF for the current sample.
+        start = time.time()
+        model.generate(spectrograms)
+        rtfs.append((time.time() - start) / sec)
+
+    return np.mean(rtfs) * 1000
