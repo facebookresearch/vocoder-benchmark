@@ -28,7 +28,6 @@ def get_model_complexity_info(
     custom_modules_hooks={},
 ):
     assert len(input) >= 1
-    assert isinstance(model, nn.Module)
     global CUSTOM_MODULES_MAPPING
     CUSTOM_MODULES_MAPPING = custom_modules_hooks
     flops_model = add_flops_counting_methods(model)
@@ -483,13 +482,6 @@ def remove_batch_counter_hook_function(module):
 
 def add_flops_counter_variable_or_reset(module):
     if is_supported_instance(module):
-        if hasattr(module, "__flops__") or hasattr(module, "__params__"):
-            print(
-                "Warning: variables __flops__ or __params__ are already "
-                "defined for the module"
-                + type(module).__name__
-                + " ptflops can affect your code!"
-            )
         module.__flops__ = 0
         module.__params__ = get_model_parameters_number(module)
 

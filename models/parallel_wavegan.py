@@ -1,6 +1,7 @@
 """
 WaveGAN Neural Vocoder.
 """
+import math
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Dict
@@ -10,12 +11,18 @@ import models.src.parallel_wavegan.models as models # @oss-only
 
 import models.src.parallel_wavegan.optimizers as optimizers # @oss-only
 # @fb-only: import langtech.tts.vocoders.models.src.parallel_wavegan.optimizers as optimizers 
+import numpy as np
 import torch
 import torchaudio
 import torchaudio.models
 
-from datasets import DatasetConfig # @oss-only
-# @fb-only: from langtech.tts.vocoders.datasets import DatasetConfig 
+from datasets import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.datasets import ( 
+    DatasetConfig,
+    MEL_NUM_BANDS,
+    MEL_HOP_SAMPLES,
+    AUDIO_SAMPLE_RATE,
+)
 
 from models.framework import Vocoder, ConfigProtocol # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
@@ -25,9 +32,21 @@ from models.src.parallel_wavegan.layers.pqmf import ( # @oss-only
     PQMF,
 )
 
+from models.src.parallel_wavegan.layers.residual_block import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_block import ( 
+    Conv1d1x1,
+    Conv1d,
+)
+
 from models.src.parallel_wavegan.losses.stft_loss import ( # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.losses.stft_loss import ( 
     MultiResolutionSTFTLoss,
+)
+
+from models.src.ptflops.flops_counter import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.ptflops.flops_counter import ( 
+    get_model_complexity_info,
+    conv_flops_counter_hook,
 )
 
 from utils import remove_none_values_from_dict # @oss-only
@@ -630,3 +649,83 @@ class ParallelWaveGAN(Vocoder):
             output = self.model["generator"].module.inference(spectrograms).flatten()
         self.model["generator"].train()
         return output
+
+    def get_complexity(
+        self,
+    ) -> List[float]:
+        """
+        Returns A list with the number of FLOPS and parameters used in this model.
+        """
+
+        # Prepare the input format.
+        waveforms = torch.rand(1, 1, AUDIO_SAMPLE_RATE)
+        spectrograms = torch.rand(
+            1,
+            MEL_NUM_BANDS,
+            int(AUDIO_SAMPLE_RATE / MEL_HOP_SAMPLES)
+            + 2 * self.config.dataset.padding_frames,
+        )
+        model = self.model["generator"].module
+        stats = np.array([0.0, 0.0])
+        custom_modules_hooks = {
+            Conv1d1x1: conv_flops_counter_hook,
+            Conv1d: conv_flops_counter_hook,
+        }
+
+        with torch.no_grad():
+
+            # MelGAN and MB-MelGAN
+            if self.config.model.generator_type == "MelGANGenerator":
+                return get_model_complexity_info(
+                    model,
+                    ([spectrograms]),
+                    custom_modules_hooks=custom_modules_hooks,
+                )
+
+            # ParallelWaveGAN
+            stats += np.array(
+                get_model_complexity_info(
+                    model.upsample_net,
+                    ([spectrograms]),
+                    custom_modules_hooks=custom_modules_hooks,
+                )
+            )
+            print(stats)
+            spectrograms = model.upsample_net(spectrograms)
+            assert spectrograms.size(-1) == waveforms.size(-1)
+
+            # encode to hidden representation
+            stats += np.array(
+                get_model_complexity_info(
+                    model.first_conv,
+                    ([waveforms]),
+                    custom_modules_hooks=custom_modules_hooks,
+                )
+            )
+            waveforms = model.first_conv(waveforms)
+            skips = 0
+            for f in model.conv_layers:
+                stats += np.array(
+                    get_model_complexity_info(
+                        f,
+                        ([waveforms, spectrograms]),
+                        custom_modules_hooks=custom_modules_hooks,
+                    )
+                )
+                waveforms, h = f(waveforms, spectrograms)
+                skips += h
+
+            skips *= math.sqrt(1.0 / len(model.conv_layers))
+
+            # apply final layers
+            waveforms = skips
+            for f in model.last_conv_layers:
+                stats += np.array(
+                    get_model_complexity_info(
+                        f,
+                        ([waveforms]),
+                        custom_modules_hooks=custom_modules_hooks,
+                    )
+                )
+                waveforms = f(waveforms)
+        return stats

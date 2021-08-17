@@ -7,11 +7,21 @@ from typing import List, Optional, Tuple, Dict, Any
 import torch
 import torchaudio
 
-from datasets import DatasetConfig # @oss-only
-# @fb-only: from langtech.tts.vocoders.datasets import DatasetConfig 
+from datasets import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.datasets import ( 
+    DatasetConfig,
+    MEL_NUM_BANDS,
+    MEL_HOP_SAMPLES,
+    AUDIO_SAMPLE_RATE,
+)
 
 from models.framework import Vocoder, ConfigProtocol # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
+
+from models.src.ptflops.flops_counter import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.ptflops.flops_counter import ( 
+    get_model_complexity_info,
+)
 
 from models.src.wavegrad import diffusion_process # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.wavegrad import diffusion_process 
@@ -220,3 +230,34 @@ class WaveGrad(Vocoder):
 
         self.model.train()  # pyre-ignore
         return output.flatten()
+
+    def get_complexity(
+        self,
+    ) -> List[float]:
+        """
+        Returns A list with the number of FLOPS and parameters used in this model.
+        """
+
+        # Prepare the input format.
+        spectrograms = torch.rand(
+            1,
+            MEL_NUM_BANDS,
+            int(AUDIO_SAMPLE_RATE / MEL_HOP_SAMPLES)
+            + 2 * self.config.dataset.padding_frames,
+        )
+
+        with torch.no_grad():
+            self.model.module.set_new_noise_schedule(  # pyre-ignore
+                init=torch.linspace,
+                init_kwargs={
+                    "steps": self.config.model.test_noise_schedule.n_iter,
+                    "start": self.config.model.test_noise_schedule.betas_range[0],
+                    "end": self.config.model.test_noise_schedule.betas_range[1],
+                },
+            )
+            flops, n_params = get_model_complexity_info(
+                self.model.module, ([spectrograms])
+            )
+            n_iter = self.config.model.test_noise_schedule.n_iter
+
+            return [flops / n_iter, n_params]

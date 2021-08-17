@@ -7,14 +7,24 @@ from typing import List, Optional, Tuple, Dict
 import numpy as np
 import torch
 
-from datasets import DatasetConfig, MEL_HOP_SAMPLES # @oss-only
-# @fb-only: from langtech.tts.vocoders.datasets import DatasetConfig, MEL_HOP_SAMPLES 
+from datasets import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.datasets import ( 
+    DatasetConfig,
+    MEL_NUM_BANDS,
+    MEL_HOP_SAMPLES,
+    AUDIO_SAMPLE_RATE,
+)
 
 from models.framework import Vocoder, ConfigProtocol # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
 
 from models.src.diffwave import model # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.diffwave import model 
+
+from models.src.ptflops.flops_counter import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.ptflops.flops_counter import ( 
+    get_model_complexity_info,
+)
 from omegaconf import MISSING
 from torch import Tensor
 
@@ -276,3 +286,39 @@ class DiffWave(Vocoder):
         self.model.train()  # pyre-ignore
 
         return audio.flatten()
+
+    def get_complexity(
+        self,
+    ) -> List[float]:
+        """
+        Returns A list with the number of FLOPS and parameters used in this model.
+        """
+
+        # Prepare the input format.
+        spectrograms = torch.rand(
+            1,
+            MEL_NUM_BANDS,
+            int(AUDIO_SAMPLE_RATE / MEL_HOP_SAMPLES)
+            + 2 * self.config.dataset.padding_frames,
+        )
+
+        device = spectrograms.device
+        waveforms = torch.randn(
+            spectrograms.shape[0],
+            MEL_HOP_SAMPLES * spectrograms.shape[-1],
+            device=device,
+        )
+        Tn = torch.tensor([0.1], device=waveforms.device)
+
+        # Feed data to network and compute the model complexity.
+        with torch.no_grad():
+            return get_model_complexity_info(
+                self.model,
+                (
+                    [
+                        waveforms,
+                        spectrograms,
+                        Tn,
+                    ]
+                ),
+            )

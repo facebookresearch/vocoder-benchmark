@@ -4,6 +4,7 @@ WaveRNN Neural Vocoder.
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Dict
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 import torchaudio
@@ -14,10 +15,16 @@ from datasets import ( # @oss-only
     DatasetConfig,
     MEL_HOP_SAMPLES,
     MEL_NUM_BANDS,
+    AUDIO_SAMPLE_RATE,
 )
 
 from models.framework import Vocoder, ConfigProtocol # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
+
+from models.src.ptflops.flops_counter import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.ptflops.flops_counter import ( 
+    get_model_complexity_info,
+)
 
 from models.src.wavenet_vocoder import lrschedule # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder import lrschedule 
@@ -323,3 +330,121 @@ class WaveRNN(Vocoder):
 
     def label_2_float(self, x, n_classes):  # pyre-ignore
         return 2 * x / (n_classes - 1.0) - 1.0
+
+    def get_complexity(
+        self,
+    ) -> List[float]:
+        """
+        Return A list with the number of FLOPS and parametrs used in this model.
+        """
+
+        # Prepare the input format.
+        model = self.model.module  # pyre-ignore
+        waveforms = torch.rand(1, AUDIO_SAMPLE_RATE)
+        spectrograms = torch.rand(
+            1,
+            MEL_NUM_BANDS,
+            int(AUDIO_SAMPLE_RATE / MEL_HOP_SAMPLES)
+            + 2 * self.config.dataset.padding_frames,
+        )
+        batch_size = waveforms.size(0)
+        h1 = torch.zeros(
+            1, batch_size, model.n_rnn, dtype=waveforms.dtype, device=waveforms.device
+        )
+        h2 = torch.zeros(
+            1, batch_size, model.n_rnn, dtype=waveforms.dtype, device=waveforms.device
+        )
+
+        stats = np.array([0.0, 0.0])
+
+        # Feed data to network and compute the model complexity.
+        stats += np.array(
+            get_model_complexity_info(
+                model.upsample,
+                ([spectrograms]),
+            )
+        )
+        spectrograms, aux = model.upsample(spectrograms)
+        spectrograms = spectrograms.transpose(1, 2)
+        aux = aux.transpose(1, 2)
+
+        aux_idx = [model.n_aux * i for i in range(5)]
+        a1 = aux[:, :, aux_idx[0] : aux_idx[1]]
+        a2 = aux[:, :, aux_idx[1] : aux_idx[2]]
+        a3 = aux[:, :, aux_idx[2] : aux_idx[3]]
+        a4 = aux[:, :, aux_idx[3] : aux_idx[4]]
+
+        x = torch.cat([waveforms.unsqueeze(-1), spectrograms, a1], dim=-1)
+        stats += np.array(
+            get_model_complexity_info(
+                model.fc,
+                ([x]),
+            )
+        )
+        x = model.fc(x)
+
+        res = x
+        stats += np.array(
+            get_model_complexity_info(
+                model.rnn1,
+                ([x, h1]),
+            )
+        )
+        x, _ = model.rnn1(x, h1)
+
+        x = x + res
+        res = x
+        x = torch.cat([x, a2], dim=-1)
+
+        stats += np.array(
+            get_model_complexity_info(
+                model.rnn2,
+                ([x, h2]),
+            )
+        )
+        x, _ = model.rnn2(x, h2)
+
+        x = x + res
+        x = torch.cat([x, a3], dim=-1)
+        stats += np.array(
+            get_model_complexity_info(
+                model.fc1,
+                ([x]),
+            )
+        )
+        x = model.fc1(x)
+
+        stats += np.array(
+            get_model_complexity_info(
+                model.relu1,
+                ([x]),
+            )
+        )
+        x = model.relu1(x)
+
+        x = torch.cat([x, a4], dim=-1)
+        stats += np.array(
+            get_model_complexity_info(
+                model.fc2,
+                ([x]),
+            )
+        )
+        x = model.fc2(x)
+
+        stats += np.array(
+            get_model_complexity_info(
+                model.relu2,
+                ([x]),
+            )
+        )
+        x = model.relu2(x)
+
+        stats += np.array(
+            get_model_complexity_info(
+                model.fc3,
+                ([x]),
+            )
+        )
+        x = model.fc3(x)
+
+        return stats
