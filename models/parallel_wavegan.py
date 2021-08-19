@@ -242,7 +242,7 @@ class ParallelWaveGAN(Vocoder):
             self.config.model.discriminator_type,
         )
 
-        self.model = torch.nn.ModuleDict(  # pyre-ignore
+        self.model = torch.nn.ModuleDict(
             {
                 "generator": generator_class(**self.config.model.generator_params),
                 "discriminator": discriminator_class(

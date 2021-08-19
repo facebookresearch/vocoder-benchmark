@@ -303,7 +303,7 @@ class WaveRNN(Vocoder):
         gru_cell.bias_ih.data = gru.bias_ih_l0.data
         return gru_cell
 
-    def get_x_from_dist(self, distrib, logits, history=None):  # pyre-ignore
+    def get_x_from_dist(self, distrib, logits, history=None):
         """
         Sampling from a given distribution
 
@@ -316,7 +316,7 @@ class WaveRNN(Vocoder):
             x = torch.argmax(logits, dim=1)
             history.append(x)
             x = self.label_2_float(
-                x, self.model.module.n_classes  # pyre-ignore
+                x, self.model.module.n_classes
             ).unsqueeze(-1)
         elif distrib == "random":
             posterior = F.softmax(logits, dim=1)
@@ -328,7 +328,7 @@ class WaveRNN(Vocoder):
             raise RuntimeError("Unknown sampling mode - ", distrib)
         return x, history
 
-    def label_2_float(self, x, n_classes):  # pyre-ignore
+    def label_2_float(self, x, n_classes):
         return 2 * x / (n_classes - 1.0) - 1.0
 
     def get_complexity(

@@ -70,7 +70,7 @@ def write_audio(
     soundfile.write(filename, data, sample_rate)
 
 
-def remove_none_values_from_dict(config_dict):  # pyre-ignore
+def remove_none_values_from_dict(config_dict):
     """
     Iterate over input configuration and remove None-value params
 

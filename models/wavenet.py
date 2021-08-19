@@ -409,10 +409,10 @@ class WaveNet(Vocoder):
         history.append(x.data)
         return history[-1], history
 
-    def label_2_float(self, x, n_classes):  # pyre-ignore
+    def label_2_float(self, x, n_classes):
         return 2 * x / (n_classes - 1.0) - 1.0
 
-    def float_2_label(self, x, n_classes):  # pyre-ignore
+    def float_2_label(self, x, n_classes):
         return (x + 1.0) * (n_classes - 1) / 2
 
     def get_complexity(

@@ -567,7 +567,7 @@ def train_loop(  # noqa
     else:
         print("WARNING: No GPU detected, running on CPU. Training may be very slow.")
 
-    def repeat_training_data_forever() -> Iterator[Any]:  # pyre-ignore
+    def repeat_training_data_forever() -> Iterator[Any]:
         """
         Repeat all training data forever.
         """
@@ -675,8 +675,8 @@ def save_model(model: Vocoder, checkpoint_dir: str) -> None:
     )
 
 
-def move_state_dict_to_device(  # pyre-ignore
-    item: Union[Dict[str, Any], List[Any], Tensor],  # pyre-ignore
+def move_state_dict_to_device(
+    item: Union[Dict[str, Any], List[Any], Tensor],
     cpu: bool,
 ) -> Union[Dict[str, Any], List[Any], Tensor]:
     """

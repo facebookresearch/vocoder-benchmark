@@ -48,10 +48,10 @@ class ModelConfig:
     factors: List[int] = MISSING
     upsampling_preconv_out_channels: int = MISSING
     upsampling_out_channels: List[int] = MISSING
-    upsampling_dilations: List[Any] = MISSING  # pyre-ignore
+    upsampling_dilations: List[Any] = MISSING
     downsampling_preconv_out_channels: int = MISSING
     downsampling_out_channels: List[int] = MISSING
-    downsampling_dilations: List[Any] = MISSING  # pyre-ignore
+    downsampling_dilations: List[Any] = MISSING
     n_iterations: int = MISSING
     grad_clip_threshold: int = MISSING
     scheduler_step_size: int = MISSING
