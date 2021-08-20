@@ -315,9 +315,7 @@ class WaveRNN(Vocoder):
         if distrib == "argmax":
             x = torch.argmax(logits, dim=1)
             history.append(x)
-            x = self.label_2_float(
-                x, self.model.module.n_classes
-            ).unsqueeze(-1)
+            x = self.label_2_float(x, self.model.module.n_classes).unsqueeze(-1)
         elif distrib == "random":
             posterior = F.softmax(logits, dim=1)
             distrib = torch.distributions.Categorical(posterior)
