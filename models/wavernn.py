@@ -192,9 +192,7 @@ class WaveRNN(Vocoder):
         # Learning rate schedule
         if self.config.model.lr_schedule:
             current_lr = self.config.model.learning_rate
-            lr_schedule_fn = getattr(
-                lrschedule, self.config.model.lr_schedule  # pyre-ignore
-            )
+            lr_schedule_fn = getattr(lrschedule, self.config.model.lr_schedule)
             lr_schedule_kwargs = remove_none_values_from_dict(
                 OmegaConf.to_container(self.config.model.lr_schedule_kwargs)
             )
