@@ -672,6 +672,10 @@ class ParallelWaveGAN(Vocoder):
             Conv1d: conv_flops_counter_hook,
         }
 
+        if torch.cuda.is_available():
+            waveforms = waveforms.cuda()
+            spectrograms = spectrograms.cuda()
+
         with torch.no_grad():
 
             # MelGAN and MB-MelGAN
@@ -690,7 +694,6 @@ class ParallelWaveGAN(Vocoder):
                     custom_modules_hooks=custom_modules_hooks,
                 )
             )
-            print(stats)
             spectrograms = model.upsample_net(spectrograms)
             assert spectrograms.size(-1) == waveforms.size(-1)
 

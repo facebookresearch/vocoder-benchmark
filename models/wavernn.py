@@ -353,6 +353,12 @@ class WaveRNN(Vocoder):
 
         stats = np.array([0.0, 0.0])
 
+        if torch.cuda.is_available():
+            waveforms = waveforms.cuda()
+            spectrograms = spectrograms.cuda()
+            h1 = h1.cuda()
+            h2 = h2.cuda()
+
         # Feed data to network and compute the model complexity.
         stats += np.array(
             get_model_complexity_info(

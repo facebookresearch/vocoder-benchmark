@@ -525,7 +525,7 @@ def cli_evaluate(
         "num_samples": len(metrics["mse"]),
         "metrics": {k: "%.3f" % np.mean(metrics[k]) for k in metrics},
     }
-    metadata_json = f"{model_name}"
+    metadata_json = "metadata"
     device = "gpu" if torch.cuda.is_available() else "cpu"
 
     if checkpoint is not None:
@@ -915,7 +915,7 @@ def psnr(mse: torch.nn.Module) -> torch.Tensor:
 
 def rtf(model: Vocoder, n_iter: int) -> float:
     """
-    Compute RTF in mSec for a given vocoder model over n_iter
+    Compute RTF for a given vocoder model over n_iter
     """
 
     mel = datasets.Audio2Mel()
@@ -924,11 +924,13 @@ def rtf(model: Vocoder, n_iter: int) -> float:
 
     rtfs = []
 
-    # Generate a list of random secs for each sample within [10, 110] range.
+    # Generate a list of random secs for each sample within [10, 20] range.
     np.random.seed(42)
-    secs = np.random.rand(n_iter) * 100 + 10
+    secs = np.random.rand(n_iter) * 10 + 10
 
-    for sec in secs:
+    progress = tqdm(secs, desc="", total=n_iter)
+
+    for sec in progress:
         waveforms = torch.rand(1, int(AUDIO_SAMPLE_RATE * sec))
         if torch.cuda.is_available():
             waveforms = waveforms.cuda()
@@ -939,4 +941,6 @@ def rtf(model: Vocoder, n_iter: int) -> float:
         model.generate(spectrograms)
         rtfs.append((time.time() - start) / sec)
 
-    return np.mean(rtfs) * 1000
+        progress.set_description("RTF: %0.2f" % np.mean(rtfs))
+
+    return np.mean(rtfs)

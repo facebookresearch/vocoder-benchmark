@@ -302,13 +302,21 @@ class DiffWave(Vocoder):
             + 2 * self.config.dataset.padding_frames,
         )
 
-        device = spectrograms.device
         waveforms = torch.randn(
             spectrograms.shape[0],
             MEL_HOP_SAMPLES * spectrograms.shape[-1],
-            device=device,
         )
-        Tn = torch.tensor([0.1], device=waveforms.device)
+
+        if torch.cuda.is_available():
+            waveforms = waveforms.cuda()
+            spectrograms = spectrograms.cuda()
+
+        Tn = torch.tensor([0.1])
+
+        if torch.cuda.is_available():
+            waveforms = waveforms.cuda()
+            spectrograms = spectrograms.cuda()
+            Tn = Tn.cuda()
 
         # Feed data to network and compute the model complexity.
         with torch.no_grad():

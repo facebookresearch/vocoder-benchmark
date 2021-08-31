@@ -11,8 +11,8 @@
 import logging
 import math
 
-import models.src.parallel_wavegan.models as models # @oss-only
-# @fb-only: import langtech.tts.vocoders.models.src.parallel_wavegan.models as models 
+import models.src.parallel_wavegan as parallel_wavegan # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.src.parallel_wavegan as parallel_wavegan 
 import numpy as np
 import torch
 
@@ -114,7 +114,9 @@ class ParallelWaveGANGenerator(torch.nn.Module):
                         "use_final_nonlinear_activation": False,
                     }
                 )
-                self.upsample_net = getattr(models, upsample_net)(**upsample_params)
+                self.upsample_net = getattr(parallel_wavegan.models, upsample_net)(
+                    **upsample_params
+                )
             else:
                 if upsample_net == "ConvInUpsampleNetwork":
                     upsample_params.update(

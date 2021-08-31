@@ -246,6 +246,10 @@ class WaveGrad(Vocoder):
             + 2 * self.config.dataset.padding_frames,
         )
 
+        if torch.cuda.is_available():
+            spectrograms = spectrograms.cuda()
+
+        # Feed data to network and compute the model complexity.
         with torch.no_grad():
             self.model.module.set_new_noise_schedule(  # pyre-ignore
                 init=torch.linspace,
