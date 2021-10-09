@@ -210,7 +210,7 @@ class WaveRNN(Vocoder):
             return loss, {}
 
         print("Nan loss found. Back propagation step is skipped for this iteration.")
-        return loss.new_zeros([1]), {}  # pyre-ignore
+        return loss.new_zeros([1]), {}
 
     def validation_losses(
         self, spectrograms: Tensor, waveforms: Tensor
