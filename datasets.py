@@ -102,7 +102,7 @@ class Audio2Mel(torch.nn.Module):
         Returns:
           Lengths of output tensors in frames.
         """
-        return torch.div(lengths, self.hop_length, rounding_mode="floor")  # pyre-ignore
+        return torch.div(lengths, self.hop_length, rounding_mode="floor")
 
     def forward(self, audio: torch.Tensor) -> torch.Tensor:
         """
