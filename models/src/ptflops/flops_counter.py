@@ -8,6 +8,7 @@ Copyright (C) 2019 Sovrasov V. - All Rights Reserved
  * You should have received a copy of the MIT license with
  * this file. If not visit https://opensource.org/licenses/MIT
 """
+# Copyright (c) Facebook, Inc. All Rights Reserved
 
 import sys
 from functools import partial
