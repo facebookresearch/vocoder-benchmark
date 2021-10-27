@@ -808,7 +808,7 @@ def generate_tensorboard_samples(
         )
 
 
-@torch.no_grad()  # pyre-ignore
+@torch.no_grad()
 def compute_validation_metrics(
     model: Vocoder, dataloader: torch.utils.data.DataLoader, writer: SummaryWriter
 ) -> None:
@@ -843,7 +843,7 @@ def compute_validation_metrics(
         writer.add_scalar("valid/" + key, mean_loss, global_step=model.global_step)
 
 
-@torch.no_grad()  # pyre-ignore
+@torch.no_grad()
 def compute_evaluation_metrics(
     model: Vocoder, dataloader: torch.utils.data.DataLoader, path: str
 ) -> Dict[str, Any]:
