@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+# Copyright (c) Facebook, Inc. All Rights Reserved
 
 from math import sqrt
 
