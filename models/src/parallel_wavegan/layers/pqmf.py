@@ -5,7 +5,6 @@
 
 # Copyright 2020 Tomoki Hayashi
 #  MIT License (https://opensource.org/licenses/MIT)
-# Copyright (c) Facebook, Inc. All Rights Reserved
 
 """Pseudo QMF modules."""
 

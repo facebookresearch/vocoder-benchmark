@@ -1,7 +1,6 @@
 # pyre-ignore-all-errors
 # pylint: skip-file
 # license information for WaveGrad can be found at https://github.com/ivanvovk/WaveGrad/blob/master/LICENSE
-# Copyright (c) Facebook, Inc. All Rights Reserved
 
 import torch
 
