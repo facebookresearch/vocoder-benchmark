@@ -5,7 +5,7 @@
 
 # Copyright 2019 Tomoki Hayashi
 #  MIT License (https://opensource.org/licenses/MIT)
-# Copyright (c) Facebook, Inc. All Rights Reserved
+# Copyright (c) Meta Platforms, Inc. and affiliates. All Rights Reserved
 
 """Parallel WaveGAN Modules."""
 
