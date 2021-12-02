@@ -1,0 +1,42 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+# All rights reserved.
+
+# This source code is licensed under the license found in the
+# LICENSE file in the root directory of this source tree.
+dataset:
+  batch_size: 64
+  frames_per_clip: 30
+  clips_per_utterance: 10
+  padding_frames: 0
+  dataloader_num_workers: 4
+  dataloader_prefetch_factor: 4
+
+model:
+  factors: [5, 5, 3, 2, 2]
+  upsampling_preconv_out_channels: 768
+  upsampling_out_channels: [512, 512, 256, 128, 128]
+  upsampling_dilations:
+    - [1, 2, 1, 2]
+    - [1, 2, 1, 2]
+    - [1, 2, 4, 8]
+    - [1, 2, 4, 8]
+    - [1, 2, 4, 8]
+  downsampling_preconv_out_channels: 32
+  downsampling_out_channels: [128, 128, 256, 512]
+  downsampling_dilations:
+    - [1, 2, 4]
+    - [1, 2, 4]
+    - [1, 2, 4]
+    - [1, 2, 4]
+  n_iterations: 100000000
+  learning_rate: 1.0e-4
+  grad_clip_threshold: 1
+  scheduler_step_size: 7000
+  scheduler_gamma: 0.9
+  noise_schedule_interval: 10000
+  training_noise_schedule:
+    n_iter: 1000
+    betas_range: [1.0e-6, 0.01]
+  test_noise_schedule:
+    n_iter: 50
+    betas_range: [1.0e-6, 0.01]

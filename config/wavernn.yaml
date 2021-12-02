@@ -1,0 +1,29 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+# All rights reserved.
+
+# This source code is licensed under the license found in the
+# LICENSE file in the root directory of this source tree.
+dataset:
+  batch_size: 64
+  frames_per_clip: 3
+  clips_per_utterance: 10
+  padding_frames: 2
+  dataloader_num_workers: 4
+  dataloader_prefetch_factor: 4
+
+model:
+  upsample_scales: [4, 5, 5, 3]
+  n_classes: 256
+  n_res_block: 10
+  n_rnn: 512
+  n_fc: 512
+  kernel_size: 5
+  n_hidden: 128
+  n_output: 128
+  n_iterations: 1500000
+  learning_rate: 1.0e-3
+  # see models/src/wavenet_vocoder/lrschedule.py for available lr_schedule
+  lr_schedule: "step_learning_rate_decay"
+  lr_schedule_kwargs:
+    anneal_rate: 0.5
+    anneal_interval: 200000
