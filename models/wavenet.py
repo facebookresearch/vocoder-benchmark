@@ -262,7 +262,7 @@ class WaveNet(Vocoder):
                 "Not supported input type: {}".format(self.config.model.input_type)
             )
 
-        output = self.model(waveforms, c=spectrograms)  # pyre-ignore
+        output = self.model(waveforms, c=spectrograms)
         if self.config.model.input_type in ["mulaw", "raw"]:
             target = target.unsqueeze(2)  # [batch_size, n_samples-1, 1]
         loss = self.criterion(output[:, :, :-1], target)
@@ -295,11 +295,12 @@ class WaveNet(Vocoder):
                 current_lr, self.global_step, **lr_schedule_kwargs
             )
             for param_group in self.optimizer.param_groups:
-                param_group["lr"] = current_lr  # pyre-ignore
+                param_group["lr"] = current_lr
 
         # Backward pass.
         self.optimizer.zero_grad()
         loss.backward()
+        # pyre-fixme[20]: Argument `closure` expected.
         self.optimizer.step()
         return loss, {}
 
@@ -323,8 +324,8 @@ class WaveNet(Vocoder):
         Returns:
           A 1D float tensor containing the output waveform.
         """
-        self.model.eval()  # pyre-ignore
-        self.model.module.clear_buffer()  # pyre-ignore
+        self.model.eval()
+        self.model.module.clear_buffer()
 
         with torch.no_grad():
             spectrograms = self.model.module.upsample_net(spectrograms)
@@ -376,7 +377,7 @@ class WaveNet(Vocoder):
                 "Not supported input type: {}".format(self.config.model.input_type)
             )
         self.model.module.clear_buffer()
-        self.model.train()  # pyre-ignore
+        self.model.train()
 
         return output.flatten()
 
@@ -453,7 +454,7 @@ class WaveNet(Vocoder):
                 "Not supported input type: {}".format(self.config.model.input_type)
             )
 
-        model = self.model.module  # pyre-ignore
+        model = self.model.module
         custom_modules_hooks = {Conv1d: conv_flops_counter_hook}
         stats = np.array([0.0, 0.0])
 

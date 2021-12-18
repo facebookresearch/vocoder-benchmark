@@ -149,7 +149,7 @@ class WaveGrad(Vocoder):
         Returns:
           The negative log likelihood loss.
         """
-        return self.model.module.compute_loss(spectrograms, waveforms)  # pyre-ignore
+        return self.model.module.compute_loss(spectrograms, waveforms)
 
     def train_step(
         self, spectrograms: Tensor, waveforms: Tensor
@@ -163,7 +163,7 @@ class WaveGrad(Vocoder):
           to Tensorboard.
         """
         if not self.global_step % self.config.model.noise_schedule_interval:
-            self.model.module.set_new_noise_schedule(  # pyre-ignore
+            self.model.module.set_new_noise_schedule(
                 init=torch.linspace,
                 init_kwargs={
                     "steps": self.config.model.training_noise_schedule.n_iter,
@@ -171,7 +171,7 @@ class WaveGrad(Vocoder):
                     "end": self.config.model.training_noise_schedule.betas_range[1],
                 },
             )
-        self.model.zero_grad()  # pyre-ignore
+        self.model.zero_grad()
 
         # Forward pass.
         loss = self.loss(spectrograms, waveforms)
@@ -179,6 +179,7 @@ class WaveGrad(Vocoder):
         # Backward pass.
         self.optimizer.zero_grad()
         loss.backward()
+        # pyre-fixme[20]: Argument `closure` expected.
         self.optimizer.step()
         self.scheduler.step()
 
@@ -201,7 +202,7 @@ class WaveGrad(Vocoder):
           A dictionary mapping loss name (e.g. 'nll_loss') to the validation value.
         """
 
-        self.model.module.set_new_noise_schedule(  # pyre-ignore
+        self.model.module.set_new_noise_schedule(
             init=torch.linspace,
             init_kwargs={
                 "steps": self.config.model.test_noise_schedule.n_iter,
@@ -215,13 +216,13 @@ class WaveGrad(Vocoder):
         }
 
     def generate(self, spectrograms: Tensor, training: bool = False) -> Tensor:
-        self.model.eval()  # pyre-ignore
+        self.model.eval()
 
         if training:
             spectrograms = spectrograms[:, :, :200]
 
         with torch.no_grad():
-            self.model.module.set_new_noise_schedule(  # pyre-ignore
+            self.model.module.set_new_noise_schedule(
                 init=torch.linspace,
                 init_kwargs={
                     "steps": self.config.model.test_noise_schedule.n_iter,
@@ -233,7 +234,7 @@ class WaveGrad(Vocoder):
                 spectrograms, store_intermediate_states=False
             )
 
-        self.model.train()  # pyre-ignore
+        self.model.train()
         return output.flatten()
 
     def get_complexity(
@@ -256,7 +257,7 @@ class WaveGrad(Vocoder):
 
         # Feed data to network and compute the model complexity.
         with torch.no_grad():
-            self.model.module.set_new_noise_schedule(  # pyre-ignore
+            self.model.module.set_new_noise_schedule(
                 init=torch.linspace,
                 init_kwargs={
                     "steps": self.config.model.test_noise_schedule.n_iter,

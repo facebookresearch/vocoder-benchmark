@@ -169,12 +169,8 @@ class WaveRNN(Vocoder):
         # Forward pass.
 
         waveforms = self.compand(waveforms)
-        waveforms = self.label_2_float(
-            waveforms, self.model.module.n_classes  # pyre-ignore
-        )
-        output = self.model(  # pyre-ignore
-            waveforms.unsqueeze(1), spectrograms.unsqueeze(1)
-        )
+        waveforms = self.label_2_float(waveforms, self.model.module.n_classes)
+        output = self.model(waveforms.unsqueeze(1), spectrograms.unsqueeze(1))
         output = output.squeeze(1)[:, :-1, :]
         loss = self.criterion(output.transpose(1, 2), target)
 
@@ -205,12 +201,13 @@ class WaveRNN(Vocoder):
                 current_lr, self.global_step, **lr_schedule_kwargs
             )
             for param_group in self.optimizer.param_groups:
-                param_group["lr"] = current_lr  # pyre-ignore
+                param_group["lr"] = current_lr
 
         # Backward pass if nan loss is not detected.
         if not torch.isnan(loss):
             self.optimizer.zero_grad()
             loss.backward()
+            # pyre-fixme[20]: Argument `closure` expected.
             self.optimizer.step()
             return loss, {}
 
@@ -237,12 +234,12 @@ class WaveRNN(Vocoder):
         Returns:
           A 1D float tensor containing the output waveform.
         """
-        self.model.eval()  # pyre-ignore
+        self.model.eval()
         if training:
             spectrograms = spectrograms[:, :, :200]
         output = []
 
-        rnn1 = self.get_gru_cell(self.model.module.rnn1)  # pyre-ignore
+        rnn1 = self.get_gru_cell(self.model.module.rnn1)
         rnn2 = self.get_gru_cell(self.model.module.rnn2)
 
         with torch.no_grad():
@@ -285,7 +282,7 @@ class WaveRNN(Vocoder):
         output = torch.stack(output).transpose(0, 1)
         output = self.expand(output.flatten())
 
-        self.model.train()  # pyre-ignore
+        self.model.train()
 
         return output
 
@@ -340,7 +337,7 @@ class WaveRNN(Vocoder):
         """
 
         # Prepare the input format.
-        model = self.model.module  # pyre-ignore
+        model = self.model.module
         waveforms = torch.rand(1, AUDIO_SAMPLE_RATE)
         spectrograms = torch.rand(
             1,

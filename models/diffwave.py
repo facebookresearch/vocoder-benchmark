@@ -179,7 +179,7 @@ class DiffWave(Vocoder):
                 noise_scale_sqrt * waveforms + (1.0 - noise_scale) ** 0.5 * noise
             )
 
-            predicted = self.model(noisy_waveforms, spectrograms, t)  # pyre-ignore
+            predicted = self.model(noisy_waveforms, spectrograms, t)
             loss = self.criterion(noise, predicted.squeeze(1))
 
         return loss
@@ -196,7 +196,8 @@ class DiffWave(Vocoder):
           to Tensorboard.
         """
 
-        for param in self.model.parameters():  # pyre-ignore
+        for param in self.model.parameters():
+            # pyre-fixme[41]: `grad` cannot be reassigned. It is a read-only property.
             param.grad = None
 
         # Forward pass.
@@ -229,7 +230,7 @@ class DiffWave(Vocoder):
         }
 
     def generate(self, spectrograms: Tensor, training: bool = False) -> Tensor:
-        self.model.eval()  # pyre-ignore
+        self.model.eval()
 
         device = spectrograms.device
 
@@ -277,7 +278,7 @@ class DiffWave(Vocoder):
                 audio = c1 * (
                     audio
                     - c2
-                    * self.model(  # pyre-ignore
+                    * self.model(
                         audio, spectrograms, torch.tensor([T[n]], device=audio.device)
                     ).squeeze(1)
                 )
@@ -289,7 +290,7 @@ class DiffWave(Vocoder):
                     audio += sigma * noise
                 audio = torch.clamp(audio, -1.0, 1.0)
 
-        self.model.train()  # pyre-ignore
+        self.model.train()
 
         return audio.flatten()
 
