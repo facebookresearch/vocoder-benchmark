@@ -154,18 +154,17 @@ class WaveFlow(FlowBase):
                  flows,
                  n_group,
                  n_mels,
+                 hop_length,
                  reverse_mode=False,
                  **kwargs):
-        super().__init__(256, reverse_mode)
+        super().__init__(hop_length, reverse_mode)
         self.flows = flows
         self.n_group = n_group
         self.n_mels = n_mels
-        self.sub_sr = self._hop_length // n_group
 
         self.upsampler = nn.Sequential(
-            nn.ReplicationPad1d((0, 1)),
-            nn.ConvTranspose1d(n_mels, n_mels, self.sub_sr *
-                               2 + 1, self.sub_sr, padding=self.sub_sr // 2),
+            nn.ConvTranspose2d(1, 1, (3, hop_length * 2 + 1),
+                               stride=(1, hop_length), padding=(1, hop_length)),
             nn.LeakyReLU(0.4, True)
         )
         self.upsampler.apply(add_weight_norms)
@@ -175,14 +174,16 @@ class WaveFlow(FlowBase):
         # Set up layers with the right sizes based on how many dimensions
         # have been output already
         for k in range(flows):
-            self.WNs.append(WN2D(n_group, n_mels, **kwargs))
+            self.WNs.append(WN2D(n_group, n_mels * n_group, **kwargs))
 
     def forward_computation(self, x: Tensor, h: Tensor) -> Tuple[Tensor, Tensor]:
-        y = self._upsample_h(h)
+        y = self.upsampler(h.unsqueeze(1)).squeeze(1)
+        y = y[..., :x.size(-1)]
 
         batch_dim = x.size(0)
         x = x.view(batch_dim, 1, -1, self.n_group).transpose(2, 3).contiguous()
-        y = y[..., :x.size(-1)]
+        y = y.view(batch_dim, y.size(1), -1,
+                   self.n_group).transpose(2, 3).reshape(batch_dim, y.size(1) * self.n_group, -1)
 
         logdet: Tensor = 0
         for WN in self.WNs:
@@ -195,11 +196,13 @@ class WaveFlow(FlowBase):
         return x.squeeze(1).transpose(1, 2).contiguous().view(batch_dim, -1), logdet
 
     def reverse_computation(self, z: Tensor, h: Tensor) -> Tuple[Tensor, Tensor]:
-        y = self._upsample_h(h)
+        y = self.upsampler(h.unsqueeze(1)).squeeze(1)
+        y = y[..., :z.size(-1)]
 
         batch_dim = z.size(0)
         z = z.view(batch_dim, 1, -1, self.n_group).transpose(2, 3).contiguous()
-        y = y[..., :z.size(-1)]
+        y = y.view(batch_dim, y.size(1), -1, self.n_group).transpose(2,
+                                                                     3).reshape(batch_dim, y.size(1) * self.n_group, -1)
 
         logdet: Tensor = None
         for WN in self.WNs[::-1]:
@@ -223,7 +226,3 @@ class WaveFlow(FlowBase):
 
         z = z.squeeze(1).transpose(1, 2).contiguous().view(batch_dim, -1)
         return z, logdet
-
-    @autocast(enabled=False)
-    def _upsample_h(self, h):
-        return self.upsampler(h.float())
