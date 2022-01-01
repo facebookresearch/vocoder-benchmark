@@ -146,6 +146,9 @@ class WaveFlow(Vocoder):
         """
         self.optimizer.zero_grad()
 
+        waveforms = waveforms[..., :waveforms.size(
+            -1) // self.config.model.n_group * self.config.model.n_group]
+
         # Forward pass.
         loss = self.loss(spectrograms, waveforms)
         # Backward pass.
