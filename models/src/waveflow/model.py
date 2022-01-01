@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 import torch.nn.functional as F
-from torch.cuda.amp import autocast
 from typing import Tuple
 
 from models.src.waveflow.utils import add_weight_norms, fused_gate
