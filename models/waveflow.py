@@ -65,7 +65,7 @@ class WaveFlow(Vocoder):
 
         self.model = torch.nn.DataParallel(
             waveflow.WaveFlow(
-                n_flows=self.config.model.flows,
+                flows=self.config.model.flows,
                 n_group=self.config.model.n_group,
                 n_mels=MEL_NUM_BANDS,
                 hop_length=MEL_HOP_SAMPLES,
