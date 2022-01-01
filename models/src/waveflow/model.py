@@ -95,7 +95,7 @@ class WN2D(nn.Module):
         self.r_field = sum(self.dilations) * 2 + 1
         self.h_r_field = sum(self.h_dilations) * 2 + 1
 
-        self.V = nn.Conv1d(aux_channels, dilation_channels *
+        self.V = nn.Conv2d(aux_channels, dilation_channels *
                            2 * 8, 1, bias=bias)
         self.V.apply(add_weight_norms)
 
@@ -125,7 +125,7 @@ class WN2D(nn.Module):
 
     def forward(self, x, y):
         x = self.start(x)
-        y = self.V(y).unsqueeze(2)
+        y = self.V(y)
         cum_skip = 0
         for layer, v in zip(self.layers, y.chunk(len(self.layers), 1)):
             x, skip = layer(x, v)
@@ -135,18 +135,20 @@ class WN2D(nn.Module):
     def reverse_mode_forward(self, x, y=None, cond=None, buffer_list=None):
         x = self.start(x)
         new_buffer_list = []
+        new_cond = []
         if buffer_list is None:
             buffer_list = [None] * len(self.layers)
         if cond is None:
-            cond = self.V(y).unsqueeze(2).chunk(len(self.layers), 1)
+            cond = self.V(y).chunk(len(self.layers), 1)
 
         cum_skip = 0
         for layer, buf, v in zip(self.layers, buffer_list, cond):
-            x, skip, buf = layer.reverse_mode_forward(x, v, buf)
+            x, skip, buf = layer.reverse_mode_forward(x, v[:, :, :1], buf)
             new_buffer_list.append(buf)
+            new_cond.append(v[:, :, 1:])
             cum_skip = cum_skip + skip
 
-        return self.end(cum_skip).chunk(2, 1) + (cond, new_buffer_list,)
+        return self.end(cum_skip).chunk(2, 1) + (new_cond, new_buffer_list,)
 
 
 class WaveFlow(FlowBase):
@@ -174,7 +176,7 @@ class WaveFlow(FlowBase):
         # Set up layers with the right sizes based on how many dimensions
         # have been output already
         for k in range(flows):
-            self.WNs.append(WN2D(n_group, n_mels * n_group, **kwargs))
+            self.WNs.append(WN2D(n_group, n_mels, **kwargs))
 
     def forward_computation(self, x: Tensor, h: Tensor) -> Tuple[Tensor, Tensor]:
         y = self.upsampler(h.unsqueeze(1)).squeeze(1)
@@ -183,12 +185,14 @@ class WaveFlow(FlowBase):
         batch_dim = x.size(0)
         x = x.view(batch_dim, 1, -1, self.n_group).transpose(2, 3).contiguous()
         y = y.view(batch_dim, y.size(1), -1,
-                   self.n_group).transpose(2, 3).reshape(batch_dim, y.size(1) * self.n_group, -1)
+                   self.n_group).transpose(2, 3)
+        y_flip = y.flip(2)
 
         logdet: Tensor = 0
-        for WN in self.WNs:
+        for i, WN in enumerate(self.WNs):
             x0 = x[:, :, :1]
-            log_s, t = WN(x[:, :, :-1], y)
+            log_s, t = WN(x[:, :, :-1], y[:, :, 1:] if i %
+                          2 == 0 else y_flip[:, :, 1:])
             xout = x[:, :, 1:] * log_s.exp() + t
             logdet += log_s.sum((1, 2, 3))
             x = torch.cat((xout.flip(2), x0), 2)
@@ -201,20 +205,25 @@ class WaveFlow(FlowBase):
 
         batch_dim = z.size(0)
         z = z.view(batch_dim, 1, -1, self.n_group).transpose(2, 3).contiguous()
-        y = y.view(batch_dim, y.size(1), -1, self.n_group).transpose(2,
-                                                                     3).reshape(batch_dim, y.size(1) * self.n_group, -1)
+        y = y.view(batch_dim, y.size(1), -1, self.n_group).transpose(2, 3)
+        y_flip = y.flip(2)
 
         logdet: Tensor = None
-        for WN in self.WNs[::-1]:
+        for i, WN in zip(range(len(self.WNs) - 1, -1, -1), self.WNs[::-1]):
             z = z.flip(2)
             xnew = z[:, :, :1]
             x = [xnew]
+
+            if i % 2 == 0:
+                y_hat = y[:, :, 1:]
+            else:
+                y_hat = y_flip[:, :, 1:]
 
             buffer_list = None
             cond = None
             for i in range(1, self.n_group):
                 log_s, t, cond, buffer_list = WN.reverse_mode_forward(
-                    xnew, y if cond is None else None, cond, buffer_list)
+                    xnew, y_hat if cond is None else None, cond, buffer_list)
                 xnew = (z[:, :, i:i+1] - t) / log_s.exp()
                 x.append(xnew)
 
