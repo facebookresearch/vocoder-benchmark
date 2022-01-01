@@ -5,9 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 dataset:
   batch_size: 8
-  frames_per_clip: 59
+  frames_per_clip: 58
   clips_per_utterance: 10
-  padding_frames: 0
+  padding_frames: 1
   dataloader_num_workers: 4
   dataloader_prefetch_factor: 4
 
