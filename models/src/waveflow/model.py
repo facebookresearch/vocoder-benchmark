@@ -164,6 +164,7 @@ class WaveFlow(FlowBase):
         self.n_mels = n_mels
 
         self.upsampler = nn.Sequential(
+            nn.ReplicationPad2d((0, 1, 0, 0)),
             nn.ConvTranspose2d(1, 1, (3, hop_length * 2 + 1),
                                stride=(1, hop_length), padding=(1, hop_length)),
             nn.LeakyReLU(0.4, True)
