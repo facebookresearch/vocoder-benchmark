@@ -179,6 +179,7 @@ class WaveFlow(FlowBase):
             self.WNs.append(WN2D(n_group, n_mels, **kwargs))
 
     def forward_computation(self, x: Tensor, h: Tensor) -> Tuple[Tensor, Tensor]:
+        x = x[..., :x.size(-1) // self.n_group * self.n_group]
         y = self.upsampler(h.unsqueeze(1)).squeeze(1)
         y = y[..., :x.size(-1)]
 
@@ -200,6 +201,7 @@ class WaveFlow(FlowBase):
         return x.squeeze(1).transpose(1, 2).contiguous().view(batch_dim, -1), logdet
 
     def reverse_computation(self, z: Tensor, h: Tensor) -> Tuple[Tensor, Tensor]:
+        z = z[..., :z.size(-1) // self.n_group * self.n_group]
         y = self.upsampler(h.unsqueeze(1)).squeeze(1)
         y = y[..., :z.size(-1)]
 
