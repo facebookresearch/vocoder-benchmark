@@ -126,8 +126,11 @@ class WaveFlow(Vocoder):
           The negative log likelihood loss.
         """
 
-        sigma2 = self.config.model.training_sigma ** 2
         z, logdet = self.model(waveforms, spectrograms)
+        return self._nll(z, logdet)
+
+    def _nll(self, z, logdet):
+        sigma2 = self.config.model.training_sigma ** 2
         z = z.view(-1)
         loss = 0.5 * z @ z / sigma2 - logdet.sum()
         loss = loss / z.numel()
@@ -145,9 +148,6 @@ class WaveFlow(Vocoder):
           to Tensorboard.
         """
         self.optimizer.zero_grad()
-
-        waveforms = waveforms[..., :waveforms.size(
-            -1) // self.config.model.n_group * self.config.model.n_group]
 
         # Forward pass.
         loss = self.loss(spectrograms, waveforms)
@@ -177,6 +177,7 @@ class WaveFlow(Vocoder):
 
         with torch.no_grad():
             x = model.infer(spectrograms, self.config.model.evaluate_sigma)
+
         self.model.train()
         return x.flatten()
 
