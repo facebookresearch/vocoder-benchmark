@@ -163,13 +163,8 @@ class WaveFlow(FlowBase):
         self.n_group = n_group
         self.n_mels = n_mels
 
-        self.upsampler = nn.Sequential(
-            nn.ReplicationPad2d((0, 1, 0, 0)),
-            nn.ConvTranspose2d(1, 1, (3, hop_length * 2 + 1),
-                               stride=(1, hop_length), padding=(1, hop_length)),
-            nn.LeakyReLU(0.4, True)
-        )
-        self.upsampler.apply(add_weight_norms)
+        self.upsampler = nn.Upsample(scale_factor=hop_length, mode='linear')
+        # self.upsampler.apply(add_weight_norms)
 
         self.WNs = nn.ModuleList()
 
@@ -180,7 +175,7 @@ class WaveFlow(FlowBase):
 
     def forward_computation(self, x: Tensor, h: Tensor) -> Tuple[Tensor, Tensor]:
         x = x[..., :x.size(-1) // self.n_group * self.n_group]
-        y = self.upsampler(h.unsqueeze(1)).squeeze(1)
+        y = self.upsampler(h)
         y = y[..., :x.size(-1)]
 
         batch_dim = x.size(0)
@@ -202,7 +197,7 @@ class WaveFlow(FlowBase):
 
     def reverse_computation(self, z: Tensor, h: Tensor) -> Tuple[Tensor, Tensor]:
         z = z[..., :z.size(-1) // self.n_group * self.n_group]
-        y = self.upsampler(h.unsqueeze(1)).squeeze(1)
+        y = self.upsampler(h)
         y = y[..., :z.size(-1)]
 
         batch_dim = z.size(0)
