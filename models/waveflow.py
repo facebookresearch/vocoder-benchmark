@@ -176,7 +176,7 @@ class WaveFlow(Vocoder):
             spectrograms = spectrograms.unsqueeze(0)
 
         with torch.no_grad():
-            x = model.infer(spectrograms, self.config.model.evaluate_sigma)
+            x = model.infer(spectrograms, self.config.model.training_sigma)
 
         self.model.train()
         return x.flatten()
