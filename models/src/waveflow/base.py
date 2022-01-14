@@ -2,6 +2,7 @@ from typing import Tuple
 import torch
 from torch import Tensor
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class Reversible(nn.Module):
@@ -43,6 +44,8 @@ class FlowBase(Reversible):
     def infer(self, h: Tensor, sigma: float = 1.) -> Tensor:
         if h.dim() == 2:
             h = h.unsqueeze(0)
+
+        h = F.pad(h, [0, 1], 'replicate')
 
         batch_dim, _, steps = h.shape
         samples = steps * self._hop_length
