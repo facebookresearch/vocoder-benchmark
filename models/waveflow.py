@@ -170,15 +170,25 @@ class WaveFlow(Vocoder):
         }
 
     def generate(self, spectrograms: Tensor, training: bool = False) -> Tensor:
-        self.model.eval()
-        model: waveflow.WaveFlow = self.model.module
+        model = waveflow.WaveFlow(
+            flows=self.config.model.flows,
+            n_group=self.config.model.n_group,
+            n_mels=MEL_NUM_BANDS,
+            hop_length=MEL_HOP_SAMPLES,
+            dilation_channels=self.config.model.dilation_channels,
+            residual_channels=self.config.model.residual_channels,
+            skip_channels=self.config.model.skip_channels
+        ).to(spectrograms.device)
+        model.load_state_dict(self.model.module.state_dict())
+        model.apply(waveflow.remove_weight_norms)
+        model.eval()
+
         if spectrograms.ndim == 2:
             spectrograms = spectrograms.unsqueeze(0)
 
         with torch.no_grad():
             x = model.infer(spectrograms, self.config.model.training_sigma)
 
-        self.model.train()
         return x.flatten()
 
     def get_complexity(
