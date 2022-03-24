@@ -29,7 +29,7 @@ class WaveGrad(BaseModule):
     paper: https://arxiv.org/pdf/2006.11239.pdf).
     """
 
-    def __init__(self, config):
+    def __init__(self, config) -> None:
         super(WaveGrad, self).__init__()
         # Setup noise schedule
         self.noise_schedule_is_set = False
@@ -43,7 +43,7 @@ class WaveGrad(BaseModule):
 
     def set_new_noise_schedule(
         self, init=torch.linspace, init_kwargs={"steps": 50, "start": 1e-6, "end": 1e-2}
-    ):
+    ) -> None:
         """
         Sets sampling noise schedule. Authors in the paper showed
         that WaveGrad supports variable noise schedules during inference.
@@ -179,7 +179,7 @@ class WaveGrad(BaseModule):
         model_mean, posterior_log_variance = self.q_posterior(y_start=y_recon, y=y, t=t)
         return model_mean, posterior_log_variance
 
-    def compute_inverse_dynamics(self, mels, y, t, clip_denoised=True):
+    def compute_inverse_dynamics(self, mels, y, t, clip_denoised: bool = True):
         """
         Computes reverse (denoising) process dynamics. Closely related to the idea of Langevin dynamics.
         :param mels (torch.Tensor): mel-spectrograms acoustic features of shape [B, n_mels, T//hop_length]
@@ -191,7 +191,7 @@ class WaveGrad(BaseModule):
         eps = torch.randn_like(y) if t > 0 else torch.zeros_like(y)
         return model_mean + eps * (0.5 * model_log_variance).exp()
 
-    def sample(self, mels, store_intermediate_states=False):
+    def sample(self, mels, store_intermediate_states: bool = False):
         """
         Samples speech waveform via progressive denoising of white noise with guidance of mels-epctrogram.
         :param mels (torch.Tensor): mel-spectrograms acoustic features of shape [B, n_mels, T//hop_length]
@@ -238,7 +238,7 @@ class WaveGrad(BaseModule):
         loss = torch.nn.L1Loss()(eps_recon, eps)
         return loss
 
-    def forward(self, mels, store_intermediate_states=False):
+    def forward(self, mels, store_intermediate_states: bool = False):
         """
         Generates speech from given mel-spectrogram.
         :param mels (torch.Tensor): mel-spectrogram tensor of shape [1, n_mels, T//hop_length]
@@ -249,7 +249,7 @@ class WaveGrad(BaseModule):
 
         return self.sample(mels, store_intermediate_states)
 
-    def _verify_noise_schedule_existence(self):
+    def _verify_noise_schedule_existence(self) -> None:
         if not self.noise_schedule_is_set:
             raise RuntimeError(
                 "No noise schedule is found. Specify your noise schedule "

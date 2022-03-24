@@ -42,7 +42,7 @@ def silu(x):
 
 
 class DiffusionEmbedding(nn.Module):
-    def __init__(self, max_steps):
+    def __init__(self, max_steps) -> None:
         super().__init__()
         self.register_buffer(
             "embedding", self._build_embedding(max_steps), persistent=False
@@ -77,7 +77,7 @@ class DiffusionEmbedding(nn.Module):
 
 
 class SpectrogramUpsampler(nn.Module):
-    def __init__(self, n_mels):
+    def __init__(self, n_mels) -> None:
         super().__init__()
         self.conv1 = ConvTranspose2d(1, 1, [3, 20], stride=[1, 10], padding=[1, 5])
         self.conv2 = ConvTranspose2d(1, 1, [3, 60], stride=[1, 30], padding=[1, 15])
@@ -93,7 +93,7 @@ class SpectrogramUpsampler(nn.Module):
 
 
 class ResidualBlock(nn.Module):
-    def __init__(self, n_mels, residual_channels, dilation):
+    def __init__(self, n_mels, residual_channels: int, dilation) -> None:
         super().__init__()
         self.dilated_conv = Conv1d(
             residual_channels,
@@ -122,7 +122,7 @@ class ResidualBlock(nn.Module):
 
 
 class DiffWave(nn.Module):
-    def __init__(self, params):
+    def __init__(self, params) -> None:
         super().__init__()
         self.params = params
         self.input_projection = Conv1d(1, params.residual_channels, 1)

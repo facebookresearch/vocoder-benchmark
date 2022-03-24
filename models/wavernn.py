@@ -326,7 +326,7 @@ class WaveRNN(Vocoder):
             raise RuntimeError("Unknown sampling mode - ", distrib)
         return x, history
 
-    def label_2_float(self, x, n_classes):
+    def label_2_float(self, x: int, n_classes):
         return 2 * x / (n_classes - 1.0) - 1.0
 
     def get_complexity(

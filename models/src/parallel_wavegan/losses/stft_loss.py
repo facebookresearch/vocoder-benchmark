@@ -13,7 +13,7 @@ from distutils.version import LooseVersion
 import torch
 import torch.nn.functional as F
 
-is_pytorch_17plus = LooseVersion(torch.__version__) >= LooseVersion("1.7")
+is_pytorch_17plus: bool = LooseVersion(torch.__version__) >= LooseVersion("1.7")
 
 
 def stft(x, fft_size, hop_size, win_length, window):
@@ -46,7 +46,7 @@ def stft(x, fft_size, hop_size, win_length, window):
 class SpectralConvergenceLoss(torch.nn.Module):
     """Spectral convergence loss module."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initilize spectral convergence loss module."""
         super(SpectralConvergenceLoss, self).__init__()
 
@@ -67,7 +67,7 @@ class SpectralConvergenceLoss(torch.nn.Module):
 class LogSTFTMagnitudeLoss(torch.nn.Module):
     """Log STFT magnitude loss module."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initilize los STFT magnitude loss module."""
         super(LogSTFTMagnitudeLoss, self).__init__()
 
@@ -89,8 +89,12 @@ class STFTLoss(torch.nn.Module):
     """STFT loss module."""
 
     def __init__(
-        self, fft_size=1024, shift_size=120, win_length=600, window="hann_window"
-    ):
+        self,
+        fft_size: int = 1024,
+        shift_size: int = 120,
+        win_length: int = 600,
+        window: str = "hann_window",
+    ) -> None:
         """Initialize STFT loss module."""
         super(STFTLoss, self).__init__()
         self.fft_size = fft_size
@@ -129,8 +133,8 @@ class MultiResolutionSTFTLoss(torch.nn.Module):
         fft_sizes=[1024, 2048, 512],
         hop_sizes=[120, 240, 50],
         win_lengths=[600, 1200, 240],
-        window="hann_window",
-    ):
+        window: str = "hann_window",
+    ) -> None:
         """Initialize Multi resolution STFT loss module.
 
         Args:

@@ -9,7 +9,7 @@ from torch.nn import functional as F
 
 
 class Stretch2d(nn.Module):
-    def __init__(self, x_scale, y_scale, mode="nearest"):
+    def __init__(self, x_scale, y_scale, mode: str = "nearest") -> None:
         super(Stretch2d, self).__init__()
         self.x_scale = x_scale
         self.y_scale = y_scale
@@ -30,13 +30,13 @@ class UpsampleNetwork(nn.Module):
     def __init__(
         self,
         upsample_scales,
-        upsample_activation="none",
+        upsample_activation: str = "none",
         upsample_activation_params={},
-        mode="nearest",
-        freq_axis_kernel_size=1,
-        cin_pad=0,
-        cin_channels=80,
-    ):
+        mode: str = "nearest",
+        freq_axis_kernel_size: int = 1,
+        cin_pad: int = 0,
+        cin_channels: int = 80,
+    ) -> None:
         super(UpsampleNetwork, self).__init__()
         self.up_layers = nn.ModuleList()
         total_scale = np.prod(upsample_scales)
@@ -77,13 +77,13 @@ class ConvInUpsampleNetwork(nn.Module):
     def __init__(
         self,
         upsample_scales,
-        upsample_activation="none",
+        upsample_activation: str = "none",
         upsample_activation_params={},
-        mode="nearest",
-        freq_axis_kernel_size=1,
-        cin_pad=0,
-        cin_channels=80,
-    ):
+        mode: str = "nearest",
+        freq_axis_kernel_size: int = 1,
+        cin_pad: int = 0,
+        cin_channels: int = 80,
+    ) -> None:
         super(ConvInUpsampleNetwork, self).__init__()
         # To capture wide-context information in conditional features
         # meaningless if cin_pad == 0

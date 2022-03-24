@@ -5,7 +5,7 @@ import numpy as np
 
 
 # https://github.com/tensorflow/tensor2tensor/issues/280#issuecomment-339110329
-def noam_learning_rate_decay(init_lr, global_step, warmup_steps=4000):
+def noam_learning_rate_decay(init_lr, global_step, warmup_steps: float = 4000):
     # Noam scheme from tensor2tensor:
     warmup_steps = float(warmup_steps)
     step = global_step + 1.0
@@ -18,7 +18,7 @@ def noam_learning_rate_decay(init_lr, global_step, warmup_steps=4000):
 
 
 def step_learning_rate_decay(
-    init_lr, global_step, anneal_rate=0.98, anneal_interval=30000
+    init_lr, global_step, anneal_rate: float = 0.98, anneal_interval: int = 30000
 ):
     return init_lr * anneal_rate ** (global_step // anneal_interval)
 

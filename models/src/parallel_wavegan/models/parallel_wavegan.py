@@ -43,24 +43,24 @@ class ParallelWaveGANGenerator(torch.nn.Module):
 
     def __init__(
         self,
-        in_channels=1,
-        out_channels=1,
-        kernel_size=3,
-        layers=30,
-        stacks=3,
-        residual_channels=64,
-        gate_channels=128,
-        skip_channels=64,
-        aux_channels=80,
-        aux_context_window=2,
-        dropout=0.0,
-        bias=True,
-        use_weight_norm=True,
-        use_causal_conv=False,
-        upsample_conditional_features=True,
-        upsample_net="ConvInUpsampleNetwork",
+        in_channels: int = 1,
+        out_channels: int = 1,
+        kernel_size: int = 3,
+        layers: int = 30,
+        stacks: int = 3,
+        residual_channels: int = 64,
+        gate_channels: int = 128,
+        skip_channels: int = 64,
+        aux_channels: int = 80,
+        aux_context_window: int = 2,
+        dropout: float = 0.0,
+        bias: bool = True,
+        use_weight_norm: bool = True,
+        use_causal_conv: bool = False,
+        upsample_conditional_features: bool = True,
+        upsample_net: str = "ConvInUpsampleNetwork",
         upsample_params={"upsample_scales": [4, 4, 4, 4]},
-    ):
+    ) -> None:
         """Initialize Parallel WaveGAN Generator module.
 
         Args:
@@ -163,7 +163,7 @@ class ParallelWaveGANGenerator(torch.nn.Module):
         if use_weight_norm:
             self.apply_weight_norm()
 
-    def forward(self, x, c):
+    def forward(self, x, c) -> float:
         """Calculate forward propagation.
 
         Args:
@@ -194,7 +194,7 @@ class ParallelWaveGANGenerator(torch.nn.Module):
 
         return x
 
-    def remove_weight_norm(self):
+    def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
         def _remove_weight_norm(m):
@@ -206,7 +206,7 @@ class ParallelWaveGANGenerator(torch.nn.Module):
 
         self.apply(_remove_weight_norm)
 
-    def apply_weight_norm(self):
+    def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
         def _apply_weight_norm(m):
@@ -269,17 +269,17 @@ class ParallelWaveGANDiscriminator(torch.nn.Module):
 
     def __init__(
         self,
-        in_channels=1,
-        out_channels=1,
-        kernel_size=3,
-        layers=10,
-        conv_channels=64,
-        dilation_factor=1,
-        nonlinear_activation="LeakyReLU",
+        in_channels: int = 1,
+        out_channels: int = 1,
+        kernel_size: int = 3,
+        layers: int = 10,
+        conv_channels: int = 64,
+        dilation_factor: int = 1,
+        nonlinear_activation: str = "LeakyReLU",
         nonlinear_activation_params={"negative_slope": 0.2},
-        bias=True,
-        use_weight_norm=True,
-    ):
+        bias: bool = True,
+        use_weight_norm: bool = True,
+    ) -> None:
         """Initialize Parallel WaveGAN Discriminator module.
 
         Args:
@@ -351,7 +351,7 @@ class ParallelWaveGANDiscriminator(torch.nn.Module):
             x = f(x)
         return x
 
-    def apply_weight_norm(self):
+    def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
         def _apply_weight_norm(m):
@@ -361,7 +361,7 @@ class ParallelWaveGANDiscriminator(torch.nn.Module):
 
         self.apply(_apply_weight_norm)
 
-    def remove_weight_norm(self):
+    def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
         def _remove_weight_norm(m):
@@ -379,21 +379,21 @@ class ResidualParallelWaveGANDiscriminator(torch.nn.Module):
 
     def __init__(
         self,
-        in_channels=1,
-        out_channels=1,
-        kernel_size=3,
-        layers=30,
-        stacks=3,
-        residual_channels=64,
-        gate_channels=128,
-        skip_channels=64,
-        dropout=0.0,
-        bias=True,
-        use_weight_norm=True,
-        use_causal_conv=False,
-        nonlinear_activation="LeakyReLU",
+        in_channels: int = 1,
+        out_channels: int = 1,
+        kernel_size: int = 3,
+        layers: int = 30,
+        stacks: int = 3,
+        residual_channels: int = 64,
+        gate_channels: int = 128,
+        skip_channels: int = 64,
+        dropout: float = 0.0,
+        bias: bool = True,
+        use_weight_norm: bool = True,
+        use_causal_conv: bool = False,
+        nonlinear_activation: str = "LeakyReLU",
         nonlinear_activation_params={"negative_slope": 0.2},
-    ):
+    ) -> None:
         """Initialize Parallel WaveGAN Discriminator module.
 
         Args:
@@ -469,7 +469,7 @@ class ResidualParallelWaveGANDiscriminator(torch.nn.Module):
         if use_weight_norm:
             self.apply_weight_norm()
 
-    def forward(self, x):
+    def forward(self, x) -> float:
         """Calculate forward propagation.
 
         Args:
@@ -493,7 +493,7 @@ class ResidualParallelWaveGANDiscriminator(torch.nn.Module):
             x = f(x)
         return x
 
-    def apply_weight_norm(self):
+    def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
         def _apply_weight_norm(m):
@@ -503,7 +503,7 @@ class ResidualParallelWaveGANDiscriminator(torch.nn.Module):
 
         self.apply(_apply_weight_norm)
 
-    def remove_weight_norm(self):
+    def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
         def _remove_weight_norm(m):

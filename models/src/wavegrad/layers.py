@@ -8,7 +8,7 @@ from models.src.wavegrad.base import BaseModule # @oss-only
 
 
 class Conv1dWithInitialization(BaseModule):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super(Conv1dWithInitialization, self).__init__()
         self.conv1d = torch.nn.Conv1d(**kwargs)
         torch.nn.init.orthogonal_(self.conv1d.weight.data, gain=1)

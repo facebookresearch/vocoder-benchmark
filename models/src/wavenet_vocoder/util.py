@@ -4,7 +4,7 @@
 from __future__ import with_statement, print_function, absolute_import
 
 
-def _assert_valid_input_type(s):
+def _assert_valid_input_type(s) -> None:
     assert s == "mulaw-quantize" or s == "mulaw" or s == "raw"
 
 

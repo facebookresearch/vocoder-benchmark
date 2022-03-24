@@ -20,11 +20,11 @@ import torch.nn as nn
 def get_model_complexity_info(
     model,
     input,
-    print_per_layer_stat=False,
-    as_strings=False,
+    print_per_layer_stat: bool = False,
+    as_strings: bool = False,
     input_constructor=None,
     ost=sys.stdout,
-    verbose=False,
+    verbose: bool = False,
     ignore_modules=[],
     custom_modules_hooks={},
 ):
@@ -48,7 +48,7 @@ def get_model_complexity_info(
     return flops_count, params_count
 
 
-def flops_to_string(flops, units="GMac", precision=2):
+def flops_to_string(flops, units: str = "GMac", precision: int = 2):
     if units is None:
         if flops // 10 ** 9 > 0:
             return str(round(flops / 10.0 ** 9, precision)) + " GMac"
@@ -69,7 +69,7 @@ def flops_to_string(flops, units="GMac", precision=2):
             return str(flops) + " Mac"
 
 
-def params_to_string(params_num, units=None, precision=2):
+def params_to_string(params_num, units=None, precision: int = 2):
     if units is None:
         if params_num // 10 ** 6 > 0:
             return str(round(params_num / 10 ** 6, 2)) + " M"
@@ -97,8 +97,13 @@ def accumulate_flops(self):
 
 
 def print_model_with_flops(
-    model, total_flops, total_params, units="GMac", precision=3, ost=sys.stdout
-):
+    model,
+    total_flops: int,
+    total_params,
+    units: str = "GMac",
+    precision: int = 3,
+    ost=sys.stdout,
+) -> None:
     if total_flops < 1:
         total_flops = 1
 
@@ -189,7 +194,7 @@ def compute_average_flops_cost(self):
     return flops_sum / self.__batch_counter__, params_sum
 
 
-def start_flops_count(self, **kwargs):
+def start_flops_count(self, **kwargs) -> None:
     """
     A method that will be available after add_flops_counting_methods() is called
     on a desired net object.
@@ -233,7 +238,7 @@ def start_flops_count(self, **kwargs):
     self.apply(partial(add_flops_counter_hook_function, **kwargs))
 
 
-def stop_flops_count(self):
+def stop_flops_count(self) -> None:
     """
     A method that will be available after add_flops_counting_methods() is called
     on a desired net object.
@@ -244,7 +249,7 @@ def stop_flops_count(self):
     self.apply(remove_flops_counter_hook_function)
 
 
-def reset_flops_count(self):
+def reset_flops_count(self) -> None:
     """
     A method that will be available after add_flops_counting_methods() is called
     on a desired net object.
@@ -255,11 +260,11 @@ def reset_flops_count(self):
 
 
 # ---- Internal functions
-def empty_flops_counter_hook(module, input, output):
+def empty_flops_counter_hook(module, input, output) -> None:
     module.__flops__ += 0
 
 
-def upsample_flops_counter_hook(module, input, output):
+def upsample_flops_counter_hook(module, input, output) -> None:
     output_size = output[0]
     batch_size = output_size.shape[0]
     output_elements_count = batch_size
@@ -268,12 +273,12 @@ def upsample_flops_counter_hook(module, input, output):
     module.__flops__ += int(output_elements_count)
 
 
-def relu_flops_counter_hook(module, input, output):
+def relu_flops_counter_hook(module, input, output) -> None:
     active_elements_count = output.numel()
     module.__flops__ += int(active_elements_count)
 
 
-def linear_flops_counter_hook(module, input, output):
+def linear_flops_counter_hook(module, input, output) -> None:
     input = input[0]
     # pytorch checks dimensions, so here we don't care much
     output_last_dim = output.shape[-1]
@@ -281,12 +286,12 @@ def linear_flops_counter_hook(module, input, output):
     module.__flops__ += int(np.prod(input.shape) * output_last_dim + bias_flops)
 
 
-def pool_flops_counter_hook(module, input, output):
+def pool_flops_counter_hook(module, input, output) -> None:
     input = input[0]
     module.__flops__ += int(np.prod(input.shape))
 
 
-def bn_flops_counter_hook(module, input, output):
+def bn_flops_counter_hook(module, input, output) -> None:
     input = input[0]
 
     batch_flops = np.prod(input.shape)
@@ -295,7 +300,7 @@ def bn_flops_counter_hook(module, input, output):
     module.__flops__ += int(batch_flops)
 
 
-def conv_flops_counter_hook(conv_module, input, output):
+def conv_flops_counter_hook(conv_module, input, output) -> None:
     # Can have multiple inputs, getting the first one
     input = input[0]
 
@@ -327,7 +332,7 @@ def conv_flops_counter_hook(conv_module, input, output):
     conv_module.__flops__ += int(overall_flops)
 
 
-def batch_counter_hook(module, input, output):
+def batch_counter_hook(module, input, output) -> None:
     batch_size = 1
     if len(input) > 0:
         # Can have multiple inputs, getting the first one
@@ -342,7 +347,7 @@ def batch_counter_hook(module, input, output):
     module.__batch_counter__ += batch_size
 
 
-def rnn_flops(flops, rnn_module, w_ih, w_hh, input_size):
+def rnn_flops(flops: int, rnn_module, w_ih, w_hh, input_size):
     # matrix matrix mult ih state and internal state
     flops += w_ih.shape[0] * w_ih.shape[1]
     # matrix matrix mult hh state and internal state
@@ -371,7 +376,7 @@ def rnn_flops(flops, rnn_module, w_ih, w_hh, input_size):
     return flops
 
 
-def rnn_flops_counter_hook(rnn_module, input, output):
+def rnn_flops_counter_hook(rnn_module, input, output) -> None:
     """
     Takes into account batch goes at first position, contrary
     to pytorch common rule (but actually it doesn't matter).
@@ -404,7 +409,7 @@ def rnn_flops_counter_hook(rnn_module, input, output):
     rnn_module.__flops__ += int(flops)
 
 
-def rnn_cell_flops_counter_hook(rnn_cell_module, input, output):
+def rnn_cell_flops_counter_hook(rnn_cell_module, input, output) -> None:
     flops = 0
     inp = input[0]
     batch_size = inp.shape[0]
@@ -421,7 +426,7 @@ def rnn_cell_flops_counter_hook(rnn_cell_module, input, output):
     rnn_cell_module.__flops__ += int(flops)
 
 
-def multihead_attention_counter_hook(multihead_attention_module, input, output):
+def multihead_attention_counter_hook(multihead_attention_module, input, output) -> None:
     flops = 0
     q, k, v = input
     batch_size = q.shape[1]
@@ -462,12 +467,12 @@ def multihead_attention_counter_hook(multihead_attention_module, input, output):
     multihead_attention_module.__flops__ += int(flops)
 
 
-def add_batch_counter_variables_or_reset(module):
+def add_batch_counter_variables_or_reset(module) -> None:
 
     module.__batch_counter__ = 0
 
 
-def add_batch_counter_hook_function(module):
+def add_batch_counter_hook_function(module) -> None:
     if hasattr(module, "__batch_counter_handle__"):
         return
 
@@ -475,13 +480,13 @@ def add_batch_counter_hook_function(module):
     module.__batch_counter_handle__ = handle
 
 
-def remove_batch_counter_hook_function(module):
+def remove_batch_counter_hook_function(module) -> None:
     if hasattr(module, "__batch_counter_handle__"):
         module.__batch_counter_handle__.remove()
         del module.__batch_counter_handle__
 
 
-def add_flops_counter_variable_or_reset(module):
+def add_flops_counter_variable_or_reset(module) -> None:
     if is_supported_instance(module):
         module.__flops__ = 0
         module.__params__ = get_model_parameters_number(module)
@@ -540,13 +545,13 @@ MODULES_MAPPING = {
 }
 
 
-def is_supported_instance(module):
+def is_supported_instance(module) -> bool:
     if type(module) in MODULES_MAPPING or type(module) in CUSTOM_MODULES_MAPPING:
         return True
     return False
 
 
-def remove_flops_counter_hook_function(module):
+def remove_flops_counter_hook_function(module) -> None:
     if is_supported_instance(module):
         if hasattr(module, "__flops_handle__"):
             module.__flops_handle__.remove()

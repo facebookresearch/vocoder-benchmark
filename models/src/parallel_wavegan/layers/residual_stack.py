@@ -21,16 +21,16 @@ class ResidualStack(torch.nn.Module):
 
     def __init__(
         self,
-        kernel_size=3,
-        channels=32,
-        dilation=1,
-        bias=True,
-        nonlinear_activation="LeakyReLU",
+        kernel_size: int = 3,
+        channels: int = 32,
+        dilation: int = 1,
+        bias: bool = True,
+        nonlinear_activation: str = "LeakyReLU",
         nonlinear_activation_params={"negative_slope": 0.2},
-        pad="ReflectionPad1d",
+        pad: str = "ReflectionPad1d",
         pad_params={},
-        use_causal_conv=False,
-    ):
+        use_causal_conv: bool = False,
+    ) -> None:
         """Initialize ResidualStack module.
 
         Args:

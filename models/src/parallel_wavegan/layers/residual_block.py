@@ -18,11 +18,11 @@ import torch.nn.functional as F
 class Conv1d(torch.nn.Conv1d):
     """Conv1d module with customized initialization."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """Initialize Conv1d module."""
         super(Conv1d, self).__init__(*args, **kwargs)
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         """Reset parameters."""
         torch.nn.init.kaiming_normal_(self.weight, nonlinearity="relu")
         if self.bias is not None:
@@ -32,7 +32,7 @@ class Conv1d(torch.nn.Conv1d):
 class Conv1d1x1(Conv1d):
     """1x1 Conv1d with customized initialization."""
 
-    def __init__(self, in_channels, out_channels, bias):
+    def __init__(self, in_channels, out_channels, bias) -> None:
         """Initialize 1x1 Conv1d module."""
         super(Conv1d1x1, self).__init__(
             in_channels, out_channels, kernel_size=1, padding=0, dilation=1, bias=bias
@@ -44,16 +44,16 @@ class ResidualBlock(torch.nn.Module):
 
     def __init__(
         self,
-        kernel_size=3,
-        residual_channels=64,
-        gate_channels=128,
-        skip_channels=64,
-        aux_channels=80,
-        dropout=0.0,
-        dilation=1,
-        bias=True,
-        use_causal_conv=False,
-    ):
+        kernel_size: int = 3,
+        residual_channels: int = 64,
+        gate_channels: int = 128,
+        skip_channels: int = 64,
+        aux_channels: int = 80,
+        dropout: float = 0.0,
+        dilation: int = 1,
+        bias: bool = True,
+        use_causal_conv: bool = False,
+    ) -> None:
         """Initialize ResidualBlock module.
 
         Args:

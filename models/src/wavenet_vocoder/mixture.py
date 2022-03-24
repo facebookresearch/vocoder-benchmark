@@ -23,7 +23,7 @@ def log_sum_exp(x):
 
 
 def discretized_mix_logistic_loss(
-    y_hat, y, num_classes=256, log_scale_min=-7.0, reduce=True
+    y_hat, y, num_classes: int = 256, log_scale_min: float = -7.0, reduce: bool = True
 ):
     """Discretized mixture of logistic distributions loss
 
@@ -108,7 +108,7 @@ def discretized_mix_logistic_loss(
         return -log_sum_exp(log_probs).unsqueeze(-1)
 
 
-def to_one_hot(tensor, n, fill_with=1.0):
+def to_one_hot(tensor, n, fill_with: float = 1.0):
     # we perform one hot encore with respect to the last axis
     one_hot = torch.FloatTensor(tensor.size() + (n,)).zero_()
     if tensor.is_cuda:
@@ -117,7 +117,9 @@ def to_one_hot(tensor, n, fill_with=1.0):
     return one_hot
 
 
-def sample_from_discretized_mix_logistic(y, log_scale_min=-7.0, clamp_log_scale=False):
+def sample_from_discretized_mix_logistic(
+    y, log_scale_min: float = -7.0, clamp_log_scale: bool = False
+):
     """
     Sample from discretized mixture of logistic distributions
 
@@ -159,7 +161,7 @@ def sample_from_discretized_mix_logistic(y, log_scale_min=-7.0, clamp_log_scale=
 
 # we can easily define discretized version of the gaussian loss, however,
 # use continuous version as same as the https://clarinet-demo.github.io/
-def mix_gaussian_loss(y_hat, y, log_scale_min=-7.0, reduce=True):
+def mix_gaussian_loss(y_hat, y, log_scale_min: float = -7.0, reduce: bool = True):
     """Mixture of continuous gaussian distributions loss
 
     Note that it is assumed that input is scaled to [-1, 1].
@@ -221,7 +223,7 @@ def mix_gaussian_loss(y_hat, y, log_scale_min=-7.0, reduce=True):
             return -log_sum_exp(log_probs).unsqueeze(-1)
 
 
-def sample_from_mix_gaussian(y, log_scale_min=-7.0):
+def sample_from_mix_gaussian(y, log_scale_min: float = -7.0):
     """
     Sample from (discretized) mixture of gaussian distributions
     Args:

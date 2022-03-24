@@ -30,7 +30,7 @@ class BasicModulationBlock(BaseModule):
         - 3x1 Conv
     """
 
-    def __init__(self, n_channels, dilation):
+    def __init__(self, n_channels, dilation) -> None:
         super(BasicModulationBlock, self).__init__()
         self.featurewise_affine = FeatureWiseAffine()
         self.leaky_relu = torch.nn.LeakyReLU(0.2)
@@ -51,7 +51,7 @@ class BasicModulationBlock(BaseModule):
 
 
 class UpsamplingBlock(BaseModule):
-    def __init__(self, in_channels, out_channels, factor, dilations):
+    def __init__(self, in_channels, out_channels, factor, dilations) -> None:
         super(UpsamplingBlock, self).__init__()
         self.first_block_main_branch = torch.nn.ModuleDict(
             {

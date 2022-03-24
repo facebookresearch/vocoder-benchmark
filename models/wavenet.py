@@ -413,7 +413,7 @@ class WaveNet(Vocoder):
         history.append(x.data)
         return history[-1], history
 
-    def label_2_float(self, x, n_classes):
+    def label_2_float(self, x: int, n_classes):
         return 2 * x / (n_classes - 1.0) - 1.0
 
     def float_2_label(self, x, n_classes):

@@ -34,22 +34,22 @@ class MelGANGenerator(torch.nn.Module):
 
     def __init__(
         self,
-        in_channels=80,
-        out_channels=1,
-        kernel_size=7,
-        channels=512,
-        bias=True,
+        in_channels: int = 80,
+        out_channels: int = 1,
+        kernel_size: int = 7,
+        channels: int = 512,
+        bias: bool = True,
         upsample_scales=[8, 8, 2, 2],
-        stack_kernel_size=3,
-        stacks=3,
-        nonlinear_activation="LeakyReLU",
+        stack_kernel_size: int = 3,
+        stacks: int = 3,
+        nonlinear_activation: str = "LeakyReLU",
         nonlinear_activation_params={"negative_slope": 0.2},
-        pad="ReflectionPad1d",
+        pad: str = "ReflectionPad1d",
         pad_params={},
-        use_final_nonlinear_activation=True,
-        use_weight_norm=True,
-        use_causal_conv=False,
-    ):
+        use_final_nonlinear_activation: bool = True,
+        use_weight_norm: bool = True,
+        use_causal_conv: bool = False,
+    ) -> None:
         """Initialize MelGANGenerator module.
 
         Args:
@@ -192,7 +192,7 @@ class MelGANGenerator(torch.nn.Module):
         """
         return self.melgan(c)
 
-    def remove_weight_norm(self):
+    def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
         def _remove_weight_norm(m):
@@ -204,7 +204,7 @@ class MelGANGenerator(torch.nn.Module):
 
         self.apply(_remove_weight_norm)
 
-    def apply_weight_norm(self):
+    def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
         def _apply_weight_norm(m):
@@ -216,7 +216,7 @@ class MelGANGenerator(torch.nn.Module):
 
         self.apply(_apply_weight_norm)
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         """Reset parameters.
 
         This initialization follows official implementation manner.
@@ -256,18 +256,18 @@ class MelGANDiscriminator(torch.nn.Module):
 
     def __init__(
         self,
-        in_channels=1,
-        out_channels=1,
+        in_channels: int = 1,
+        out_channels: int = 1,
         kernel_sizes=[5, 3],
         channels=16,
-        max_downsample_channels=1024,
-        bias=True,
+        max_downsample_channels: int = 1024,
+        bias: bool = True,
         downsample_scales=[4, 4, 4, 4],
-        nonlinear_activation="LeakyReLU",
+        nonlinear_activation: str = "LeakyReLU",
         nonlinear_activation_params={"negative_slope": 0.2},
-        pad="ReflectionPad1d",
+        pad: str = "ReflectionPad1d",
         pad_params={},
-    ):
+    ) -> None:
         """Initilize MelGAN discriminator module.
 
         Args:
@@ -375,10 +375,10 @@ class MelGANMultiScaleDiscriminator(torch.nn.Module):
 
     def __init__(
         self,
-        in_channels=1,
-        out_channels=1,
-        scales=3,
-        downsample_pooling="AvgPool1d",
+        in_channels: int = 1,
+        out_channels: int = 1,
+        scales: int = 3,
+        downsample_pooling: str = "AvgPool1d",
         # follow the official implementation setting
         downsample_pooling_params={
             "kernel_size": 4,
@@ -387,16 +387,16 @@ class MelGANMultiScaleDiscriminator(torch.nn.Module):
             "count_include_pad": False,
         },
         kernel_sizes=[5, 3],
-        channels=16,
-        max_downsample_channels=1024,
-        bias=True,
+        channels: int = 16,
+        max_downsample_channels: int = 1024,
+        bias: bool = True,
         downsample_scales=[4, 4, 4, 4],
-        nonlinear_activation="LeakyReLU",
+        nonlinear_activation: str = "LeakyReLU",
         nonlinear_activation_params={"negative_slope": 0.2},
-        pad="ReflectionPad1d",
+        pad: str = "ReflectionPad1d",
         pad_params={},
-        use_weight_norm=True,
-    ):
+        use_weight_norm: bool = True,
+    ) -> None:
         """Initilize MelGAN multi-scale discriminator module.
 
         Args:
@@ -465,7 +465,7 @@ class MelGANMultiScaleDiscriminator(torch.nn.Module):
 
         return outs
 
-    def remove_weight_norm(self):
+    def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
         def _remove_weight_norm(m):
@@ -477,7 +477,7 @@ class MelGANMultiScaleDiscriminator(torch.nn.Module):
 
         self.apply(_remove_weight_norm)
 
-    def apply_weight_norm(self):
+    def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
         def _apply_weight_norm(m):
@@ -489,7 +489,7 @@ class MelGANMultiScaleDiscriminator(torch.nn.Module):
 
         self.apply(_apply_weight_norm)
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         """Reset parameters.
 
         This initialization follows official implementation manner.

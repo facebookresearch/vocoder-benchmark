@@ -14,7 +14,9 @@ import torch
 import torch.nn.functional as F
 
 
-def design_prototype_filter(taps=62, cutoff_ratio=0.142, beta=9.0):
+def design_prototype_filter(
+    taps: float = 62, cutoff_ratio: float = 0.142, beta: float = 9.0
+):
     """Design prototype filter for PQMF.
 
     This method is based on `A Kaiser window approach for the design of prototype
@@ -61,7 +63,13 @@ class PQMF(torch.nn.Module):
 
     """
 
-    def __init__(self, subbands=4, taps=62, cutoff_ratio=0.142, beta=9.0):
+    def __init__(
+        self,
+        subbands: int = 4,
+        taps: int = 62,
+        cutoff_ratio: float = 0.142,
+        beta: float = 9.0,
+    ) -> None:
         """Initilize PQMF module.
 
         The cutoff_ratio and beta parameters are optimized for #subbands = 4.

@@ -6,9 +6,9 @@ import torch
 
 
 class BaseModule(torch.nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(BaseModule, self).__init__()
 
     @property
-    def nparams(self):
+    def nparams(self) -> int:
         return sum(p.numel() for p in self.parameters() if p.requires_grad)

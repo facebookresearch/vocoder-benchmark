@@ -46,7 +46,7 @@ class WaveGradNN(BaseModule):
     Current implementation follows described architecture in the paper.
     """
 
-    def __init__(self, config):
+    def __init__(self, config) -> None:
         super(WaveGradNN, self).__init__()
         # Building upsampling branch (mels -> signal)
         self.ublock_preconv = Conv1dWithInitialization(

@@ -16,7 +16,7 @@ LINEAR_SCALE = 5000
 
 
 class PositionalEncoding(BaseModule):
-    def __init__(self, n_channels):
+    def __init__(self, n_channels) -> None:
         super(PositionalEncoding, self).__init__()
         self.n_channels = n_channels
 
@@ -33,7 +33,7 @@ class PositionalEncoding(BaseModule):
 
 
 class FeatureWiseLinearModulation(BaseModule):
-    def __init__(self, in_channels, out_channels, input_dscaled_by):
+    def __init__(self, in_channels, out_channels, input_dscaled_by) -> None:
         super(FeatureWiseLinearModulation, self).__init__()
         self.signal_conv = torch.nn.Sequential(
             *[
@@ -71,7 +71,7 @@ class FeatureWiseLinearModulation(BaseModule):
 
 
 class FeatureWiseAffine(BaseModule):
-    def __init__(self):
+    def __init__(self) -> None:
         super(FeatureWiseAffine, self).__init__()
 
     def forward(self, x, scale, shift):

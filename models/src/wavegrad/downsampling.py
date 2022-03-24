@@ -18,7 +18,7 @@ from models.src.wavegrad.layers import ( # @oss-only
 
 
 class ConvolutionBlock(BaseModule):
-    def __init__(self, in_channels, out_channels, dilation):
+    def __init__(self, in_channels, out_channels, dilation) -> None:
         super(ConvolutionBlock, self).__init__()
         self.leaky_relu = torch.nn.LeakyReLU(0.2)
         self.convolution = Conv1dWithInitialization(
@@ -37,7 +37,7 @@ class ConvolutionBlock(BaseModule):
 
 
 class DownsamplingBlock(BaseModule):
-    def __init__(self, in_channels, out_channels, factor, dilations):
+    def __init__(self, in_channels, out_channels, factor, dilations) -> None:
         super(DownsamplingBlock, self).__init__()
         in_sizes = [in_channels] + [out_channels for _ in range(len(dilations) - 1)]
         out_sizes = [out_channels for _ in range(len(in_sizes))]

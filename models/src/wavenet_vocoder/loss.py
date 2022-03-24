@@ -24,11 +24,11 @@ def sequence_mask(sequence_length, max_len=None):
 
 
 class DiscretizedMixturelogisticLoss(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config) -> None:
         self.config = config
         super(DiscretizedMixturelogisticLoss, self).__init__()
 
-    def forward(self, input, target, log_scale_min=-7.0):
+    def forward(self, input, target, log_scale_min: float = -7.0):
 
         losses = discretized_mix_logistic_loss(
             input,
@@ -42,11 +42,11 @@ class DiscretizedMixturelogisticLoss(nn.Module):
 
 
 class MixtureGaussianLoss(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config) -> None:
         self.config = config
         super(MixtureGaussianLoss, self).__init__()
 
-    def forward(self, input, target, log_scale_min=-7.0):
+    def forward(self, input, target, log_scale_min: float = -7.0):
         losses = mix_gaussian_loss(
             input, target, log_scale_min=log_scale_min, reduce=False
         )

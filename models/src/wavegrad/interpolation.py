@@ -9,8 +9,12 @@ from models.src.wavegrad.base import BaseModule # @oss-only
 
 class InterpolationBlock(BaseModule):
     def __init__(
-        self, scale_factor, mode="linear", align_corners=False, downsample=False
-    ):
+        self,
+        scale_factor,
+        mode: str = "linear",
+        align_corners: bool = False,
+        downsample: bool = False,
+    ) -> None:
         super(InterpolationBlock, self).__init__()
         self.downsample = downsample
         self.scale_factor = scale_factor

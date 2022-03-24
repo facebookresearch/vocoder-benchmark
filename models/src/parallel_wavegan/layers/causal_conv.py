@@ -20,11 +20,11 @@ class CausalConv1d(torch.nn.Module):
         in_channels,
         out_channels,
         kernel_size,
-        dilation=1,
-        bias=True,
-        pad="ConstantPad1d",
+        dilation: int = 1,
+        bias: bool = True,
+        pad: str = "ConstantPad1d",
         pad_params={"value": 0.0},
-    ):
+    ) -> None:
         """Initialize CausalConv1d module."""
         super(CausalConv1d, self).__init__()
         self.pad = getattr(torch.nn, pad)((kernel_size - 1) * dilation, **pad_params)
@@ -48,7 +48,9 @@ class CausalConv1d(torch.nn.Module):
 class CausalConvTranspose1d(torch.nn.Module):
     """CausalConvTranspose1d module with customized initialization."""
 
-    def __init__(self, in_channels, out_channels, kernel_size, stride, bias=True):
+    def __init__(
+        self, in_channels, out_channels, kernel_size, stride, bias: bool = True
+    ) -> None:
         """Initialize CausalConvTranspose1d module."""
         super(CausalConvTranspose1d, self).__init__()
         self.deconv = torch.nn.ConvTranspose1d(

@@ -22,7 +22,7 @@ from models.src.parallel_wavegan.layers.residual_block import ( # @oss-only
 class Stretch2d(torch.nn.Module):
     """Stretch2d module."""
 
-    def __init__(self, x_scale, y_scale, mode="nearest"):
+    def __init__(self, x_scale, y_scale, mode: str = "nearest") -> None:
         """Initialize Stretch2d module.
 
         Args:
@@ -54,11 +54,11 @@ class Stretch2d(torch.nn.Module):
 class Conv2d(torch.nn.Conv2d):
     """Conv2d module with customized initialization."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """Initialize Conv2d module."""
         super(Conv2d, self).__init__(*args, **kwargs)
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         """Reset parameters."""
         self.weight.data.fill_(1.0 / np.prod(self.kernel_size))
         if self.bias is not None:
@@ -73,10 +73,10 @@ class UpsampleNetwork(torch.nn.Module):
         upsample_scales,
         nonlinear_activation=None,
         nonlinear_activation_params={},
-        interpolate_mode="nearest",
-        freq_axis_kernel_size=1,
-        use_causal_conv=False,
-    ):
+        interpolate_mode: str = "nearest",
+        freq_axis_kernel_size: int = 1,
+        use_causal_conv: bool = False,
+    ) -> None:
         """Initialize upsampling network module.
 
         Args:
@@ -142,12 +142,12 @@ class ConvInUpsampleNetwork(torch.nn.Module):
         upsample_scales,
         nonlinear_activation=None,
         nonlinear_activation_params={},
-        interpolate_mode="nearest",
-        freq_axis_kernel_size=1,
-        aux_channels=80,
-        aux_context_window=0,
-        use_causal_conv=False,
-    ):
+        interpolate_mode: str = "nearest",
+        freq_axis_kernel_size: int = 1,
+        aux_channels: int = 80,
+        aux_context_window: int = 0,
+        use_causal_conv: bool = False,
+    ) -> None:
         """Initialize convolution + upsampling network module.
 
         Args:

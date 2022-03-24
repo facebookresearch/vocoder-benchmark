@@ -8,7 +8,7 @@ from torch.nn import functional as F
 class Conv1d(nn.Conv1d):
     """Extended nn.Conv1d for incremental dilated convolutions"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.clear_buffer()
         self._linearized_weight = None
@@ -47,7 +47,7 @@ class Conv1d(nn.Conv1d):
         output = F.linear(input.view(bsz, -1), weight, self.bias)
         return output.view(bsz, 1, -1)
 
-    def clear_buffer(self):
+    def clear_buffer(self) -> None:
         self.input_buffer = None
 
     def _get_linearized_weight(self):
@@ -63,5 +63,5 @@ class Conv1d(nn.Conv1d):
             self._linearized_weight = weight.view(self.out_channels, -1)
         return self._linearized_weight
 
-    def _clear_linearized_weight(self, *args):
+    def _clear_linearized_weight(self, *args) -> None:
         self._linearized_weight = None
