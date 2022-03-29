@@ -122,8 +122,6 @@ class Audio2Mel(torch.nn.Module):
         assert audio.ndim == 2, "Expecting input of shape [batch_size, num_samples]"
         audio = torch.nn.functional.pad(
             audio.unsqueeze(1),
-            # pyre-fixme[6]: Expected `List[int]` for 2nd param but got `Tuple[int,
-            #  int]`.
             (self.padding, self.padding),
             "reflect",
         ).squeeze(1)
@@ -318,8 +316,6 @@ class VocoderDataset(torch.utils.data.IterableDataset):
             padding = (
                 MEL_HOP_SAMPLES - waveform.numel() % MEL_HOP_SAMPLES
             ) % MEL_HOP_SAMPLES
-            # pyre-fixme[6]: Expected `List[int]` for 2nd param but got `Tuple[int,
-            #  typing.Any]`.
             waveform = torch.nn.functional.pad(waveform, (0, padding))
 
             # Compute spectrogram of waveform.
