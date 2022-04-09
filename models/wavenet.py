@@ -245,6 +245,7 @@ class WaveNet(Vocoder):
             target = self.compand(target)
 
             if self.config.model.input_type == "mulaw":
+                # pyre-fixme[9]: waveforms has type `Tensor`; used as `float`.
                 waveforms = self.label_2_float(
                     waveforms, self.config.model.quantize_channels
                 )
@@ -413,7 +414,7 @@ class WaveNet(Vocoder):
         history.append(x.data)
         return history[-1], history
 
-    def label_2_float(self, x: int, n_classes):
+    def label_2_float(self, x: int, n_classes) -> float:
         return 2 * x / (n_classes - 1.0) - 1.0
 
     def float_2_label(self, x, n_classes):
@@ -442,6 +443,7 @@ class WaveNet(Vocoder):
                 waveforms = self.label_2_float(
                     waveforms, self.config.model.quantize_channels
                 )
+                # pyre-fixme[16]: `float` has no attribute `unsqueeze`.
                 waveforms = waveforms.unsqueeze(1)
             else:
                 waveforms = F.one_hot(waveforms, self.config.model.quantize_channels)

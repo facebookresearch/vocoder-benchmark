@@ -163,7 +163,7 @@ class ParallelWaveGANGenerator(torch.nn.Module):
         if use_weight_norm:
             self.apply_weight_norm()
 
-    def forward(self, x, c) -> float:
+    def forward(self, x: float, c) -> float:
         """Calculate forward propagation.
 
         Args:
@@ -469,7 +469,7 @@ class ResidualParallelWaveGANDiscriminator(torch.nn.Module):
         if use_weight_norm:
             self.apply_weight_norm()
 
-    def forward(self, x) -> float:
+    def forward(self, x: float) -> float:
         """Calculate forward propagation.
 
         Args:

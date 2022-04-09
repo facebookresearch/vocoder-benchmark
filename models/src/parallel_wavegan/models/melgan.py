@@ -259,7 +259,7 @@ class MelGANDiscriminator(torch.nn.Module):
         in_channels: int = 1,
         out_channels: int = 1,
         kernel_sizes=[5, 3],
-        channels=16,
+        channels: int = 16,
         max_downsample_channels: int = 1024,
         bias: bool = True,
         downsample_scales=[4, 4, 4, 4],

@@ -169,6 +169,7 @@ class WaveRNN(Vocoder):
         # Forward pass.
 
         waveforms = self.compand(waveforms)
+        # pyre-fixme[9]: waveforms has type `Tensor`; used as `float`.
         waveforms = self.label_2_float(waveforms, self.model.module.n_classes)
         output = self.model(waveforms.unsqueeze(1), spectrograms.unsqueeze(1))
         output = output.squeeze(1)[:, :-1, :]
@@ -326,7 +327,7 @@ class WaveRNN(Vocoder):
             raise RuntimeError("Unknown sampling mode - ", distrib)
         return x, history
 
-    def label_2_float(self, x: int, n_classes):
+    def label_2_float(self, x: int, n_classes) -> float:
         return 2 * x / (n_classes - 1.0) - 1.0
 
     def get_complexity(
