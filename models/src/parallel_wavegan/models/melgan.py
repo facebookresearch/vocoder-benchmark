@@ -14,12 +14,10 @@ import numpy as np
 import torch
 
 from models.src.parallel_wavegan.layers.causal_conv import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.causal_conv import ( 
-    CausalConv1d,
-)
 
 from models.src.parallel_wavegan.layers.causal_conv import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.causal_conv import ( 
+# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.causal_conv import (  # @fb-only 
+    CausalConv1d,
     CausalConvTranspose1d,
 )
 

@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from __future__ import with_statement, print_function, absolute_import
+from __future__ import absolute_import, print_function, with_statement
 
 from models.src.wavenet_vocoder.version import ( # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.version import ( 

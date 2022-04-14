@@ -15,7 +15,7 @@ import signal
 import time
 import warnings
 from collections import defaultdict
-from typing import Type, List, Union, Dict, Any, Optional, Iterator, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, Union
 
 import click
 
@@ -31,10 +31,14 @@ from path_utils import get_default_config_path # @oss-only
 # @fb-only: from langtech.tts.vocoders.path_utils import get_default_config_path 
 
 from utils import die_if, hard_exit # @oss-only
-# @fb-only: from langtech.tts.vocoders.utils import die_if, hard_exit 
 
 from utils import read_audio, write_audio # @oss-only
-# @fb-only: from langtech.tts.vocoders.utils import read_audio, write_audio 
+# @fb-only: from langtech.tts.vocoders.utils import (  # @fb-only 
+    die_if,
+    hard_exit,
+    read_audio,
+    write_audio,
+)
 from omegaconf import OmegaConf
 from pytorch_msssim import ssim
 from torch import Tensor

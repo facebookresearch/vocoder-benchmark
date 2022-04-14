@@ -5,7 +5,7 @@
 # https://github.com/pclucas14/pixel-cnn-pp
 # https://github.com/openai/pixel-cnn
 
-from __future__ import with_statement, print_function, absolute_import
+from __future__ import absolute_import, print_function, with_statement
 
 import numpy as np
 import torch

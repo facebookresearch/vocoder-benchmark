@@ -7,21 +7,21 @@
 DiffWave Neural Vocoder.
 """
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
 
 from datasets import ( # @oss-only
 # @fb-only: from langtech.tts.vocoders.datasets import ( 
-    DatasetConfig,
-    MEL_NUM_BANDS,
-    MEL_HOP_SAMPLES,
     AUDIO_SAMPLE_RATE,
+    DatasetConfig,
+    MEL_HOP_SAMPLES,
+    MEL_NUM_BANDS,
 )
 
 from models.framework import Vocoder, ConfigProtocol # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
+# @fb-only: from langtech.tts.vocoders.models.framework import ConfigProtocol, Vocoder 
 
 from models.src.diffwave import model # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.diffwave import model 

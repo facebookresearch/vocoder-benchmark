@@ -7,21 +7,21 @@
 WaveGrad Neural Vocoder.
 """
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, Dict, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 import torch
 import torchaudio
 
 from datasets import ( # @oss-only
 # @fb-only: from langtech.tts.vocoders.datasets import ( 
-    DatasetConfig,
-    MEL_NUM_BANDS,
-    MEL_HOP_SAMPLES,
     AUDIO_SAMPLE_RATE,
+    DatasetConfig,
+    MEL_HOP_SAMPLES,
+    MEL_NUM_BANDS,
 )
 
 from models.framework import Vocoder, ConfigProtocol # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
+# @fb-only: from langtech.tts.vocoders.models.framework import ConfigProtocol, Vocoder 
 
 from models.src.ptflops.flops_counter import ( # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.ptflops.flops_counter import ( 

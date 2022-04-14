@@ -11,7 +11,7 @@ import os
 import random
 import warnings
 from dataclasses import dataclass
-from typing import Tuple, Set, List, Union, Iterator
+from typing import Iterator, List, Set, Tuple, Union
 
 import click
 import torch

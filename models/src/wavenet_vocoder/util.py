@@ -1,7 +1,7 @@
 # pyre-ignore-all-errors
 # pylint: skip-file
 # coding: utf-8
-from __future__ import with_statement, print_function, absolute_import
+from __future__ import absolute_import, print_function, with_statement
 
 
 def _assert_valid_input_type(s) -> None:

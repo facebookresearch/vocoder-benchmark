@@ -7,7 +7,7 @@
 WaveRNN Neural Vocoder.
 """
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -17,14 +17,14 @@ import torchaudio.models
 
 from datasets import ( # @oss-only
 # @fb-only: from langtech.tts.vocoders.datasets import ( 
+    AUDIO_SAMPLE_RATE,
     DatasetConfig,
     MEL_HOP_SAMPLES,
     MEL_NUM_BANDS,
-    AUDIO_SAMPLE_RATE,
 )
 
 from models.framework import Vocoder, ConfigProtocol # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
+# @fb-only: from langtech.tts.vocoders.models.framework import ConfigProtocol, Vocoder 
 
 from models.src.ptflops.flops_counter import ( # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.ptflops.flops_counter import ( 

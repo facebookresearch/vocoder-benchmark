@@ -8,7 +8,7 @@ WaveNet Neural Vocoder.
 """
 import math
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 import models.src.wavenet_vocoder.wavenet as wavenet # @oss-only
 # @fb-only: import langtech.tts.vocoders.models.src.wavenet_vocoder.wavenet as wavenet 
@@ -19,19 +19,19 @@ import torchaudio.models
 
 from datasets import ( # @oss-only
 # @fb-only: from langtech.tts.vocoders.datasets import ( 
-    DatasetConfig,
-    MEL_NUM_BANDS,
-    MEL_HOP_SAMPLES,
     AUDIO_SAMPLE_RATE,
+    DatasetConfig,
+    MEL_HOP_SAMPLES,
+    MEL_NUM_BANDS,
 )
 
 from models.framework import Vocoder, ConfigProtocol # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.framework import Vocoder, ConfigProtocol 
+# @fb-only: from langtech.tts.vocoders.models.framework import ConfigProtocol, Vocoder 
 
 from models.src.ptflops.flops_counter import ( # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.ptflops.flops_counter import ( 
-    get_model_complexity_info,
     conv_flops_counter_hook,
+    get_model_complexity_info,
 )
 
 from models.src.wavenet_vocoder import lrschedule # @oss-only

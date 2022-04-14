@@ -1,7 +1,7 @@
 # pyre-ignore-all-errors
 # pylint: skip-file
 # coding: utf-8
-from __future__ import with_statement, print_function, absolute_import
+from __future__ import absolute_import, print_function, with_statement
 
 import math
 
@@ -17,14 +17,12 @@ from models.src.wavenet_vocoder.mixture import ( # @oss-only
 )
 
 from models.src.wavenet_vocoder.modules import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.modules import ( 
-    Conv1d1x1,
-    ResidualConv1dGLU,
-)
 
 from models.src.wavenet_vocoder.modules import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.modules import ( 
+# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.modules import (  # @fb-only 
+    Conv1d1x1,
     Embedding,
+    ResidualConv1dGLU,
 )
 from torch import nn
 from torch.nn import functional as F

@@ -23,17 +23,13 @@ from models.src.parallel_wavegan.layers import ( # @oss-only
 )
 
 from models.src.parallel_wavegan.layers.residual_block import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_block import ( 
+
+from models.src.parallel_wavegan.layers.residual_block import ( # @oss-only
+
+from models.src.parallel_wavegan.layers.residual_block import ( # @oss-only
+# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_block import (  # @fb-only  # @fb-only 
     Conv1d,
-)
-
-from models.src.parallel_wavegan.layers.residual_block import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_block import ( 
     Conv1d1x1,
-)
-
-from models.src.parallel_wavegan.layers.residual_block import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_block import ( 
     ResidualBlock,
 )
 

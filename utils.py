@@ -8,8 +8,7 @@ Vocoder utilities.
 """
 import os
 import sys
-from typing import Tuple
-from typing import Union
+from typing import Tuple, Union
 
 import librosa
 import numpy as np
