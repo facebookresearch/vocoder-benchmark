@@ -27,7 +27,7 @@ class PositionalEncoding(BaseModule):
         exponents = torch.arange(half_dim, dtype=torch.float32).to(noise_level) / float(
             half_dim
         )
-        exponents = 1e-4 ** exponents
+        exponents = 1e-4**exponents
         exponents = LINEAR_SCALE * noise_level.unsqueeze(1) * exponents.unsqueeze(0)
         return torch.cat([exponents.sin(), exponents.cos()], dim=-1)
 

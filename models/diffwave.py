@@ -173,7 +173,7 @@ class DiffWave(Vocoder):
                 0, len(noise_schedule), [N], device=waveforms.device  # pyre-ignore
             )
             noise_scale = noise_level[t].unsqueeze(1)
-            noise_scale_sqrt = noise_scale ** 0.5
+            noise_scale_sqrt = noise_scale**0.5
             noise = torch.randn_like(waveforms)
             noisy_waveforms = (
                 noise_scale_sqrt * waveforms + (1.0 - noise_scale) ** 0.5 * noise

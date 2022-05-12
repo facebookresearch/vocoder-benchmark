@@ -133,7 +133,7 @@ class WaveGrad(BaseModule):
         # Closed form signal diffusion
         outputs = (
             continuous_sqrt_alpha_cumprod * y_0
-            + (1 - continuous_sqrt_alpha_cumprod ** 2).sqrt() * eps
+            + (1 - continuous_sqrt_alpha_cumprod**2).sqrt() * eps
         )
 
         return outputs
