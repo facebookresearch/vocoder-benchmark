@@ -373,6 +373,7 @@ class ParallelWaveGAN(Vocoder):
     # Linter complains that this function is too complex, but to avoid any possible
     # errors, the code is pulled from https://fburl.com/yxdei7mq with minimal
     # refactor, hence the 'noqa' below.
+    # pyre-fixme[14]: `train_step` overrides method defined in `Vocoder` inconsistently.
     def train_step(  # noqa
         self, spectrograms: Tensor, waveforms: Tensor
     ) -> Tuple[Tensor, Dict[str, Tensor]]:
@@ -523,6 +524,8 @@ class ParallelWaveGAN(Vocoder):
 
         return gen_loss, total_train_loss
 
+    # pyre-fixme[14]: `validation_losses` overrides method defined in `Vocoder`
+    #  inconsistently.
     def validation_losses(
         self, spectrograms: Tensor, waveforms: Tensor
     ) -> Dict[str, Tensor]:
@@ -637,6 +640,7 @@ class ParallelWaveGAN(Vocoder):
 
         return total_eval_loss
 
+    # pyre-fixme[14]: `generate` overrides method defined in `Vocoder` inconsistently.
     def generate(
         self, spectrograms: Tensor, training: bool = False
     ) -> Tensor:  # fix-me

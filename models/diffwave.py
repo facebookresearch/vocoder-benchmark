@@ -184,6 +184,7 @@ class DiffWave(Vocoder):
 
         return loss
 
+    # pyre-fixme[14]: `train_step` overrides method defined in `Vocoder` inconsistently.
     def train_step(
         self, spectrograms: Tensor, waveforms: Tensor
     ) -> Tuple[Tensor, Dict[str, Tensor]]:
@@ -216,6 +217,8 @@ class DiffWave(Vocoder):
 
         return loss, loss_stats  # pyre-ignore
 
+    # pyre-fixme[14]: `validation_losses` overrides method defined in `Vocoder`
+    #  inconsistently.
     def validation_losses(
         self, spectrograms: Tensor, waveforms: Tensor
     ) -> Dict[str, Tensor]:
@@ -229,6 +232,7 @@ class DiffWave(Vocoder):
             "nll_loss": self.loss(spectrograms, waveforms, "val"),
         }
 
+    # pyre-fixme[14]: `generate` overrides method defined in `Vocoder` inconsistently.
     def generate(self, spectrograms: Tensor, training: bool = False) -> Tensor:
         self.model.eval()
 

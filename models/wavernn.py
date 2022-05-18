@@ -177,6 +177,7 @@ class WaveRNN(Vocoder):
 
         return loss
 
+    # pyre-fixme[14]: `train_step` overrides method defined in `Vocoder` inconsistently.
     def train_step(
         self, spectrograms: Tensor, waveforms: Tensor
     ) -> Tuple[Tensor, Dict[str, Tensor]]:
@@ -215,6 +216,8 @@ class WaveRNN(Vocoder):
         print("Nan loss found. Back propagation step is skipped for this iteration.")
         return loss.new_zeros([1]), {}
 
+    # pyre-fixme[14]: `validation_losses` overrides method defined in `Vocoder`
+    #  inconsistently.
     def validation_losses(
         self, spectrograms: Tensor, waveforms: Tensor
     ) -> Dict[str, Tensor]:
@@ -228,6 +231,7 @@ class WaveRNN(Vocoder):
             "nll_loss": self.loss(spectrograms, waveforms),
         }
 
+    # pyre-fixme[14]: `generate` overrides method defined in `Vocoder` inconsistently.
     def generate(self, spectrograms: Tensor, training: bool = False) -> Tensor:
         """
         Generate a sample from this model.

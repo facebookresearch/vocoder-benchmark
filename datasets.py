@@ -445,6 +445,7 @@ def load_dataset(
     "--dataset",
     required=True,
     help="Which dataset to download",
+    # pyre-fixme[6]: For 1st param expected `Sequence[str]` but got `Set[str]`.
     type=click.Choice(KNOWN_DATASETS),
 )
 @click.option(
@@ -470,6 +471,7 @@ def download_command(dataset: str, path: str) -> None:
     "--dataset",
     required=True,
     help="Which dataset to download",
+    # pyre-fixme[6]: For 1st param expected `Sequence[str]` but got `Set[str]`.
     type=click.Choice(KNOWN_DATASETS),
 )
 @click.option(
