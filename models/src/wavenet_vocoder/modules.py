@@ -85,7 +85,7 @@ class ResidualConv1dGLU(nn.Module):
         causal=True,
         bias=True,
         *args,
-        **kwargs
+        **kwargs,
     ):
         super(ResidualConv1dGLU, self).__init__()
         self.dropout = dropout
@@ -107,7 +107,7 @@ class ResidualConv1dGLU(nn.Module):
             dilation=dilation,
             bias=bias,
             *args,
-            **kwargs
+            **kwargs,
         )
 
         # local conditioning
