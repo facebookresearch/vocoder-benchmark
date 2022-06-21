@@ -209,7 +209,6 @@ class WaveRNN(Vocoder):
         if not torch.isnan(loss):
             self.optimizer.zero_grad()
             loss.backward()
-            # pyre-fixme[20]: Argument `closure` expected.
             self.optimizer.step()
             return loss, {}
 
@@ -244,10 +243,16 @@ class WaveRNN(Vocoder):
             spectrograms = spectrograms[:, :, :200]
         output = []
 
+        # pyre-fixme[6]: For 1st param expected `Module` but got `Union[Tensor,
+        #  Module]`.
         rnn1 = self.get_gru_cell(self.model.module.rnn1)
+        # pyre-fixme[6]: For 1st param expected `Module` but got `Union[Tensor,
+        #  Module]`.
         rnn2 = self.get_gru_cell(self.model.module.rnn2)
 
         with torch.no_grad():
+            # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+            #  torch.nn.modules.module.Module]` is not a function.
             spectrograms, aux = self.model.module.upsample(spectrograms)
             spectrograms = spectrograms.transpose(1, 2)
             aux = aux.transpose(1, 2)
@@ -257,6 +262,7 @@ class WaveRNN(Vocoder):
             x = spectrograms.new_zeros(batch_size, 1)
 
             d = self.model.module.n_aux
+            # pyre-fixme[29]: `Union[BoundMethod[typing.Callable(torch._C._TensorBase...
             aux_split = [aux[:, :, d * i : d * (i + 1)] for i in range(4)]
 
             for i in tqdm(range(seq_len)):
@@ -266,6 +272,8 @@ class WaveRNN(Vocoder):
                 a1_t, a2_t, a3_t, a4_t = (a[:, i, :] for a in aux_split)
 
                 x = torch.cat([x, m_t, a1_t], dim=1)
+                # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+                #  torch.nn.modules.module.Module]` is not a function.
                 x = self.model.module.fc(x)
                 h1 = rnn1(x, h1)
 
@@ -275,11 +283,17 @@ class WaveRNN(Vocoder):
 
                 x = x + h2
                 x = torch.cat([x, a3_t], dim=1)
+                # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+                #  torch.nn.modules.module.Module]` is not a function.
                 x = F.relu(self.model.module.fc1(x))
 
                 x = torch.cat([x, a4_t], dim=1)
+                # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+                #  torch.nn.modules.module.Module]` is not a function.
                 x = F.relu(self.model.module.fc2(x))
 
+                # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+                #  torch.nn.modules.module.Module]` is not a function.
                 logits = self.model.module.fc3(x)
 
                 x, output = self.get_x_from_dist("random", logits, output)
@@ -301,8 +315,12 @@ class WaveRNN(Vocoder):
         Returns:
           The modified GRU cell.
         """
+        # pyre-fixme[6]: For 1st param expected `int` but got `Union[Tensor, Module]`.
+        # pyre-fixme[6]: For 2nd param expected `int` but got `Union[Tensor, Module]`.
         gru_cell = torch.nn.GRUCell(gru.input_size, gru.hidden_size)
+        # pyre-fixme[8]: Attribute has type `Tensor`; used as `Union[Tensor, Module]`.
         gru_cell.weight_hh.data = gru.weight_hh_l0.data
+        # pyre-fixme[8]: Attribute has type `Tensor`; used as `Union[Tensor, Module]`.
         gru_cell.weight_ih.data = gru.weight_ih_l0.data
         gru_cell.bias_hh.data = gru.bias_hh_l0.data
         gru_cell.bias_ih.data = gru.bias_ih_l0.data
@@ -352,10 +370,22 @@ class WaveRNN(Vocoder):
         )
         batch_size = waveforms.size(0)
         h1 = torch.zeros(
-            1, batch_size, model.n_rnn, dtype=waveforms.dtype, device=waveforms.device
+            1,
+            batch_size,
+            # pyre-fixme[6]: For 3rd param expected `int` but got `Union[Tensor,
+            #  Module]`.
+            model.n_rnn,
+            dtype=waveforms.dtype,
+            device=waveforms.device,
         )
         h2 = torch.zeros(
-            1, batch_size, model.n_rnn, dtype=waveforms.dtype, device=waveforms.device
+            1,
+            batch_size,
+            # pyre-fixme[6]: For 3rd param expected `int` but got `Union[Tensor,
+            #  Module]`.
+            model.n_rnn,
+            dtype=waveforms.dtype,
+            device=waveforms.device,
         )
 
         stats = np.array([0.0, 0.0])
@@ -373,10 +403,13 @@ class WaveRNN(Vocoder):
                 ([spectrograms]),
             )
         )
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         spectrograms, aux = model.upsample(spectrograms)
         spectrograms = spectrograms.transpose(1, 2)
         aux = aux.transpose(1, 2)
 
+        # pyre-fixme[29]: `Union[BoundMethod[typing.Callable(torch._C._TensorBase.__m...
         aux_idx = [model.n_aux * i for i in range(5)]
         a1 = aux[:, :, aux_idx[0] : aux_idx[1]]
         a2 = aux[:, :, aux_idx[1] : aux_idx[2]]
@@ -390,6 +423,8 @@ class WaveRNN(Vocoder):
                 ([x]),
             )
         )
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         x = model.fc(x)
 
         res = x
@@ -399,6 +434,8 @@ class WaveRNN(Vocoder):
                 ([x, h1]),
             )
         )
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         x, _ = model.rnn1(x, h1)
 
         x = x + res
@@ -411,6 +448,8 @@ class WaveRNN(Vocoder):
                 ([x, h2]),
             )
         )
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         x, _ = model.rnn2(x, h2)
 
         x = x + res
@@ -421,6 +460,8 @@ class WaveRNN(Vocoder):
                 ([x]),
             )
         )
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         x = model.fc1(x)
 
         stats += np.array(
@@ -429,6 +470,8 @@ class WaveRNN(Vocoder):
                 ([x]),
             )
         )
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         x = model.relu1(x)
 
         x = torch.cat([x, a4], dim=-1)
@@ -438,6 +481,8 @@ class WaveRNN(Vocoder):
                 ([x]),
             )
         )
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         x = model.fc2(x)
 
         stats += np.array(
@@ -446,6 +491,8 @@ class WaveRNN(Vocoder):
                 ([x]),
             )
         )
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         x = model.relu2(x)
 
         stats += np.array(
@@ -454,6 +501,8 @@ class WaveRNN(Vocoder):
                 ([x]),
             )
         )
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         x = model.fc3(x)
 
         return stats

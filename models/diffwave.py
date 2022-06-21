@@ -173,6 +173,8 @@ class DiffWave(Vocoder):
                 0, len(noise_schedule), [N], device=waveforms.device  # pyre-ignore
             )
             noise_scale = noise_level[t].unsqueeze(1)
+            # pyre-fixme[58]: `**` is not supported for operand types `Tensor` and
+            #  `float`.
             noise_scale_sqrt = noise_scale**0.5
             noise = torch.randn_like(waveforms)
             noisy_waveforms = (
@@ -198,7 +200,6 @@ class DiffWave(Vocoder):
         """
 
         for param in self.model.parameters():
-            # pyre-fixme[41]: `grad` cannot be reassigned. It is a read-only property.
             param.grad = None
 
         # Forward pass.

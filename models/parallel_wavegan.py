@@ -469,7 +469,6 @@ class ParallelWaveGAN(Vocoder):
                 self.model["generator"].parameters(),
                 self.config.model.generator_grad_norm,
             )
-        # pyre-fixme[20]: Argument `closure` expected.
         self.optimizer["generator"].step()
         self.scheduler["generator"].step()
 
@@ -518,7 +517,6 @@ class ParallelWaveGAN(Vocoder):
                     self.model["discriminator"].parameters(),
                     self.config.model.discriminator_grad_norm,
                 )
-            # pyre-fixme[20]: Argument `closure` expected.
             self.optimizer["discriminator"].step()
             self.scheduler["discriminator"].step()
 

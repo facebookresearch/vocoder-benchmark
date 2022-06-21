@@ -135,6 +135,7 @@ class Audio2Mel(torch.nn.Module):
             return_complex=False,
         )
         real_part, imag_part = fft.unbind(-1)
+        # pyre-fixme[58]: `**` is not supported for operand types `Tensor` and `int`.
         magnitude = torch.sqrt(real_part**2 + imag_part**2)
         mel_output = torch.matmul(self.mel_basis, magnitude)
         log_mel_spec = 20 * torch.log10(torch.clamp(mel_output, min=1e-5))

@@ -149,6 +149,8 @@ class WaveGrad(Vocoder):
         Returns:
           The negative log likelihood loss.
         """
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         return self.model.module.compute_loss(spectrograms, waveforms)
 
     # pyre-fixme[14]: `train_step` overrides method defined in `Vocoder` inconsistently.
@@ -164,6 +166,8 @@ class WaveGrad(Vocoder):
           to Tensorboard.
         """
         if not self.global_step % self.config.model.noise_schedule_interval:
+            # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+            #  torch.nn.modules.module.Module]` is not a function.
             self.model.module.set_new_noise_schedule(
                 init=torch.linspace,
                 init_kwargs={
@@ -180,7 +184,6 @@ class WaveGrad(Vocoder):
         # Backward pass.
         self.optimizer.zero_grad()
         loss.backward()
-        # pyre-fixme[20]: Argument `closure` expected.
         self.optimizer.step()
         self.scheduler.step()
 
@@ -205,6 +208,8 @@ class WaveGrad(Vocoder):
           A dictionary mapping loss name (e.g. 'nll_loss') to the validation value.
         """
 
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         self.model.module.set_new_noise_schedule(
             init=torch.linspace,
             init_kwargs={
@@ -226,6 +231,8 @@ class WaveGrad(Vocoder):
             spectrograms = spectrograms[:, :, :200]
 
         with torch.no_grad():
+            # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+            #  torch.nn.modules.module.Module]` is not a function.
             self.model.module.set_new_noise_schedule(
                 init=torch.linspace,
                 init_kwargs={
@@ -261,6 +268,8 @@ class WaveGrad(Vocoder):
 
         # Feed data to network and compute the model complexity.
         with torch.no_grad():
+            # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+            #  torch.nn.modules.module.Module]` is not a function.
             self.model.module.set_new_noise_schedule(
                 init=torch.linspace,
                 init_kwargs={

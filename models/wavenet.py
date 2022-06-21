@@ -302,7 +302,6 @@ class WaveNet(Vocoder):
         # Backward pass.
         self.optimizer.zero_grad()
         loss.backward()
-        # pyre-fixme[20]: Argument `closure` expected.
         self.optimizer.step()
         return loss, {}
 
@@ -330,9 +329,13 @@ class WaveNet(Vocoder):
           A 1D float tensor containing the output waveform.
         """
         self.model.eval()
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         self.model.module.clear_buffer()
 
         with torch.no_grad():
+            # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+            #  torch.nn.modules.module.Module]` is not a function.
             spectrograms = self.model.module.upsample_net(spectrograms)
             seq_len = (
                 22050 if training else spectrograms.size(-1)
@@ -351,13 +354,19 @@ class WaveNet(Vocoder):
             for t in tqdm(range(seq_len)):
                 # Conditioning features for single time step
                 ct = spectrograms[:, t, :].unsqueeze(1)
+                # pyre-fixme[16]: Item `Tensor` of `Union[Tensor, Module]` has no
+                #  attribute `incremental_forward`.
                 x = self.model.module.first_conv.incremental_forward(x)
                 skips = 0
+                # pyre-fixme[29]: `Union[BoundMethod[typing.Callable(torch._tensor.Te...
                 for f in self.model.module.conv_layers:
                     x, h = f.incremental_forward(x, ct, None)
                     skips += h
+                # pyre-fixme[6]: For 1st param expected `Sized` but got
+                #  `Union[Tensor, Module]`.
                 skips *= math.sqrt(1.0 / len(self.model.module.conv_layers))
                 x = skips
+                # pyre-fixme[29]: `Union[BoundMethod[typing.Callable(torch._tensor.Te...
                 for f in self.model.module.last_conv_layers:
                     try:
                         x = f.incremental_forward(x)
@@ -381,6 +390,8 @@ class WaveNet(Vocoder):
             raise RuntimeError(
                 "Not supported input type: {}".format(self.config.model.input_type)
             )
+        # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+        #  torch.nn.modules.module.Module]` is not a function.
         self.model.module.clear_buffer()
         self.model.train()
 
@@ -478,6 +489,8 @@ class WaveNet(Vocoder):
                 )
             )
 
+            # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+            #  torch.nn.modules.module.Module]` is not a function.
             spectrograms = model.upsample_net(spectrograms)
             assert spectrograms.size(-1) == waveforms.size(-1)
 
@@ -489,9 +502,12 @@ class WaveNet(Vocoder):
                 )
             )
 
+            # pyre-fixme[29]: `Union[torch._tensor.Tensor,
+            #  torch.nn.modules.module.Module]` is not a function.
             waveforms = model.first_conv(waveforms)
             skips = 0
 
+            # pyre-fixme[29]: `Union[BoundMethod[typing.Callable(torch._tensor.Tensor...
             for f in model.conv_layers:
                 stats += np.array(
                     get_model_complexity_info(
@@ -503,9 +519,12 @@ class WaveNet(Vocoder):
                 waveforms, h = f(waveforms, spectrograms, None)
                 skips += h
 
+            # pyre-fixme[6]: For 1st param expected `Sized` but got `Union[Tensor,
+            #  Module]`.
             skips *= math.sqrt(1.0 / len(model.conv_layers))
 
             waveforms = skips
+            # pyre-fixme[29]: `Union[BoundMethod[typing.Callable(torch._tensor.Tensor...
             for f in model.last_conv_layers:
                 stats += np.array(
                     get_model_complexity_info(

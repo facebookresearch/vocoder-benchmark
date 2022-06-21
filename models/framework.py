@@ -117,7 +117,7 @@ class Vocoder(torch.nn.Module):
         """
         Global step as a regular integer.
         """
-        return int(self.global_step_buffer.cpu())  # pyre-ignore
+        return int(self.global_step_buffer.cpu())
 
     @global_step.setter
     def global_step(self, value: int) -> None:
@@ -919,6 +919,9 @@ def psnr(mse: torch.nn.Module) -> torch.Tensor:
     """
     Compute PSNR from MSE.
     """
+    # pyre-fixme[6]: For 1st param expected `Tensor` but got `float`.
+    # pyre-fixme[58]: `/` is not supported for operand types `float` and `Tensor`.
+    # pyre-fixme[6]: For 1st param expected `Tensor` but got `Module`.
     return 20 * torch.log10(1.0 / torch.sqrt(mse))
 
 
