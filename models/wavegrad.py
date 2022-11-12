@@ -126,6 +126,8 @@ class WaveGrad(Vocoder):
           model and an optional scheduler used for that optimizer. These are
           saved and restored from the checkpoints.
         """
+        # pyre-fixme[7]: Expected `List[Tuple[Optimizer, Optional[_LRScheduler]]]`
+        #  but got `List[Tuple[Optimizer, StepLR]]`.
         return [(self.optimizer, self.scheduler)]
 
     def is_done(self) -> bool:
