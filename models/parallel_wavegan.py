@@ -405,7 +405,7 @@ class ParallelWaveGAN(Vocoder):
         # reconstruct the signal from multi-band signal
         if self.config.model.generator_params.out_channels > 1:
             y_mb_ = y_
-            y_ = self.criterion["pqmf"].synthesis(y_mb_)  # pyre-ignore
+            y_ = self.criterion["pqmf"].synthesis(y_mb_)
 
         # multi-resolution sfft loss
         sc_loss, mag_loss = self.criterion["stft"](y_.squeeze(1), y.squeeze(1))
@@ -416,7 +416,7 @@ class ParallelWaveGAN(Vocoder):
         # subband multi-resolution stft loss
         if self.config.model.use_subband_stft_loss:
             gen_loss *= 0.5  # for balancing with subband stft loss
-            y_mb = self.criterion["pqmf"].analysis(y)  # pyre-ignore
+            y_mb = self.criterion["pqmf"].analysis(y)
             y_mb = y_mb.view(-1, y_mb.size(2))  # (B, C, T) -> (B x C, T)
             y_mb_ = y_mb_.view(-1, y_mb_.size(2))  # (B, C, T) -> (B x C, T)
             sub_sc_loss, sub_mag_loss = self.criterion["sub_stft"](y_mb_, y_mb)
@@ -480,7 +480,7 @@ class ParallelWaveGAN(Vocoder):
             with torch.no_grad():
                 y_ = self.model["generator"](*x)
             if self.config.model.generator_params.out_channels > 1:
-                y_ = self.criterion["pqmf"].synthesis(y_)  # pyre-ignore
+                y_ = self.criterion["pqmf"].synthesis(y_)
 
             # discriminator loss
             p = self.model["discriminator"](y)
@@ -550,7 +550,7 @@ class ParallelWaveGAN(Vocoder):
         y_ = self.model["generator"](*x)
         if self.config.model.generator_params.out_channels > 1:
             y_mb_ = y_
-            y_ = self.criterion["pqmf"].synthesis(y_mb_)  # pyre-ignore
+            y_ = self.criterion["pqmf"].synthesis(y_mb_)
 
         # multi-resolution stft loss
         sc_loss, mag_loss = self.criterion["stft"](y_.squeeze(1), y.squeeze(1))
@@ -559,7 +559,7 @@ class ParallelWaveGAN(Vocoder):
         # subband multi-resolution stft loss
         if self.config.model.use_subband_stft_loss:
             aux_loss *= 0.5  # for balancing with subband stft loss
-            y_mb = self.criterion["pqmf"].analysis(y)  # pyre-ignore
+            y_mb = self.criterion["pqmf"].analysis(y)
             y_mb = y_mb.view(-1, y_mb.size(2))  # (B, C, T) -> (B x C, T)
             y_mb_ = y_mb_.view(-1, y_mb_.size(2))  # (B, C, T) -> (B x C, T)
             sub_sc_loss, sub_mag_loss = self.criterion["sub_stft"](y_mb_, y_mb)

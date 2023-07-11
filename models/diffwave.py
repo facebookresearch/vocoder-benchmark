@@ -208,7 +208,7 @@ class DiffWave(Vocoder):
         # Backward pass.
         self.scaler.scale(loss).backward()
         self.scaler.unscale_(self.optimizer)
-        self.grad_norm = torch.nn.utils.clip_grad_norm_(  # pyre-ignore
+        self.grad_norm = torch.nn.utils.clip_grad_norm_(
             self.model.parameters(), self.config.model.max_grad_norm or 1e9
         )
         self.scaler.step(self.optimizer)
@@ -216,7 +216,7 @@ class DiffWave(Vocoder):
 
         loss_stats = {"total_loss": loss, "grad_norm": self.grad_norm}
 
-        return loss, loss_stats  # pyre-ignore
+        return loss, loss_stats
 
     # pyre-fixme[14]: `validation_losses` overrides method defined in `Vocoder`
     #  inconsistently.
