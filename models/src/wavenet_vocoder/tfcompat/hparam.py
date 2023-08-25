@@ -303,7 +303,7 @@ def parse_values(values, type_map):
     return results_dictionary
 
 
-class HParams(object):
+class HParams:
     """Class to hold a set of hyperparameters as name-value pairs.
 
     A `HParams` object holds hyperparameters used to build and train a model,
