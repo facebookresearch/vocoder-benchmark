@@ -94,6 +94,7 @@ class DiffWave(Vocoder):
         self.model = torch.nn.DataParallel(model.DiffWave(self.config.model))
         # pyre-fixme[6]: Expected `bool` for 1st param but got `Optional[bool]`.
         self.autocast = torch.cuda.amp.autocast(enabled=config.model.fp16)
+        # pyre-fixme[6]: For 1st argument expected `bool` but got `Optional[bool]`.
         self.scaler = torch.cuda.amp.GradScaler(enabled=config.model.fp16)
 
         # Train noise config
