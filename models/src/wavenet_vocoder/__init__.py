@@ -1,5 +1,7 @@
 # coding: utf-8
 
+# pyre-unsafe
+
 from __future__ import absolute_import, print_function, with_statement
 
 from models.src.wavenet_vocoder.version import ( # @oss-only
