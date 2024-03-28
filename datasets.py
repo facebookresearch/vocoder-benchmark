@@ -302,8 +302,7 @@ class VocoderDataset(torch.utils.data.IterableDataset):
             indices = [
                 idx
                 for i, idx in enumerate(self.indices)
-                if i % worker_info.num_workers  # pylint: disable=no-member
-                == worker_info.id  # pylint: disable=no-member
+                if i % worker_info.num_workers == worker_info.id
             ]
         else:
             indices = self.indices

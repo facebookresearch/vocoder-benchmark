@@ -1,5 +1,5 @@
 # pyre-ignore-all-errors
-# pylint: skip-file
+
 # coding: utf-8
 # Code is adapted from:
 # https://github.com/pclucas14/pixel-cnn-pp

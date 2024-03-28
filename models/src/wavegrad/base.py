@@ -1,5 +1,5 @@
 # pyre-ignore-all-errors
-# pylint: skip-file
+
 # license information for WaveGrad can be found at https://github.com/ivanvovk/WaveGrad/blob/master/LICENSE
 
 import torch

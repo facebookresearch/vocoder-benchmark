@@ -1,5 +1,5 @@
 # pyre-ignore-all-errors
-# pylint: skip-file
+
 # coding: utf-8
 from torch import nn
 from torch.nn import functional as F

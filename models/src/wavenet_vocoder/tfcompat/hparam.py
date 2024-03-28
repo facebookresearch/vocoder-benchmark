@@ -1,5 +1,5 @@
 # pyre-ignore-all-errors
-# pylint: skip-file
+
 
 # Copyright 2016 The TensorFlow Authors. All Rights Reserved.
 #
@@ -698,7 +698,7 @@ class HParams:
         return "_".join([typename, suffix])
 
 
-##   def to_proto(self, export_scope=None):  # pylint: disable=unused-argument
+##   def to_proto(self, export_scope=None):
 ##     """Converts a `HParams` object to a `HParamDef` protocol buffer.
 ##
 ##     Args:
@@ -728,7 +728,7 @@ class HParams:
 ##     return hparam_proto
 
 ##   @staticmethod
-##   def from_proto(hparam_def, import_scope=None):  # pylint: disable=unused-argument
+##   def from_proto(hparam_def, import_scope=None):
 ##     return HParams(hparam_def=hparam_def)
 
 

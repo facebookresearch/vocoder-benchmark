@@ -42,7 +42,7 @@ def hard_exit(code: int = 1) -> None:
     """
     sys.stdout.flush()
     sys.stderr.flush()
-    os._exit(code)  # pylint: disable=protected-access
+    os._exit(code)
 
 
 def write_audio(

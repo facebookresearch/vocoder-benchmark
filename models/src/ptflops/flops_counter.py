@@ -1,5 +1,5 @@
 # pyre-ignore-all-errors
-# pylint: skip-file
+
 
 """
 Copyright (C) 2019 Sovrasov V. - All Rights Reserved

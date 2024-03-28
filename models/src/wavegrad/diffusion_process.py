@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 # pyre-ignore-all-errors
-# pylint: skip-file
+
 
 import numpy as np
 import torch
