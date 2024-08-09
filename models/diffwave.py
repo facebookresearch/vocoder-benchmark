@@ -175,6 +175,7 @@ class DiffWave(Vocoder):
             t = torch.randint(
                 0, len(noise_schedule), [N], device=waveforms.device  # pyre-ignore
             )
+            # pyre-fixme[61]: `noise_level` is undefined, or not always defined.
             noise_scale = noise_level[t].unsqueeze(1)
             # pyre-fixme[58]: `**` is not supported for operand types `Tensor` and
             #  `float`.

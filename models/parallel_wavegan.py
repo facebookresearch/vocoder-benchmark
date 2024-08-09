@@ -440,6 +440,7 @@ class ParallelWaveGAN(Vocoder):
                     adv_loss += self.criterion["mse"](
                         p_[i][-1], p_[i][-1].new_ones(p_[i][-1].size())
                     )
+                # pyre-fixme[61]: `i` is undefined, or not always defined.
                 adv_loss /= i + 1
                 total_train_loss["adversarial_loss"] += adv_loss.item()  # pyre-ignore
 
@@ -452,6 +453,8 @@ class ParallelWaveGAN(Vocoder):
                     for i in range(len(p_)):
                         for j in range(len(p_[i]) - 1):
                             fm_loss += self.criterion["l1"](p_[i][j], p[i][j].detach())
+                    # pyre-fixme[61]: `i` is undefined, or not always defined.
+                    # pyre-fixme[61]: `j` is undefined, or not always defined.
                     fm_loss /= (i + 1) * (j + 1)
                     total_train_loss["feature_matching_loss"] += fm_loss.item()
                     adv_loss += (
@@ -503,7 +506,9 @@ class ParallelWaveGAN(Vocoder):
                     fake_loss += self.criterion["mse"](
                         p_[i][-1], p_[i][-1].new_zeros(p_[i][-1].size())
                     )
+                # pyre-fixme[61]: `i` is undefined, or not always defined.
                 real_loss /= i + 1
+                # pyre-fixme[61]: `i` is undefined, or not always defined.
                 fake_loss /= i + 1
                 dis_loss = real_loss + fake_loss
 
@@ -582,6 +587,7 @@ class ParallelWaveGAN(Vocoder):
                 adv_loss += self.criterion["mse"](
                     p_[i][-1], p_[i][-1].new_ones(p_[i][-1].size())
                 )
+            # pyre-fixme[61]: `i` is undefined, or not always defined.
             adv_loss /= i + 1
             gen_loss = aux_loss + self.config.model.lambda_adv * adv_loss
 
@@ -592,6 +598,8 @@ class ParallelWaveGAN(Vocoder):
                 for i in range(len(p_)):
                     for j in range(len(p_[i]) - 1):
                         fm_loss += self.criterion["l1"](p_[i][j], p[i][j])
+                # pyre-fixme[61]: `i` is undefined, or not always defined.
+                # pyre-fixme[61]: `j` is undefined, or not always defined.
                 fm_loss /= (i + 1) * (j + 1)
                 total_eval_loss[
                     "feature_matching_loss"
@@ -625,7 +633,9 @@ class ParallelWaveGAN(Vocoder):
                 fake_loss += self.criterion["mse"](
                     p_[i][-1], p_[i][-1].new_zeros(p_[i][-1].size())
                 )
+            # pyre-fixme[61]: `i` is undefined, or not always defined.
             real_loss /= i + 1
+            # pyre-fixme[61]: `i` is undefined, or not always defined.
             fake_loss /= i + 1
             dis_loss = real_loss + fake_loss
 
