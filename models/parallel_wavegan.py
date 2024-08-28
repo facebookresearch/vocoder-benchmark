@@ -8,6 +8,7 @@
 """
 WaveGAN Neural Vocoder.
 """
+
 import math
 from collections import defaultdict
 from dataclasses import dataclass
@@ -601,9 +602,10 @@ class ParallelWaveGAN(Vocoder):
                 # pyre-fixme[61]: `i` is undefined, or not always defined.
                 # pyre-fixme[61]: `j` is undefined, or not always defined.
                 fm_loss /= (i + 1) * (j + 1)
-                total_eval_loss[
-                    "feature_matching_loss"
-                ] += fm_loss.item()  # pyre-ignore
+                total_eval_loss["feature_matching_loss"] += (
+                    # pyre-fixme[16]: `float` has no attribute `item`.
+                    fm_loss.item()
+                )
                 gen_loss += (
                     self.config.model.lambda_adv
                     * self.config.model.lambda_feat_match  # pyre-ignore
@@ -698,7 +700,6 @@ class ParallelWaveGAN(Vocoder):
             spectrograms = spectrograms.cuda()
 
         with torch.no_grad():
-
             # MelGAN and MB-MelGAN
             if self.config.model.generator_type == "MelGANGenerator":
                 return get_model_complexity_info(

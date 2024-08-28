@@ -8,6 +8,7 @@
 """
 DiffWave Neural Vocoder.
 """
+
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
@@ -173,7 +174,13 @@ class DiffWave(Vocoder):
 
         with self.autocast:
             t = torch.randint(
-                0, len(noise_schedule), [N], device=waveforms.device  # pyre-ignore
+                0,
+                # pyre-fixme[6]: For 1st argument expected
+                #  `pyre_extensions.ReadOnly[Sized]` but got `Optional[List[float]]`.
+                # pyre-fixme[61]: `noise_schedule` is undefined, or not always defined.
+                len(noise_schedule),
+                [N],
+                device=waveforms.device,
             )
             # pyre-fixme[61]: `noise_level` is undefined, or not always defined.
             noise_scale = noise_level[t].unsqueeze(1)

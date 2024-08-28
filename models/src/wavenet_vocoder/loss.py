@@ -29,7 +29,6 @@ class DiscretizedMixturelogisticLoss(nn.Module):
         super(DiscretizedMixturelogisticLoss, self).__init__()
 
     def forward(self, input, target, log_scale_min: float = -7.0):
-
         losses = discretized_mix_logistic_loss(
             input,
             target,

@@ -8,6 +8,7 @@
 """
 Dataset commands.
 """
+
 import json
 import os
 import random
@@ -354,7 +355,9 @@ def create_dataloader(
     )
 
 
-def load_dataset(path: str, config: DatasetConfig, num_generate_samples: int) -> Tuple[
+def load_dataset(
+    path: str, config: DatasetConfig, num_generate_samples: int
+) -> Tuple[
     torch.utils.data.DataLoader,
     torch.utils.data.DataLoader,
     torch.utils.data.DataLoader,

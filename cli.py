@@ -8,6 +8,7 @@
 """
 Main command-line entry point for 'vocoder' command.
 """
+
 from typing import List, Type
 
 import click

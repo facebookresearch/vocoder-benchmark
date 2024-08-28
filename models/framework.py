@@ -8,6 +8,7 @@
 """
 Vocoder modeling framework.
 """
+
 import difflib
 import glob
 import json
@@ -858,7 +859,6 @@ def compute_validation_metrics(
 def compute_evaluation_metrics(
     model: Vocoder, dataloader: torch.utils.data.DataLoader, path: str
 ) -> Dict[str, Any]:
-
     metrics: dict[str, Any] = defaultdict(None)
     metrics["ssim"] = []
     metrics["mse"] = []

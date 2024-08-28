@@ -324,7 +324,6 @@ def conv_flops_counter_hook(conv_module, input, output) -> None:
     bias_flops = 0
 
     if conv_module.bias is not None:
-
         bias_flops = out_channels * active_elements_count
 
     overall_flops = overall_conv_flops + bias_flops
@@ -468,7 +467,6 @@ def multihead_attention_counter_hook(multihead_attention_module, input, output) 
 
 
 def add_batch_counter_variables_or_reset(module) -> None:
-
     module.__batch_counter__ = 0
 
 

@@ -8,6 +8,7 @@
 """
 WaveRNN Neural Vocoder.
 """
+
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
@@ -261,7 +262,6 @@ class WaveRNN(Vocoder):
             aux_split = [aux[:, :, d * i : d * (i + 1)] for i in range(4)]
 
             for i in tqdm(range(seq_len)):
-
                 m_t = spectrograms[:, i, :]
 
                 a1_t, a2_t, a3_t, a4_t = (a[:, i, :] for a in aux_split)

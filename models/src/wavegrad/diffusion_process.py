@@ -53,8 +53,8 @@ class WaveGrad(BaseModule):
             Should always contain the key `steps` corresponding to the number of iterations to be done by the model.
             This is done so because `torch.linspace` has this argument named as `steps`.
         """
-        assert "steps" in list(
-            init_kwargs.keys()
+        assert (
+            "steps" in list(init_kwargs.keys())
         ), "`init_kwargs` should always contain the key `steps` corresponding to the number of iterations to be done by the model."
         n_iter = init_kwargs["steps"]
 
