@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# pyre-unsafe
+# pyre-strict
 
 __version__ = "0.4.8"

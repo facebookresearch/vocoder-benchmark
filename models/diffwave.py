@@ -1,7 +1,7 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # All rights reserved.
 
-# pyre-unsafe
+# pyre-strict
 
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
@@ -94,6 +94,7 @@ class DiffWave(Vocoder):
             self.config.model.training_noise_schedule.betas_range[1],
             self.config.model.training_noise_schedule.n_iter,
         ).tolist()
+        # pyre-fixme[4]: Attribute must be annotated.
         self.model = torch.nn.DataParallel(model.DiffWave(self.config.model))
         # pyre-fixme[6]: Expected `bool` for 1st param but got `Optional[bool]`.
         self.autocast = torch.cuda.amp.autocast(enabled=config.model.fp16)

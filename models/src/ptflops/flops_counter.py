@@ -12,6 +12,7 @@ Copyright (C) 2019 Sovrasov V. - All Rights Reserved
 
 import sys
 from functools import partial
+from typing import TextIO
 
 import numpy as np
 import torch.nn as nn
@@ -23,7 +24,7 @@ def get_model_complexity_info(
     print_per_layer_stat: bool = False,
     as_strings: bool = False,
     input_constructor=None,
-    ost=sys.stdout,
+    ost: TextIO = sys.stdout,
     verbose: bool = False,
     ignore_modules=[],
     custom_modules_hooks={},
@@ -102,7 +103,7 @@ def print_model_with_flops(
     total_params,
     units: str = "GMac",
     precision: int = 3,
-    ost=sys.stdout,
+    ost: TextIO = sys.stdout,
 ) -> None:
     if total_flops < 1:
         total_flops = 1
@@ -154,7 +155,7 @@ def print_model_with_flops(
     model.apply(del_extra_repr)
 
 
-def get_model_parameters_number(model):
+def get_model_parameters_number(model) -> int:
     params_num = sum(p.numel() for p in model.parameters() if p.requires_grad)
     return params_num
 
@@ -346,7 +347,7 @@ def batch_counter_hook(module, input, output) -> None:
     module.__batch_counter__ += batch_size
 
 
-def rnn_flops(flops: int, rnn_module, w_ih, w_hh, input_size):
+def rnn_flops(flops: int, rnn_module, w_ih, w_hh, input_size) -> int:
     # matrix matrix mult ih state and internal state
     flops += w_ih.shape[0] * w_ih.shape[1]
     # matrix matrix mult hh state and internal state

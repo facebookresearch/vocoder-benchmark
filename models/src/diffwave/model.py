@@ -25,19 +25,21 @@ import torch.nn.functional as F
 
 from datasets import MEL_NUM_BANDS # @oss-only
 # @fb-only: from langtech.tts.vocoders.datasets import MEL_NUM_BANDS 
+from torch._tensor import Tensor
+from torch.nn.modules.conv import Conv1d
 
 Linear = nn.Linear
 ConvTranspose2d = nn.ConvTranspose2d
 
 
-def Conv1d(*args, **kwargs):
+def Conv1d(*args, **kwargs) -> Conv1d:
     layer = nn.Conv1d(*args, **kwargs)
     nn.init.kaiming_normal_(layer.weight)
     return layer
 
 
 @torch.jit.script
-def silu(x):
+def silu(x: Tensor) -> Tensor:
     return x * torch.sigmoid(x)
 
 
@@ -50,7 +52,7 @@ class DiffusionEmbedding(nn.Module):
         self.projection1 = Linear(128, 512)
         self.projection2 = Linear(512, 512)
 
-    def forward(self, diffusion_step):
+    def forward(self, diffusion_step: Tensor):
         if diffusion_step.dtype in [torch.int32, torch.int64]:
             x = self.embedding[diffusion_step]
         else:
@@ -61,14 +63,14 @@ class DiffusionEmbedding(nn.Module):
         x = silu(x)
         return x
 
-    def _lerp_embedding(self, t):
+    def _lerp_embedding(self, t: Tensor) -> Tensor:
         low_idx = torch.floor(t).long()
         high_idx = torch.ceil(t).long()
         low = self.embedding[low_idx]
         high = self.embedding[high_idx]
         return low + (high - low) * (t - low_idx)
 
-    def _build_embedding(self, max_steps):
+    def _build_embedding(self, max_steps) -> Tensor:
         steps = torch.arange(max_steps).unsqueeze(1)  # [T,1]
         dims = torch.arange(64).unsqueeze(0)  # [1,64]
         table = steps * 10.0 ** (dims * 4.0 / 63.0)  # [T,64]
@@ -82,7 +84,7 @@ class SpectrogramUpsampler(nn.Module):
         self.conv1 = ConvTranspose2d(1, 1, [3, 20], stride=[1, 10], padding=[1, 5])
         self.conv2 = ConvTranspose2d(1, 1, [3, 60], stride=[1, 30], padding=[1, 15])
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         x = torch.unsqueeze(x, 1)
         x = self.conv1(x)
         x = F.leaky_relu(x, 0.4)

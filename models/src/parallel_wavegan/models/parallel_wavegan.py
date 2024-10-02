@@ -11,6 +11,7 @@
 
 import logging
 import math
+from typing import Dict, List
 
 import models.src.parallel_wavegan as parallel_wavegan # @oss-only
 # @fb-only: import langtech.tts.vocoders.models.src.parallel_wavegan as parallel_wavegan 
@@ -55,7 +56,7 @@ class ParallelWaveGANGenerator(torch.nn.Module):
         use_causal_conv: bool = False,
         upsample_conditional_features: bool = True,
         upsample_net: str = "ConvInUpsampleNetwork",
-        upsample_params={"upsample_scales": [4, 4, 4, 4]},
+        upsample_params: Dict[str, List[int]] = {"upsample_scales": [4, 4, 4, 4]},
     ) -> None:
         """Initialize Parallel WaveGAN Generator module.
 
@@ -270,7 +271,7 @@ class ParallelWaveGANDiscriminator(torch.nn.Module):
         conv_channels: int = 64,
         dilation_factor: int = 1,
         nonlinear_activation: str = "LeakyReLU",
-        nonlinear_activation_params={"negative_slope": 0.2},
+        nonlinear_activation_params: Dict[str, float] = {"negative_slope": 0.2},
         bias: bool = True,
         use_weight_norm: bool = True,
     ) -> None:
@@ -386,7 +387,7 @@ class ResidualParallelWaveGANDiscriminator(torch.nn.Module):
         use_weight_norm: bool = True,
         use_causal_conv: bool = False,
         nonlinear_activation: str = "LeakyReLU",
-        nonlinear_activation_params={"negative_slope": 0.2},
+        nonlinear_activation_params: Dict[str, float] = {"negative_slope": 0.2},
     ) -> None:
         """Initialize Parallel WaveGAN Discriminator module.
 

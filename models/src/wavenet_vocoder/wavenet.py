@@ -4,6 +4,7 @@
 from __future__ import absolute_import, print_function, with_statement
 
 import math
+from typing import Dict, List, Union
 
 import torch
 
@@ -25,10 +26,11 @@ from models.src.wavenet_vocoder.modules import ( # @oss-only
     ResidualConv1dGLU,
 )
 from torch import nn
+from torch._tensor import Tensor
 from torch.nn import functional as F
 
 
-def _expand_global_features(B, T, g, bct=True):
+def _expand_global_features(B, T, g, bct: bool = True):
     """Expand global conditioning features to all time steps
 
     Args:
@@ -110,25 +112,25 @@ class WaveNet(nn.Module):
 
     def __init__(
         self,
-        out_channels=256,
-        layers=20,
-        stacks=2,
-        residual_channels=512,
-        gate_channels=512,
-        skip_out_channels=512,
-        kernel_size=3,
-        dropout=1 - 0.95,
-        cin_channels=-1,
-        gin_channels=-1,
+        out_channels: int = 256,
+        layers: int = 20,
+        stacks: int = 2,
+        residual_channels: int = 512,
+        gate_channels: int = 512,
+        skip_out_channels: int = 512,
+        kernel_size: int = 3,
+        dropout: float = 1 - 0.95,
+        cin_channels: int = -1,
+        gin_channels: int = -1,
         n_speakers=None,
-        upsample_conditional_features=False,
-        upsample_net="ConvInUpsampleNetwork",
-        upsample_params={"upsample_scales": [4, 4, 4, 4]},
-        scalar_input=False,
-        use_speaker_embedding=False,
-        output_distribution="Logistic",
-        cin_pad=0,
-    ):
+        upsample_conditional_features: bool = False,
+        upsample_net: str = "ConvInUpsampleNetwork",
+        upsample_params: Dict[str, List[int]] = {"upsample_scales": [4, 4, 4, 4]},
+        scalar_input: bool = False,
+        use_speaker_embedding: bool = False,
+        output_distribution: str = "Logistic",
+        cin_pad: int = 0,
+    ) -> None:
         super(WaveNet, self).__init__()
         self.scalar_input = scalar_input
         self.out_channels = out_channels
@@ -181,13 +183,15 @@ class WaveNet(nn.Module):
 
         self.receptive_field = receptive_field_size(layers, stacks, kernel_size)
 
-    def has_speaker_embedding(self):
+    def has_speaker_embedding(self) -> bool:
         return self.embed_speakers is not None
 
-    def local_conditioning_enabled(self):
+    def local_conditioning_enabled(self) -> bool:
         return self.cin_channels > 0
 
-    def forward(self, x, c=None, g=None, softmax=False):
+    def forward(
+        self, x: Union[float, Tensor], c=None, g=None, softmax: bool = False
+    ) -> Union[float, Tensor]:
         """Forward step
 
         Args:
@@ -243,13 +247,13 @@ class WaveNet(nn.Module):
         initial_input=None,
         c=None,
         g=None,
-        T=100,
+        T: int = 100,
         test_inputs=None,
         tqdm=lambda x: x,
-        softmax=True,
-        quantize=True,
-        log_scale_min=-50.0,
-    ):
+        softmax: bool = True,
+        quantize: bool = True,
+        log_scale_min: float = -50.0,
+    ) -> Tensor:
         """Incremental forward step
 
         Due to linearized convolutions, inputs of shape (B x C x T) are reshaped
@@ -378,7 +382,7 @@ class WaveNet(nn.Module):
         self.clear_buffer()
         return outputs
 
-    def clear_buffer(self):
+    def clear_buffer(self) -> None:
         self.first_conv.clear_buffer()
         for f in self.conv_layers:
             f.clear_buffer()
@@ -388,7 +392,7 @@ class WaveNet(nn.Module):
             except AttributeError:
                 pass
 
-    def make_generation_fast_(self):
+    def make_generation_fast_(self) -> None:
         def remove_weight_norm(m):
             try:
                 nn.utils.remove_weight_norm(m)

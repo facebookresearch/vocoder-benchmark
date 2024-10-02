@@ -8,6 +8,8 @@
 
 """Causal convolusion layer modules."""
 
+from typing import Dict
+
 import torch
 
 
@@ -22,7 +24,7 @@ class CausalConv1d(torch.nn.Module):
         dilation: int = 1,
         bias: bool = True,
         pad: str = "ConstantPad1d",
-        pad_params={"value": 0.0},
+        pad_params: Dict[str, float] = {"value": 0.0},
     ) -> None:
         """Initialize CausalConv1d module."""
         super(CausalConv1d, self).__init__()

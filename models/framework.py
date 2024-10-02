@@ -1,7 +1,7 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # All rights reserved.
 
-# pyre-unsafe
+# pyre-strict
 
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
@@ -579,6 +579,7 @@ def train_loop(  # noqa
     else:
         print("WARNING: No GPU detected, running on CPU. Training may be very slow.")
 
+    # pyre-fixme[3]: Return annotation cannot contain `Any`.
     def repeat_training_data_forever() -> Iterator[Any]:
         """
         Repeat all training data forever.
@@ -687,7 +688,9 @@ def save_model(model: Vocoder, checkpoint_dir: str) -> None:
     )
 
 
+# pyre-fixme[3]: Return annotation cannot contain `Any`.
 def move_state_dict_to_device(
+    # pyre-fixme[2]: Parameter annotation cannot contain `Any`.
     item: Union[Dict[str, Any], List[Any], Tensor],
     cpu: bool,
 ) -> Union[Dict[str, Any], List[Any], Tensor]:

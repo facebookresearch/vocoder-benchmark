@@ -2,6 +2,7 @@
 
 # coding: utf-8
 from torch import nn
+from torch._tensor import Tensor
 from torch.nn import functional as F
 
 
@@ -14,7 +15,7 @@ class Conv1d(nn.Conv1d):
         self._linearized_weight = None
         self.register_backward_hook(self._clear_linearized_weight)
 
-    def incremental_forward(self, input):
+    def incremental_forward(self, input) -> Tensor:
         # input: (B, T, C)
         if self.training:
             raise RuntimeError("incremental_forward only supports eval mode")

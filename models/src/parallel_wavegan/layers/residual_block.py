@@ -13,6 +13,7 @@ import math
 
 import torch
 import torch.nn.functional as F
+from torch._tensor import Tensor
 
 
 class Conv1d(torch.nn.Conv1d):
@@ -98,7 +99,7 @@ class ResidualBlock(torch.nn.Module):
         self.conv1x1_out = Conv1d1x1(gate_out_channels, residual_channels, bias=bias)
         self.conv1x1_skip = Conv1d1x1(gate_out_channels, skip_channels, bias=bias)
 
-    def forward(self, x, c):
+    def forward(self, x: Tensor, c):
         """Calculate forward propagation.
 
         Args:

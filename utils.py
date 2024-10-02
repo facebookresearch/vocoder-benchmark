@@ -1,7 +1,7 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # All rights reserved.
 
-# pyre-unsafe
+# pyre-strict
 
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
@@ -77,6 +77,8 @@ def write_audio(
     soundfile.write(filename, data, sample_rate)
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def remove_none_values_from_dict(config_dict):
     """
     Iterate over input configuration and remove None-value params

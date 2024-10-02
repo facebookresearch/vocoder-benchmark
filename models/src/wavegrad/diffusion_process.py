@@ -7,6 +7,8 @@
 # pyre-ignore-all-errors
 
 
+from typing import Dict, List, Optional, Union
+
 import numpy as np
 import torch
 
@@ -18,6 +20,7 @@ from models.src.wavegrad.base import BaseModule # @oss-only
 
 from models.src.wavegrad.nn import WaveGradNN # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.wavegrad.nn import WaveGradNN 
+from torch._tensor import Tensor
 
 
 class WaveGrad(BaseModule):
@@ -42,7 +45,9 @@ class WaveGrad(BaseModule):
         self.nn = WaveGradNN(config)
 
     def set_new_noise_schedule(
-        self, init=torch.linspace, init_kwargs={"steps": 50, "start": 1e-6, "end": 1e-2}
+        self,
+        init=torch.linspace,
+        init_kwargs: Dict[str, float] = {"steps": 50, "start": 1e-6, "end": 1e-2},
     ) -> None:
         """
         Sets sampling noise schedule. Authors in the paper showed
@@ -101,7 +106,7 @@ class WaveGrad(BaseModule):
         self.noise_schedule_kwargs = {"init": init, "init_kwargs": init_kwargs}
         self.noise_schedule_is_set = True
 
-    def sample_continuous_noise_level(self, batch_size, device):
+    def sample_continuous_noise_level(self, batch_size, device) -> Tensor:
         """
         Samples continuous noise level sqrt(alpha_cumprod).
         This is what makes WaveGrad different from other Denoising Diffusion Probabilistic Models.
@@ -116,7 +121,12 @@ class WaveGrad(BaseModule):
         ).to(device)
         return continuous_sqrt_alpha_cumprod.unsqueeze(-1)
 
-    def q_sample(self, y_0, continuous_sqrt_alpha_cumprod=None, eps=None):
+    def q_sample(
+        self,
+        y_0: Tensor,
+        continuous_sqrt_alpha_cumprod: Optional[Tensor] = None,
+        eps=None,
+    ) -> Tensor:
         """
         Efficiently computes diffusion version y_t from y_0 using a closed form expression:
             y_t = sqrt(alpha_cumprod)_t * y_0 + sqrt(1 - alpha_cumprod_t) * eps,
@@ -191,7 +201,9 @@ class WaveGrad(BaseModule):
         eps = torch.randn_like(y) if t > 0 else torch.zeros_like(y)
         return model_mean + eps * (0.5 * model_log_variance).exp()
 
-    def sample(self, mels, store_intermediate_states: bool = False):
+    def sample(
+        self, mels, store_intermediate_states: bool = False
+    ) -> Union[List[Tensor], Tensor]:
         """
         Samples speech waveform via progressive denoising of white noise with guidance of mels-epctrogram.
         :param mels (torch.Tensor): mel-spectrograms acoustic features of shape [B, n_mels, T//hop_length]
@@ -214,7 +226,7 @@ class WaveGrad(BaseModule):
                 t -= 1
             return ys if store_intermediate_states else ys[-1]
 
-    def compute_loss(self, mels, y_0):
+    def compute_loss(self, mels, y_0: Tensor):
         """
         Computes loss between GT Gaussian noise and reconstructed noise by model from diffusion process.
         :param mels (torch.Tensor): mel-spectrograms acoustic features of shape [B, n_mels, T//hop_length]
@@ -238,7 +250,9 @@ class WaveGrad(BaseModule):
         loss = torch.nn.L1Loss()(eps_recon, eps)
         return loss
 
-    def forward(self, mels, store_intermediate_states: bool = False):
+    def forward(
+        self, mels, store_intermediate_states: bool = False
+    ) -> Union[List[Tensor], Tensor]:
         """
         Generates speech from given mel-spectrogram.
         :param mels (torch.Tensor): mel-spectrogram tensor of shape [1, n_mels, T//hop_length]

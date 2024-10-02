@@ -9,9 +9,10 @@ from models.src.wavenet_vocoder.mixture import ( # @oss-only
     mix_gaussian_loss,
 )
 from torch import nn
+from torch._tensor import Tensor
 
 
-def sequence_mask(sequence_length, max_len=None):
+def sequence_mask(sequence_length, max_len=None) -> Tensor:
     if max_len is None:
         max_len = sequence_length.data.max()
     batch_size = sequence_length.size(0)

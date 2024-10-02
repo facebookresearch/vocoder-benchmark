@@ -10,6 +10,7 @@ from models.src.wavegrad.layers import ( # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.wavegrad.layers import ( 
     Conv1dWithInitialization,
 )
+from torch._tensor import Tensor
 
 
 LINEAR_SCALE = 5000
@@ -20,7 +21,7 @@ class PositionalEncoding(BaseModule):
         super(PositionalEncoding, self).__init__()
         self.n_channels = n_channels
 
-    def forward(self, noise_level):
+    def forward(self, noise_level) -> Tensor:
         if len(noise_level.shape) > 1:
             noise_level = noise_level.squeeze(-1)
         half_dim = self.n_channels // 2

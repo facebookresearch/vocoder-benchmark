@@ -1,7 +1,7 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # All rights reserved.
 
-# pyre-unsafe
+# pyre-strict
 
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
@@ -56,9 +56,11 @@ class ModelConfig:
     factors: List[int] = MISSING
     upsampling_preconv_out_channels: int = MISSING
     upsampling_out_channels: List[int] = MISSING
+    # pyre-fixme[4]: Attribute annotation cannot contain `Any`.
     upsampling_dilations: List[Any] = MISSING
     downsampling_preconv_out_channels: int = MISSING
     downsampling_out_channels: List[int] = MISSING
+    # pyre-fixme[4]: Attribute annotation cannot contain `Any`.
     downsampling_dilations: List[Any] = MISSING
     n_iterations: int = MISSING
     grad_clip_threshold: int = MISSING
@@ -94,6 +96,7 @@ class WaveGrad(Vocoder):
         super().__init__(config)
 
         self.config = config
+        # pyre-fixme[4]: Attribute must be annotated.
         self.model = torch.nn.DataParallel(diffusion_process.WaveGrad(config))
         self.optimizer: torch.optim.Optimizer = torch.optim.Adam(
             self.parameters(), lr=self.config.model.learning_rate

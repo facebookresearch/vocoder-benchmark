@@ -9,8 +9,10 @@ This code is drived from https://github.com/LiyuanLucasLiu/RAdam.
 """
 
 import math
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
 import torch
+from torch._tensor import Tensor
 from torch.optim.optimizer import Optimizer
 
 
@@ -19,9 +21,9 @@ class RAdam(Optimizer):
 
     def __init__(
         self,
-        params,
+        params: Union[Iterable[Dict[str, Any]], Iterable[Tensor]],
         lr: float = 1e-3,
-        betas=(0.9, 0.999),
+        betas: Tuple[float, float] = (0.9, 0.999),
         eps: float = 1e-8,
         weight_decay: int = 0,
     ) -> None:
@@ -30,11 +32,11 @@ class RAdam(Optimizer):
         self.buffer = [[None, None, None] for ind in range(10)]
         super(RAdam, self).__init__(params, defaults)
 
-    def __setstate__(self, state) -> None:
+    def __setstate__(self, state: Dict[str, Any]) -> None:
         """Set state."""
         super(RAdam, self).__setstate__(state)
 
-    def step(self, closure=None):
+    def step(self, closure: Optional[Callable[[], float]] = None) -> Optional[float]:
         """Run one step."""
         loss = None
         if closure is not None:

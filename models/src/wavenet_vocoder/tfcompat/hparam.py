@@ -23,6 +23,7 @@ from __future__ import absolute_import, division, print_function
 import json
 import numbers
 import re
+from typing import Optional, Tuple, Union
 
 import six
 
@@ -36,7 +37,7 @@ import six
 #   <variable name>[<index>]? = <rhs>
 # where <rhs> is either a single token or [] enclosed list of tokens.
 # For example:  "var[1] = a" or "x = [1,2,3]"
-PARAM_RE = re.compile(
+PARAM_RE: re.Pattern[str] = re.compile(
     r"""
   (?P<name>[a-zA-Z][\w\.]*)      # variable name: "var" or "x"
   (\[\s*(?P<index>\d+)\s*\])?  # (optional) index: "1" or None
@@ -62,7 +63,9 @@ def _reuse_fail(name, values):
     raise ValueError("Multiple assignments to variable '%s' in %s" % (name, values))
 
 
-def _process_scalar_value(name, parse_fn, var_type, m_dict, values, results_dictionary):
+def _process_scalar_value(
+    name, parse_fn, var_type, m_dict, values, results_dictionary
+) -> None:
     """Update results_dictionary with a scalar value.
 
     Used to update the results_dictionary to be returned by parse_values when
@@ -110,7 +113,9 @@ def _process_scalar_value(name, parse_fn, var_type, m_dict, values, results_dict
         results_dictionary[name][index] = parsed_value
 
 
-def _process_list_value(name, parse_fn, var_type, m_dict, values, results_dictionary):
+def _process_list_value(
+    name, parse_fn, var_type, m_dict, values, results_dictionary
+) -> None:
     """Update results_dictionary from a list of values.
 
     Used to update results_dictionary to be returned by parse_values when
@@ -374,7 +379,7 @@ class HParams:
 
     _HAS_DYNAMIC_ATTRIBUTES = True  # Required for pytype checks.
 
-    def __init__(self, hparam_def=None, model_structure=None, **kwargs):
+    def __init__(self, hparam_def=None, model_structure=None, **kwargs) -> None:
         """Create an instance of `HParams` from keyword arguments.
 
         The keyword arguments specify name-values pairs for the hyperparameters.
@@ -466,7 +471,7 @@ class HParams:
     ##         else:
     ##           self.add_hparam(name, [v for v in getattr(value, kind).value])
 
-    def add_hparam(self, name, value):
+    def add_hparam(self, name: str, value) -> None:
         """Adds {name, value} pair to hyperparameters.
 
         Args:
@@ -492,7 +497,7 @@ class HParams:
             self._hparam_types[name] = (type(value), False)
         setattr(self, name, value)
 
-    def set_hparam(self, name, value):
+    def set_hparam(self, name: str, value) -> None:
         """Set the value of an existing hyperparameter.
 
         This function verifies that the type of the value matches the type of the
@@ -523,7 +528,7 @@ class HParams:
                 )
             setattr(self, name, _cast_to_type_if_compatible(name, param_type, value))
 
-    def del_hparam(self, name):
+    def del_hparam(self, name: str) -> None:
         """Removes the hyperparameter with key 'name'.
 
         Args:
@@ -533,7 +538,7 @@ class HParams:
             delattr(self, name)
             del self._hparam_types[name]
 
-    def parse(self, values):
+    def parse(self, values) -> "HParams":
         """Override hyperparameter values, parsing new values from a string.
 
         See parse_values for more detail on the allowed format for values.
@@ -556,7 +561,7 @@ class HParams:
         values_map = parse_values(values, type_map)
         return self.override_from_dict(values_map)
 
-    def override_from_dict(self, values_dict):
+    def override_from_dict(self, values_dict) -> "HParams":
         """Override hyperparameter values, parsing new values from a dictionary.
 
         Args:
@@ -573,17 +578,22 @@ class HParams:
         return self
 
     ##   @deprecation.deprecated(None, 'Use `override_from_dict`.')
-    def set_from_map(self, values_map):
+    def set_from_map(self, values_map) -> "HParams":
         """DEPRECATED. Use override_from_dict."""
         return self.override_from_dict(values_dict=values_map)
 
-    def set_model_structure(self, model_structure):
+    def set_model_structure(self, model_structure) -> None:
         self._model_structure = model_structure
 
     def get_model_structure(self):
         return self._model_structure
 
-    def to_json(self, indent=None, separators=None, sort_keys=False):
+    def to_json(
+        self,
+        indent: Union[None, int, str] = None,
+        separators: Optional[Tuple[str, str]] = None,
+        sort_keys: bool = False,
+    ) -> str:
         """Serializes the hyperparameters into JSON.
 
         Args:
@@ -602,7 +612,7 @@ class HParams:
             self.values(), indent=indent, separators=separators, sort_keys=sort_keys
         )
 
-    def parse_json(self, values_json):
+    def parse_json(self, values_json: Union[bytearray, bytes, str]) -> "HParams":
         """Override hyperparameter values, parsing new values from a json object.
 
         Args:
@@ -658,14 +668,14 @@ class HParams:
     def __contains__(self, key):
         return key in self._hparam_types
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(sorted(self.values().items()))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "%s(%s)" % (type(self).__name__, self.__str__())
 
     @staticmethod
-    def _get_kind_name(param_type, is_list):
+    def _get_kind_name(param_type, is_list) -> str:
         """Returns the field name given parameter type and is_list.
 
         Args:

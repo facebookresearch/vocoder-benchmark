@@ -9,6 +9,7 @@
 """MelGAN Modules."""
 
 import logging
+from typing import Dict, List
 
 import numpy as np
 import torch
@@ -41,7 +42,7 @@ class MelGANGenerator(torch.nn.Module):
         stack_kernel_size: int = 3,
         stacks: int = 3,
         nonlinear_activation: str = "LeakyReLU",
-        nonlinear_activation_params={"negative_slope": 0.2},
+        nonlinear_activation_params: Dict[str, float] = {"negative_slope": 0.2},
         pad: str = "ReflectionPad1d",
         pad_params={},
         use_final_nonlinear_activation: bool = True,
@@ -260,9 +261,9 @@ class MelGANDiscriminator(torch.nn.Module):
         channels: int = 16,
         max_downsample_channels: int = 1024,
         bias: bool = True,
-        downsample_scales=[4, 4, 4, 4],
+        downsample_scales: List[int] = [4, 4, 4, 4],
         nonlinear_activation: str = "LeakyReLU",
-        nonlinear_activation_params={"negative_slope": 0.2},
+        nonlinear_activation_params: Dict[str, float] = {"negative_slope": 0.2},
         pad: str = "ReflectionPad1d",
         pad_params={},
     ) -> None:
@@ -378,19 +379,19 @@ class MelGANMultiScaleDiscriminator(torch.nn.Module):
         scales: int = 3,
         downsample_pooling: str = "AvgPool1d",
         # follow the official implementation setting
-        downsample_pooling_params={
+        downsample_pooling_params: Dict[str, int] = {
             "kernel_size": 4,
             "stride": 2,
             "padding": 1,
             "count_include_pad": False,
         },
-        kernel_sizes=[5, 3],
+        kernel_sizes: List[int] = [5, 3],
         channels: int = 16,
         max_downsample_channels: int = 1024,
         bias: bool = True,
-        downsample_scales=[4, 4, 4, 4],
+        downsample_scales: List[int] = [4, 4, 4, 4],
         nonlinear_activation: str = "LeakyReLU",
-        nonlinear_activation_params={"negative_slope": 0.2},
+        nonlinear_activation_params: Dict[str, float] = {"negative_slope": 0.2},
         pad: str = "ReflectionPad1d",
         pad_params={},
         use_weight_norm: bool = True,

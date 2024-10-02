@@ -1,7 +1,7 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # All rights reserved.
 
-# pyre-unsafe
+# pyre-strict
 
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
@@ -41,6 +41,8 @@ from utils import remove_none_values_from_dict # @oss-only
 # @fb-only: from langtech.tts.vocoders.utils import remove_none_values_from_dict 
 from omegaconf import MISSING, OmegaConf
 from torch import Tensor
+from torch._tensor import Tensor
+from torch.distributions.categorical import Categorical
 from tqdm import tqdm
 
 
@@ -101,6 +103,7 @@ class WaveRNN(Vocoder):
         super().__init__(config)
 
         self.config = config
+        # pyre-fixme[4]: Attribute must be annotated.
         self.model = torch.nn.DataParallel(
             torchaudio.models.WaveRNN(
                 n_res_block=config.model.n_res_block,
@@ -283,6 +286,7 @@ class WaveRNN(Vocoder):
 
                 logits = self.model.module.fc3(x)
 
+                # pyre-fixme[6]: For 1st argument expected `Categorical` but got `str`.
                 x, output = self.get_x_from_dist("random", logits, output)
 
         output = torch.stack(output).transpose(0, 1)
@@ -309,7 +313,9 @@ class WaveRNN(Vocoder):
         gru_cell.bias_ih.data = gru.bias_ih_l0.data
         return gru_cell
 
-    def get_x_from_dist(self, distrib, logits, history=None):
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
+    def get_x_from_dist(self, distrib: Categorical, logits: Tensor, history=None):
         """
         Sampling from a given distribution
 
@@ -321,6 +327,8 @@ class WaveRNN(Vocoder):
         if distrib == "argmax":
             x = torch.argmax(logits, dim=1)
             history.append(x)
+            # pyre-fixme[16]: `float` has no attribute `unsqueeze`.
+            # pyre-fixme[6]: For 1st argument expected `int` but got `Tensor`.
             x = self.label_2_float(x, self.model.module.n_classes).unsqueeze(-1)
         elif distrib == "random":
             posterior = F.softmax(logits, dim=1)
@@ -332,6 +340,7 @@ class WaveRNN(Vocoder):
             raise RuntimeError("Unknown sampling mode - ", distrib)
         return x, history
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def label_2_float(self, x: int, n_classes) -> float:
         return 2 * x / (n_classes - 1.0) - 1.0
 

@@ -9,14 +9,22 @@
 """STFT-based Loss modules."""
 
 from distutils.version import LooseVersion
+from typing import Optional, Tuple
 
 import torch
 import torch.nn.functional as F
+from torch._tensor import Tensor
 
 is_pytorch_17plus: bool = LooseVersion(torch.__version__) >= LooseVersion("1.7")
 
 
-def stft(x, fft_size, hop_size, win_length, window):
+def stft(
+    x: Tensor,
+    fft_size: int,
+    hop_size: Optional[int],
+    win_length: Optional[int],
+    window: Optional[Tensor],
+) -> Tensor:
     """Perform STFT and convert to magnitude spectrogram.
 
     Args:
@@ -71,7 +79,7 @@ class LogSTFTMagnitudeLoss(torch.nn.Module):
         """Initilize los STFT magnitude loss module."""
         super(LogSTFTMagnitudeLoss, self).__init__()
 
-    def forward(self, x_mag, y_mag):
+    def forward(self, x_mag: Tensor, y_mag: Tensor) -> Tensor:
         """Calculate forward propagation.
 
         Args:
@@ -105,7 +113,7 @@ class STFTLoss(torch.nn.Module):
         # NOTE(kan-bayashi): Use register_buffer to fix #223
         self.register_buffer("window", getattr(torch, window)(win_length))
 
-    def forward(self, x, y):
+    def forward(self, x: Tensor, y: Tensor):
         """Calculate forward propagation.
 
         Args:
@@ -150,7 +158,7 @@ class MultiResolutionSTFTLoss(torch.nn.Module):
         for fs, ss, wl in zip(fft_sizes, hop_sizes, win_lengths):
             self.stft_losses += [STFTLoss(fs, ss, wl, window)]
 
-    def forward(self, x, y):
+    def forward(self, x, y) -> Tuple[float, float]:
         """Calculate forward propagation.
 
         Args:

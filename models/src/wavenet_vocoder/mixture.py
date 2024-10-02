@@ -9,6 +9,7 @@ from __future__ import absolute_import, print_function, with_statement
 
 import numpy as np
 import torch
+from torch._tensor import Tensor
 from torch.distributions import Normal
 from torch.nn import functional as F
 
@@ -108,7 +109,7 @@ def discretized_mix_logistic_loss(
         return -log_sum_exp(log_probs).unsqueeze(-1)
 
 
-def to_one_hot(tensor, n, fill_with: float = 1.0):
+def to_one_hot(tensor, n, fill_with: float = 1.0) -> Tensor:
     # we perform one hot encore with respect to the last axis
     one_hot = torch.FloatTensor(tensor.size() + (n,)).zero_()
     if tensor.is_cuda:
@@ -119,7 +120,7 @@ def to_one_hot(tensor, n, fill_with: float = 1.0):
 
 def sample_from_discretized_mix_logistic(
     y, log_scale_min: float = -7.0, clamp_log_scale: bool = False
-):
+) -> Tensor:
     """
     Sample from discretized mixture of logistic distributions
 
@@ -223,7 +224,7 @@ def mix_gaussian_loss(y_hat, y, log_scale_min: float = -7.0, reduce: bool = True
             return -log_sum_exp(log_probs).unsqueeze(-1)
 
 
-def sample_from_mix_gaussian(y, log_scale_min: float = -7.0):
+def sample_from_mix_gaussian(y, log_scale_min: float = -7.0) -> Tensor:
     """
     Sample from (discretized) mixture of gaussian distributions
     Args:

@@ -11,10 +11,12 @@ import torch
 from models.src.wavenet_vocoder import conv # @oss-only
 # @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder import conv 
 from torch import nn
+from torch._tensor import Tensor
 from torch.nn import functional as F
+from torch.nn.modules.sparse import Embedding
 
 
-def Conv1d(in_channels, out_channels, kernel_size, dropout=0, **kwargs):
+def Conv1d(in_channels, out_channels, kernel_size, dropout: int = 0, **kwargs):
     m = conv.Conv1d(in_channels, out_channels, kernel_size, **kwargs)
     nn.init.kaiming_normal_(m.weight, nonlinearity="relu")
     if m.bias is not None:
@@ -22,7 +24,9 @@ def Conv1d(in_channels, out_channels, kernel_size, dropout=0, **kwargs):
     return nn.utils.weight_norm(m)
 
 
-def Embedding(num_embeddings, embedding_dim, padding_idx, std=0.01):
+def Embedding(
+    num_embeddings, embedding_dim, padding_idx, std: float = 0.01
+) -> Embedding:
     m = nn.Embedding(num_embeddings, embedding_dim, padding_idx=padding_idx)
     m.weight.data.normal_(0, std)
     return m
@@ -36,7 +40,7 @@ def ConvTranspose2d(in_channels, out_channels, kernel_size, **kwargs):
     return nn.utils.weight_norm(m)
 
 
-def Conv1d1x1(in_channels, out_channels, bias=True):
+def Conv1d1x1(in_channels, out_channels, bias: bool = True):
     """1-by-1 convolution layer"""
     return Conv1d(
         in_channels, out_channels, kernel_size=1, padding=0, dilation=1, bias=bias
@@ -77,16 +81,16 @@ class ResidualConv1dGLU(nn.Module):
         gate_channels,
         kernel_size,
         skip_out_channels=None,
-        cin_channels=-1,
-        gin_channels=-1,
-        dropout=1 - 0.95,
+        cin_channels: int = -1,
+        gin_channels: int = -1,
+        dropout: float = 1 - 0.95,
         padding=None,
-        dilation=1,
-        causal=True,
-        bias=True,
+        dilation: int = 1,
+        causal: bool = True,
+        bias: bool = True,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         super(ResidualConv1dGLU, self).__init__()
         self.dropout = dropout
         if skip_out_channels is None:
@@ -127,13 +131,13 @@ class ResidualConv1dGLU(nn.Module):
         self.conv1x1_out = Conv1d1x1(gate_out_channels, residual_channels, bias=bias)
         self.conv1x1_skip = Conv1d1x1(gate_out_channels, skip_out_channels, bias=bias)
 
-    def forward(self, x, c=None, g=None):
+    def forward(self, x: Tensor, c=None, g=None):
         return self._forward(x, c, g, False)
 
-    def incremental_forward(self, x, c=None, g=None):
+    def incremental_forward(self, x: Tensor, c=None, g=None):
         return self._forward(x, c, g, True)
 
-    def _forward(self, x, c, g, is_incremental):
+    def _forward(self, x: Tensor, c, g, is_incremental):
         """Forward
 
         Args:
@@ -183,7 +187,7 @@ class ResidualConv1dGLU(nn.Module):
         x = (x + residual) * math.sqrt(0.5)
         return x, s
 
-    def clear_buffer(self):
+    def clear_buffer(self) -> None:
         for c in [
             self.conv,
             self.conv1x1_out,

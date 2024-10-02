@@ -8,6 +8,8 @@
 
 """Residual stack module in MelGAN."""
 
+from typing import Dict
+
 import torch
 
 from models.src.parallel_wavegan.layers.causal_conv import ( # @oss-only
@@ -26,7 +28,7 @@ class ResidualStack(torch.nn.Module):
         dilation: int = 1,
         bias: bool = True,
         nonlinear_activation: str = "LeakyReLU",
-        nonlinear_activation_params={"negative_slope": 0.2},
+        nonlinear_activation_params: Dict[str, float] = {"negative_slope": 0.2},
         pad: str = "ReflectionPad1d",
         pad_params={},
         use_causal_conv: bool = False,

@@ -12,6 +12,7 @@ import numpy as np
 import scipy
 import torch
 import torch.nn.functional as F
+from torch._tensor import Tensor
 
 
 def design_prototype_filter(
@@ -128,7 +129,7 @@ class PQMF(torch.nn.Module):
         # keep padding info
         self.pad_fn = torch.nn.ConstantPad1d(taps // 2, 0.0)
 
-    def analysis(self, x):
+    def analysis(self, x: Tensor) -> Tensor:
         """Analysis with PQMF.
 
         Args:
@@ -141,7 +142,7 @@ class PQMF(torch.nn.Module):
         x = F.conv1d(self.pad_fn(x), self.analysis_filter)
         return F.conv1d(x, self.updown_filter, stride=self.subbands)
 
-    def synthesis(self, x):
+    def synthesis(self, x: Tensor) -> Tensor:
         """Synthesis with PQMF.
 
         Args:

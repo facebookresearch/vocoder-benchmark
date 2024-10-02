@@ -1,7 +1,7 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # All rights reserved.
 
-# pyre-unsafe
+# pyre-strict
 
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
@@ -148,6 +148,7 @@ class WaveNet(Vocoder):
         self.config = config
         self.scalar_input: bool = is_scalar_input(config.model.input_type)
 
+        # pyre-fixme[4]: Attribute must be annotated.
         self.model = torch.nn.DataParallel(
             wavenet.WaveNet(
                 out_channels=config.model.out_channels,
@@ -163,6 +164,8 @@ class WaveNet(Vocoder):
                 kernel_size=config.model.kernel_size,
                 cin_pad=config.model.cin_pad,
                 upsample_conditional_features=config.model.upsample_conditional_features,
+                # pyre-fixme[6]: For 14th argument expected `Dict[str, List[int]]`
+                #  but got `UpsampleConfig`.
                 upsample_params=config.model.upsample_params,
                 scalar_input=self.scalar_input,
                 output_distribution=config.model.output_distribution,
@@ -420,9 +423,12 @@ class WaveNet(Vocoder):
         history.append(x.data)
         return history[-1], history
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def label_2_float(self, x: int, n_classes) -> float:
         return 2 * x / (n_classes - 1.0) - 1.0
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def float_2_label(self, x, n_classes):
         return (x + 1.0) * (n_classes - 1) / 2
 
