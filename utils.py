@@ -47,7 +47,10 @@ def hard_exit(code: int = 1) -> None:
 
 
 def write_audio(
-    filename: str, data: Union["torch.Tensor", np.ndarray], sample_rate: int
+    filename: str,
+    # pyre-fixme[24]: Generic type `np.ndarray` expects 2 type parameters.
+    data: Union["torch.Tensor", np.ndarray],
+    sample_rate: int,
 ) -> None:
     """
     Write audio to disk.
@@ -96,6 +99,7 @@ def remove_none_values_from_dict(config_dict):
     return config_dict
 
 
+# pyre-fixme[24]: Generic type `np.ndarray` expects 2 type parameters.
 def read_audio(filename: str, sample_rate: int) -> Tuple[np.ndarray, int]:
     """
     Read audio from disk.

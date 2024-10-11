@@ -522,4 +522,6 @@ class WaveNet(Vocoder):
                 )
                 waveforms = f(waveforms)
 
+        # pyre-fixme[7]: Expected `List[float]` but got `ndarray[typing.Any,
+        #  dtype[typing.Any]]`.
         return stats

@@ -474,4 +474,6 @@ class WaveRNN(Vocoder):
         )
         x = model.fc3(x)
 
+        # pyre-fixme[7]: Expected `List[float]` but got `ndarray[typing.Any,
+        #  dtype[typing.Any]]`.
         return stats
