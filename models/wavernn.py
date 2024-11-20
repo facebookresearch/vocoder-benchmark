@@ -306,8 +306,14 @@ class WaveRNN(Vocoder):
         Returns:
           The modified GRU cell.
         """
+        # pyre-fixme[6]: For 1st argument expected `int` but got `Union[Tensor,
+        #  Module]`.
+        # pyre-fixme[6]: For 2nd argument expected `int` but got `Union[Tensor,
+        #  Module]`.
         gru_cell = torch.nn.GRUCell(gru.input_size, gru.hidden_size)
+        # pyre-fixme[8]: Attribute has type `Tensor`; used as `Union[Tensor, Module]`.
         gru_cell.weight_hh.data = gru.weight_hh_l0.data
+        # pyre-fixme[8]: Attribute has type `Tensor`; used as `Union[Tensor, Module]`.
         gru_cell.weight_ih.data = gru.weight_ih_l0.data
         gru_cell.bias_hh.data = gru.bias_hh_l0.data
         gru_cell.bias_ih.data = gru.bias_ih_l0.data

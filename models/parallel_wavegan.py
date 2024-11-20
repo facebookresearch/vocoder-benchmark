@@ -408,6 +408,7 @@ class ParallelWaveGAN(Vocoder):
         # reconstruct the signal from multi-band signal
         if self.config.model.generator_params.out_channels > 1:
             y_mb_ = y_
+            # pyre-fixme[29]: `Union[Tensor, Module]` is not a function.
             y_ = self.criterion["pqmf"].synthesis(y_mb_)
 
         # multi-resolution sfft loss
@@ -419,6 +420,7 @@ class ParallelWaveGAN(Vocoder):
         # subband multi-resolution stft loss
         if self.config.model.use_subband_stft_loss:
             gen_loss *= 0.5  # for balancing with subband stft loss
+            # pyre-fixme[29]: `Union[Tensor, Module]` is not a function.
             y_mb = self.criterion["pqmf"].analysis(y)
             y_mb = y_mb.view(-1, y_mb.size(2))  # (B, C, T) -> (B x C, T)
             y_mb_ = y_mb_.view(-1, y_mb_.size(2))  # (B, C, T) -> (B x C, T)
@@ -486,6 +488,7 @@ class ParallelWaveGAN(Vocoder):
             with torch.no_grad():
                 y_ = self.model["generator"](*x)
             if self.config.model.generator_params.out_channels > 1:
+                # pyre-fixme[29]: `Union[Tensor, Module]` is not a function.
                 y_ = self.criterion["pqmf"].synthesis(y_)
 
             # discriminator loss
@@ -558,6 +561,7 @@ class ParallelWaveGAN(Vocoder):
         y_ = self.model["generator"](*x)
         if self.config.model.generator_params.out_channels > 1:
             y_mb_ = y_
+            # pyre-fixme[29]: `Union[Tensor, Module]` is not a function.
             y_ = self.criterion["pqmf"].synthesis(y_mb_)
 
         # multi-resolution stft loss
@@ -567,6 +571,7 @@ class ParallelWaveGAN(Vocoder):
         # subband multi-resolution stft loss
         if self.config.model.use_subband_stft_loss:
             aux_loss *= 0.5  # for balancing with subband stft loss
+            # pyre-fixme[29]: `Union[Tensor, Module]` is not a function.
             y_mb = self.criterion["pqmf"].analysis(y)
             y_mb = y_mb.view(-1, y_mb.size(2))  # (B, C, T) -> (B x C, T)
             y_mb_ = y_mb_.view(-1, y_mb_.size(2))  # (B, C, T) -> (B x C, T)
