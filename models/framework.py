@@ -881,7 +881,7 @@ def compute_evaluation_metrics(
 
         wav_gen = model.generate(spectrograms)
 
-        spectrograms_gen = mel(wav_gen.unsqueeze(0))
+        spectrograms_gen = mel(wav_gen.unsqueeze(0))[..., :spectrograms.shape[-1]]
 
         write_audio(
             os.path.join(path, "..", "waveforms", "%05d.wav" % (i + 1)),

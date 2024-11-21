@@ -13,26 +13,28 @@ from typing import List, Type
 
 import click
 
-import datasets as datasets # @oss-only
-# @fb-only: import langtech.tts.vocoders.datasets as datasets 
+import datasets as datasets  # @oss-only
+# @fb-only: import langtech.tts.vocoders.datasets as datasets
 
-import models.diffwave as diffwave # @oss-only
-# @fb-only: import langtech.tts.vocoders.models.diffwave as diffwave 
+import models.diffwave as diffwave  # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.diffwave as diffwave
 
-import models.framework as framework # @oss-only
-# @fb-only: import langtech.tts.vocoders.models.framework as framework 
+import models.framework as framework  # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.framework as framework
 
-import models.parallel_wavegan as parallel_wavegan # @oss-only
-# @fb-only: import langtech.tts.vocoders.models.parallel_wavegan as parallel_wavegan 
+import models.parallel_wavegan as parallel_wavegan  # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.parallel_wavegan as parallel_wavegan
 
-import models.wavegrad as wavegrad # @oss-only
-# @fb-only: import langtech.tts.vocoders.models.wavegrad as wavegrad 
+import models.wavegrad as wavegrad  # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.wavegrad as wavegrad
 
-import models.wavenet as wavenet # @oss-only
-# @fb-only: import langtech.tts.vocoders.models.wavenet as wavenet 
+import models.wavenet as wavenet  # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.wavenet as wavenet
 
-import models.wavernn as wavernn # @oss-only
-# @fb-only: import langtech.tts.vocoders.models.wavernn as wavernn 
+import models.wavernn as wavernn  # @oss-only
+# @fb-only: import langtech.tts.vocoders.models.wavernn as wavernn
+
+import models.waveflow as waveflow  # @oss-only
 
 
 # List the models available in this repository.
@@ -42,6 +44,7 @@ MODELS: List[Type[framework.Vocoder]] = [
     wavenet.WaveNet,
     diffwave.DiffWave,
     parallel_wavegan.ParallelWaveGAN,
+    waveflow.WaveFlow,
 ]
 
 

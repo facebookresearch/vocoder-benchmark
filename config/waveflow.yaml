@@ -1,0 +1,23 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+# All rights reserved.
+
+# This source code is licensed under the license found in the
+# LICENSE file in the root directory of this source tree.
+dataset:
+  batch_size: 5
+  frames_per_clip: 58
+  clips_per_utterance: 10
+  padding_frames: 0
+  dataloader_num_workers: 4
+  dataloader_prefetch_factor: 4
+
+model:
+  flows: 8
+  n_group: 64
+  dilation_channels: 64
+  residual_channels: 64
+  skip_channels: 64
+  learning_rate: 2.0e-4
+  n_iterations: 1000000
+  training_sigma: 0.7
+  evaluate_sigma: 0.6
