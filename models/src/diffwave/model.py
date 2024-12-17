@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -32,6 +35,8 @@ Linear = nn.Linear
 ConvTranspose2d = nn.ConvTranspose2d
 
 
+# pyre-fixme[2]: Parameter must be annotated.
+# pyre-fixme[11]: Annotation `Conv1d` is not defined as a type.
 def Conv1d(*args, **kwargs) -> Conv1d:
     layer = nn.Conv1d(*args, **kwargs)
     nn.init.kaiming_normal_(layer.weight)
@@ -44,6 +49,7 @@ def silu(x: Tensor) -> Tensor:
 
 
 class DiffusionEmbedding(nn.Module):
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, max_steps) -> None:
         super().__init__()
         self.register_buffer(
@@ -52,6 +58,7 @@ class DiffusionEmbedding(nn.Module):
         self.projection1 = Linear(128, 512)
         self.projection2 = Linear(512, 512)
 
+    # pyre-fixme[3]: Return type must be annotated.
     def forward(self, diffusion_step: Tensor):
         if diffusion_step.dtype in [torch.int32, torch.int64]:
             x = self.embedding[diffusion_step]
@@ -70,6 +77,7 @@ class DiffusionEmbedding(nn.Module):
         high = self.embedding[high_idx]
         return low + (high - low) * (t - low_idx)
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def _build_embedding(self, max_steps) -> Tensor:
         steps = torch.arange(max_steps).unsqueeze(1)  # [T,1]
         dims = torch.arange(64).unsqueeze(0)  # [1,64]
@@ -79,9 +87,22 @@ class DiffusionEmbedding(nn.Module):
 
 
 class SpectrogramUpsampler(nn.Module):
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, n_mels) -> None:
         super().__init__()
+        # pyre-fixme[6]: For 3rd argument expected `Union[Tuple[int, int], int]` but
+        #  got `List[int]`.
+        # pyre-fixme[6]: For 4th argument expected `Union[Tuple[int, int], int]` but
+        #  got `List[int]`.
+        # pyre-fixme[6]: For 5th argument expected `Union[Tuple[int, int], int]` but
+        #  got `List[int]`.
         self.conv1 = ConvTranspose2d(1, 1, [3, 20], stride=[1, 10], padding=[1, 5])
+        # pyre-fixme[6]: For 3rd argument expected `Union[Tuple[int, int], int]` but
+        #  got `List[int]`.
+        # pyre-fixme[6]: For 4th argument expected `Union[Tuple[int, int], int]` but
+        #  got `List[int]`.
+        # pyre-fixme[6]: For 5th argument expected `Union[Tuple[int, int], int]` but
+        #  got `List[int]`.
         self.conv2 = ConvTranspose2d(1, 1, [3, 60], stride=[1, 30], padding=[1, 15])
 
     def forward(self, x: Tensor) -> Tensor:
@@ -95,8 +116,10 @@ class SpectrogramUpsampler(nn.Module):
 
 
 class ResidualBlock(nn.Module):
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, n_mels, residual_channels: int, dilation) -> None:
         super().__init__()
+        # pyre-fixme[4]: Attribute must be annotated.
         self.dilated_conv = Conv1d(
             residual_channels,
             2 * residual_channels,
@@ -105,9 +128,13 @@ class ResidualBlock(nn.Module):
             dilation=dilation,
         )
         self.diffusion_projection = Linear(512, residual_channels)
+        # pyre-fixme[4]: Attribute must be annotated.
         self.conditioner_projection = Conv1d(n_mels, 2 * residual_channels, 1)
+        # pyre-fixme[4]: Attribute must be annotated.
         self.output_projection = Conv1d(residual_channels, 2 * residual_channels, 1)
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x, conditioner, diffusion_step):
         diffusion_step = self.diffusion_projection(diffusion_step).unsqueeze(-1)
         conditioner = self.conditioner_projection(conditioner)
@@ -124,9 +151,12 @@ class ResidualBlock(nn.Module):
 
 
 class DiffWave(nn.Module):
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, params) -> None:
         super().__init__()
+        # pyre-fixme[4]: Attribute must be annotated.
         self.params = params
+        # pyre-fixme[4]: Attribute must be annotated.
         self.input_projection = Conv1d(1, params.residual_channels, 1)
         self.diffusion_embedding = DiffusionEmbedding(len(params.noise_schedule))
         self.spectrogram_upsampler = SpectrogramUpsampler(MEL_NUM_BANDS)
@@ -140,12 +170,16 @@ class DiffWave(nn.Module):
                 for i in range(params.residual_layers)
             ]
         )
+        # pyre-fixme[4]: Attribute must be annotated.
         self.skip_projection = Conv1d(
             params.residual_channels, params.residual_channels, 1
         )
+        # pyre-fixme[4]: Attribute must be annotated.
         self.output_projection = Conv1d(params.residual_channels, 1, 1)
         nn.init.zeros_(self.output_projection.weight)
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, audio, spectrogram, diffusion_step):
         x = audio.unsqueeze(1)
         x = self.input_projection(x)

@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -18,6 +21,7 @@ from models.src.wavegrad.layers import ( # @oss-only
 
 
 class ConvolutionBlock(BaseModule):
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, in_channels, out_channels, dilation) -> None:
         super(ConvolutionBlock, self).__init__()
         self.leaky_relu = torch.nn.LeakyReLU(0.2)
@@ -30,6 +34,8 @@ class ConvolutionBlock(BaseModule):
             dilation=dilation,
         )
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x):
         outputs = self.leaky_relu(x)
         outputs = self.convolution(outputs)
@@ -37,6 +43,7 @@ class ConvolutionBlock(BaseModule):
 
 
 class DownsamplingBlock(BaseModule):
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, in_channels, out_channels, factor, dilations) -> None:
         super(DownsamplingBlock, self).__init__()
         in_sizes = [in_channels] + [out_channels for _ in range(len(dilations) - 1)]
@@ -76,6 +83,8 @@ class DownsamplingBlock(BaseModule):
             ]
         )
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x):
         outputs = self.main_branch(x)
         outputs = outputs + self.residual_branch(x)

@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -100,6 +103,8 @@ class ParallelWaveGANGenerator(torch.nn.Module):
         # define conv + upsampling network
         if upsample_conditional_features:
             upsample_params.update(
+                # pyre-fixme[6]: For 1st argument expected
+                #  `SupportsKeysAndGetItem[str, List[int]]` but got `Dict[str, bool]`.
                 {
                     "use_causal_conv": use_causal_conv,
                 }
@@ -107,23 +112,39 @@ class ParallelWaveGANGenerator(torch.nn.Module):
             if upsample_net == "MelGANGenerator":
                 assert aux_context_window == 0
                 upsample_params.update(
+                    # pyre-fixme[6]: For 1st argument expected
+                    #  `SupportsKeysAndGetItem[str, List[int]]` but got `Dict[str,
+                    #  bool]`.
                     {
                         "use_weight_norm": False,  # not to apply twice
                         "use_final_nonlinear_activation": False,
                     }
                 )
+                # pyre-fixme[4]: Attribute must be annotated.
                 self.upsample_net = getattr(parallel_wavegan.models, upsample_net)(
+                    # pyre-fixme[6]: For 1st argument expected `Dict[str, float]`
+                    #  but got `List[int]`.
+                    # pyre-fixme[6]: For 1st argument expected `bool` but got
+                    #  `List[int]`.
+                    # pyre-fixme[6]: For 1st argument expected `int` but got
+                    #  `List[int]`.
+                    # pyre-fixme[6]: For 1st argument expected `str` but got
+                    #  `List[int]`.
                     **upsample_params
                 )
             else:
                 if upsample_net == "ConvInUpsampleNetwork":
                     upsample_params.update(
+                        # pyre-fixme[6]: For 1st argument expected
+                        #  `SupportsKeysAndGetItem[str, List[int]]` but got `Dict[str,
+                        #  int]`.
                         {
                             "aux_channels": aux_channels,
                             "aux_context_window": aux_context_window,
                         }
                     )
                 self.upsample_net = getattr(upsample, upsample_net)(**upsample_params)
+            # pyre-fixme[4]: Attribute must be annotated.
             self.upsample_factor = np.prod(upsample_params["upsample_scales"])
         else:
             self.upsample_net = None
@@ -160,6 +181,7 @@ class ParallelWaveGANGenerator(torch.nn.Module):
         if use_weight_norm:
             self.apply_weight_norm()
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x: float, c) -> float:
         """Calculate forward propagation.
 
@@ -174,6 +196,7 @@ class ParallelWaveGANGenerator(torch.nn.Module):
         # perform upsampling
         if c is not None and self.upsample_net is not None:
             c = self.upsample_net(c)
+            # pyre-fixme[16]: `float` has no attribute `size`.
             assert c.size(-1) == x.size(-1)
 
         # encode to hidden representation
@@ -194,6 +217,8 @@ class ParallelWaveGANGenerator(torch.nn.Module):
     def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def _remove_weight_norm(m):
             try:
                 logging.debug(f"Weight norm is removed from {m}.")
@@ -206,6 +231,8 @@ class ParallelWaveGANGenerator(torch.nn.Module):
     def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def _apply_weight_norm(m):
             if isinstance(m, torch.nn.Conv1d) or isinstance(m, torch.nn.Conv2d):
                 torch.nn.utils.weight_norm(m)
@@ -214,6 +241,8 @@ class ParallelWaveGANGenerator(torch.nn.Module):
         self.apply(_apply_weight_norm)
 
     @staticmethod
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def _get_receptive_field_size(layers, stacks, kernel_size, dilation=lambda x: 2**x):
         assert layers % stacks == 0
         layers_per_cycle = layers // stacks
@@ -221,12 +250,15 @@ class ParallelWaveGANGenerator(torch.nn.Module):
         return (kernel_size - 1) * sum(dilations) + 1
 
     @property
+    # pyre-fixme[3]: Return type must be annotated.
     def receptive_field_size(self):
         """Return receptive field size."""
         return self._get_receptive_field_size(
             self.layers, self.stacks, self.kernel_size
         )
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def inference(self, c=None, x=None):
         """Perform inference.
 
@@ -256,6 +288,8 @@ class ParallelWaveGANGenerator(torch.nn.Module):
                 )
             c = c.transpose(1, 0).unsqueeze(0)
             c = torch.nn.ReplicationPad1d(self.aux_context_window)(c)
+        # pyre-fixme[16]: `float` has no attribute `squeeze`.
+        # pyre-fixme[6]: For 1st argument expected `float` but got `Tensor`.
         return self.forward(x, c).squeeze(0).transpose(1, 0)
 
 
@@ -332,6 +366,8 @@ class ParallelWaveGANDiscriminator(torch.nn.Module):
         if use_weight_norm:
             self.apply_weight_norm()
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x):
         """Calculate forward propagation.
 
@@ -349,6 +385,8 @@ class ParallelWaveGANDiscriminator(torch.nn.Module):
     def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def _apply_weight_norm(m):
             if isinstance(m, torch.nn.Conv1d) or isinstance(m, torch.nn.Conv2d):
                 torch.nn.utils.weight_norm(m)
@@ -359,6 +397,8 @@ class ParallelWaveGANDiscriminator(torch.nn.Module):
     def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def _remove_weight_norm(m):
             try:
                 logging.debug(f"Weight norm is removed from {m}.")
@@ -491,6 +531,8 @@ class ResidualParallelWaveGANDiscriminator(torch.nn.Module):
     def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def _apply_weight_norm(m):
             if isinstance(m, torch.nn.Conv1d) or isinstance(m, torch.nn.Conv2d):
                 torch.nn.utils.weight_norm(m)
@@ -501,6 +543,8 @@ class ResidualParallelWaveGANDiscriminator(torch.nn.Module):
     def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def _remove_weight_norm(m):
             try:
                 logging.debug(f"Weight norm is removed from {m}.")

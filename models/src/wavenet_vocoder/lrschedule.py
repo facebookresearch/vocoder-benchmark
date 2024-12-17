@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -5,6 +8,8 @@ import numpy as np
 
 
 # https://github.com/tensorflow/tensor2tensor/issues/280#issuecomment-339110329
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def noam_learning_rate_decay(init_lr, global_step, warmup_steps: float = 4000):
     # Noam scheme from tensor2tensor:
     warmup_steps = float(warmup_steps)
@@ -13,12 +18,20 @@ def noam_learning_rate_decay(init_lr, global_step, warmup_steps: float = 4000):
     return lr
 
 
+# pyre-fixme[3]: Return type must be annotated.
 def step_learning_rate_decay(
-    init_lr, global_step, anneal_rate: float = 0.98, anneal_interval: int = 30000
+    # pyre-fixme[2]: Parameter must be annotated.
+    init_lr,
+    # pyre-fixme[2]: Parameter must be annotated.
+    global_step,
+    anneal_rate: float = 0.98,
+    anneal_interval: int = 30000,
 ):
     return init_lr * anneal_rate ** (global_step // anneal_interval)
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def cyclic_cosine_annealing(init_lr, global_step, T, M):
     """Cyclic cosine annealing
     https://arxiv.org/pdf/1704.00109.pdf

@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -50,6 +53,8 @@ PARAM_RE: re.Pattern[str] = re.compile(
 )
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def _parse_fail(name, var_type, value, values):
     """Helper function for raising a value error for bad assignment."""
     raise ValueError(
@@ -58,13 +63,26 @@ def _parse_fail(name, var_type, value, values):
     )
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def _reuse_fail(name, values):
     """Helper function for raising a value error for reuse of name."""
     raise ValueError("Multiple assignments to variable '%s' in %s" % (name, values))
 
 
 def _process_scalar_value(
-    name, parse_fn, var_type, m_dict, values, results_dictionary
+    # pyre-fixme[2]: Parameter must be annotated.
+    name,
+    # pyre-fixme[2]: Parameter must be annotated.
+    parse_fn,
+    # pyre-fixme[2]: Parameter must be annotated.
+    var_type,
+    # pyre-fixme[2]: Parameter must be annotated.
+    m_dict,
+    # pyre-fixme[2]: Parameter must be annotated.
+    values,
+    # pyre-fixme[2]: Parameter must be annotated.
+    results_dictionary,
 ) -> None:
     """Update results_dictionary with a scalar value.
 
@@ -96,6 +114,7 @@ def _process_scalar_value(
     if not m_dict["index"]:
         if name in results_dictionary:
             _reuse_fail(name, values)
+        # pyre-fixme[61]: `parsed_value` is undefined, or not always defined.
         results_dictionary[name] = parsed_value
     else:
         if name in results_dictionary:
@@ -110,11 +129,23 @@ def _process_scalar_value(
         # Make sure the index position hasn't already been assigned a value.
         if index in results_dictionary[name]:
             _reuse_fail("{}[{}]".format(name, index), values)
+        # pyre-fixme[61]: `parsed_value` is undefined, or not always defined.
         results_dictionary[name][index] = parsed_value
 
 
 def _process_list_value(
-    name, parse_fn, var_type, m_dict, values, results_dictionary
+    # pyre-fixme[2]: Parameter must be annotated.
+    name,
+    # pyre-fixme[2]: Parameter must be annotated.
+    parse_fn,
+    # pyre-fixme[2]: Parameter must be annotated.
+    var_type,
+    # pyre-fixme[2]: Parameter must be annotated.
+    m_dict,
+    # pyre-fixme[2]: Parameter must be annotated.
+    values,
+    # pyre-fixme[2]: Parameter must be annotated.
+    results_dictionary,
 ) -> None:
     """Update results_dictionary from a list of values.
 
@@ -148,6 +179,8 @@ def _process_list_value(
         _parse_fail(name, var_type, m_dict["vals"], values)
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def _cast_to_type_if_compatible(name, param_type, value):
     """Cast hparam to the provided type, if compatible.
 
@@ -199,6 +232,8 @@ def _cast_to_type_if_compatible(name, param_type, value):
     return param_type(value)
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def parse_values(values, type_map):
     """Parses hyperparameter values from a string into a python map.
 
@@ -277,7 +312,11 @@ def parse_values(values, type_map):
 
         # Set up correct parsing function (depending on whether type_ is a bool)
         if type_ == bool:
-
+            # pyre-fixme[53]: Captured variable `name` is not annotated.
+            # pyre-fixme[53]: Captured variable `type_` is not annotated.
+            # pyre-fixme[53]: Captured variable `values` is not annotated.
+            # pyre-fixme[3]: Return type must be annotated.
+            # pyre-fixme[2]: Parameter must be annotated.
             def parse_bool(value):
                 if value in ["true", "True"]:
                     return True
@@ -379,6 +418,7 @@ class HParams:
 
     _HAS_DYNAMIC_ATTRIBUTES = True  # Required for pytype checks.
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, hparam_def=None, model_structure=None, **kwargs) -> None:
         """Create an instance of `HParams` from keyword arguments.
 
@@ -424,7 +464,9 @@ class HParams:
         # The type value is the type of the parameter for scalar hyperparameters,
         # or the type of the list elements for multidimensional hyperparameters.
         # The bool value is True if the value is a list, False otherwise.
+        # pyre-fixme[4]: Attribute must be annotated.
         self._hparam_types = {}
+        # pyre-fixme[4]: Attribute must be annotated.
         self._model_structure = model_structure
         if hparam_def:
             ##       self._init_from_proto(hparam_def)
@@ -471,6 +513,7 @@ class HParams:
     ##         else:
     ##           self.add_hparam(name, [v for v in getattr(value, kind).value])
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def add_hparam(self, name: str, value) -> None:
         """Adds {name, value} pair to hyperparameters.
 
@@ -497,6 +540,7 @@ class HParams:
             self._hparam_types[name] = (type(value), False)
         setattr(self, name, value)
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def set_hparam(self, name: str, value) -> None:
         """Set the value of an existing hyperparameter.
 
@@ -538,6 +582,7 @@ class HParams:
             delattr(self, name)
             del self._hparam_types[name]
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def parse(self, values) -> "HParams":
         """Override hyperparameter values, parsing new values from a string.
 
@@ -561,6 +606,7 @@ class HParams:
         values_map = parse_values(values, type_map)
         return self.override_from_dict(values_map)
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def override_from_dict(self, values_dict) -> "HParams":
         """Override hyperparameter values, parsing new values from a dictionary.
 
@@ -578,13 +624,16 @@ class HParams:
         return self
 
     ##   @deprecation.deprecated(None, 'Use `override_from_dict`.')
+    # pyre-fixme[2]: Parameter must be annotated.
     def set_from_map(self, values_map) -> "HParams":
         """DEPRECATED. Use override_from_dict."""
         return self.override_from_dict(values_dict=values_map)
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def set_model_structure(self, model_structure) -> None:
         self._model_structure = model_structure
 
+    # pyre-fixme[3]: Return type must be annotated.
     def get_model_structure(self):
         return self._model_structure
 
@@ -627,6 +676,7 @@ class HParams:
         values_map = json.loads(values_json)
         return self.override_from_dict(values_map)
 
+    # pyre-fixme[3]: Return type must be annotated.
     def values(self):
         """Return the hyperparameter values as a Python dictionary.
 
@@ -636,6 +686,8 @@ class HParams:
         """
         return {n: getattr(self, n) for n in self._hparam_types.keys()}
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def get(self, key, default=None):
         """Returns the value of `key` if it exists, else `default`."""
         if key in self._hparam_types:
@@ -665,6 +717,8 @@ class HParams:
 
         return default
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def __contains__(self, key):
         return key in self._hparam_types
 
@@ -675,6 +729,7 @@ class HParams:
         return "%s(%s)" % (type(self).__name__, self.__str__())
 
     @staticmethod
+    # pyre-fixme[2]: Parameter must be annotated.
     def _get_kind_name(param_type, is_list) -> str:
         """Returns the field name given parameter type and is_list.
 

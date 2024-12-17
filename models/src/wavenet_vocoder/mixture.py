@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 # coding: utf-8
@@ -14,6 +17,8 @@ from torch.distributions import Normal
 from torch.nn import functional as F
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def log_sum_exp(x):
     """numerically stable log_sum_exp implementation that prevents overflow"""
     # TF ordering
@@ -23,8 +28,15 @@ def log_sum_exp(x):
     return m + torch.log(torch.sum(torch.exp(x - m2), dim=axis))
 
 
+# pyre-fixme[3]: Return type must be annotated.
 def discretized_mix_logistic_loss(
-    y_hat, y, num_classes: int = 256, log_scale_min: float = -7.0, reduce: bool = True
+    # pyre-fixme[2]: Parameter must be annotated.
+    y_hat,
+    # pyre-fixme[2]: Parameter must be annotated.
+    y,
+    num_classes: int = 256,
+    log_scale_min: float = -7.0,
+    reduce: bool = True,
 ):
     """Discretized mixture of logistic distributions loss
 
@@ -109,6 +121,7 @@ def discretized_mix_logistic_loss(
         return -log_sum_exp(log_probs).unsqueeze(-1)
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def to_one_hot(tensor, n, fill_with: float = 1.0) -> Tensor:
     # we perform one hot encore with respect to the last axis
     one_hot = torch.FloatTensor(tensor.size() + (n,)).zero_()
@@ -119,7 +132,10 @@ def to_one_hot(tensor, n, fill_with: float = 1.0) -> Tensor:
 
 
 def sample_from_discretized_mix_logistic(
-    y, log_scale_min: float = -7.0, clamp_log_scale: bool = False
+    # pyre-fixme[2]: Parameter must be annotated.
+    y,
+    log_scale_min: float = -7.0,
+    clamp_log_scale: bool = False,
 ) -> Tensor:
     """
     Sample from discretized mixture of logistic distributions
@@ -162,6 +178,8 @@ def sample_from_discretized_mix_logistic(
 
 # we can easily define discretized version of the gaussian loss, however,
 # use continuous version as same as the https://clarinet-demo.github.io/
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def mix_gaussian_loss(y_hat, y, log_scale_min: float = -7.0, reduce: bool = True):
     """Mixture of continuous gaussian distributions loss
 
@@ -224,6 +242,7 @@ def mix_gaussian_loss(y_hat, y, log_scale_min: float = -7.0, reduce: bool = True
             return -log_sum_exp(log_probs).unsqueeze(-1)
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def sample_from_mix_gaussian(y, log_scale_min: float = -7.0) -> Tensor:
     """
     Sample from (discretized) mixture of gaussian distributions
@@ -266,7 +285,9 @@ def sample_from_mix_gaussian(y, log_scale_min: float = -7.0) -> Tensor:
         elif C == 3:
             means, log_scales = y[:, :, 1], y[:, :, 2]
 
+    # pyre-fixme[61]: `log_scales` is undefined, or not always defined.
     scales = torch.exp(log_scales)
+    # pyre-fixme[61]: `means` is undefined, or not always defined.
     dist = Normal(loc=means, scale=scales)
     x = dist.sample()
 

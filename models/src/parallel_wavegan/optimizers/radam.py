@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -29,6 +32,7 @@ class RAdam(Optimizer):
     ) -> None:
         """Initilize RAdam optimizer."""
         defaults = dict(lr=lr, betas=betas, eps=eps, weight_decay=weight_decay)
+        # pyre-fixme[4]: Attribute must be annotated.
         self.buffer = [[None, None, None] for ind in range(10)]
         super(RAdam, self).__init__(params, defaults)
 

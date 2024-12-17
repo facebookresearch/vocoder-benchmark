@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 # coding: utf-8
@@ -9,18 +12,25 @@ from torch.nn import functional as F
 
 
 class Stretch2d(nn.Module):
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, x_scale, y_scale, mode: str = "nearest") -> None:
         super(Stretch2d, self).__init__()
+        # pyre-fixme[4]: Attribute must be annotated.
         self.x_scale = x_scale
+        # pyre-fixme[4]: Attribute must be annotated.
         self.y_scale = y_scale
         self.mode = mode
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x):
         return F.interpolate(
             x, scale_factor=(self.y_scale, self.x_scale), mode=self.mode
         )
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def _get_activation(upsample_activation):
     nonlinear = getattr(nn, upsample_activation)
     return nonlinear
@@ -29,8 +39,10 @@ def _get_activation(upsample_activation):
 class UpsampleNetwork(nn.Module):
     def __init__(
         self,
+        # pyre-fixme[2]: Parameter must be annotated.
         upsample_scales,
         upsample_activation: str = "none",
+        # pyre-fixme[2]: Parameter must be annotated.
         upsample_activation_params={},
         mode: str = "nearest",
         freq_axis_kernel_size: int = 1,
@@ -40,6 +52,7 @@ class UpsampleNetwork(nn.Module):
         super(UpsampleNetwork, self).__init__()
         self.up_layers = nn.ModuleList()
         total_scale = np.prod(upsample_scales)
+        # pyre-fixme[4]: Attribute must be annotated.
         self.indent = cin_pad * total_scale
         for scale in upsample_scales:
             freq_axis_padding = (freq_axis_kernel_size - 1) // 2
@@ -55,6 +68,8 @@ class UpsampleNetwork(nn.Module):
                 nonlinear = _get_activation(upsample_activation)
                 self.up_layers.append(nonlinear(**upsample_activation_params))
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, c):
         """
         Args:
@@ -76,8 +91,10 @@ class UpsampleNetwork(nn.Module):
 class ConvInUpsampleNetwork(nn.Module):
     def __init__(
         self,
+        # pyre-fixme[2]: Parameter must be annotated.
         upsample_scales,
         upsample_activation: str = "none",
+        # pyre-fixme[2]: Parameter must be annotated.
         upsample_activation_params={},
         mode: str = "nearest",
         freq_axis_kernel_size: int = 1,
@@ -99,6 +116,8 @@ class ConvInUpsampleNetwork(nn.Module):
             cin_channels=cin_channels,
         )
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, c):
         c_up = self.upsample(self.conv_in(c))
         return c_up

@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -22,6 +25,7 @@ from models.src.parallel_wavegan.layers.residual_block import ( # @oss-only
 class Stretch2d(torch.nn.Module):
     """Stretch2d module."""
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, x_scale, y_scale, mode: str = "nearest") -> None:
         """Initialize Stretch2d module.
 
@@ -32,10 +36,14 @@ class Stretch2d(torch.nn.Module):
 
         """
         super(Stretch2d, self).__init__()
+        # pyre-fixme[4]: Attribute must be annotated.
         self.x_scale = x_scale
+        # pyre-fixme[4]: Attribute must be annotated.
         self.y_scale = y_scale
         self.mode = mode
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x):
         """Calculate forward propagation.
 
@@ -54,6 +62,7 @@ class Stretch2d(torch.nn.Module):
 class Conv2d(torch.nn.Conv2d):
     """Conv2d module with customized initialization."""
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, *args, **kwargs) -> None:
         """Initialize Conv2d module."""
         super(Conv2d, self).__init__(*args, **kwargs)
@@ -70,8 +79,11 @@ class UpsampleNetwork(torch.nn.Module):
 
     def __init__(
         self,
+        # pyre-fixme[2]: Parameter must be annotated.
         upsample_scales,
+        # pyre-fixme[2]: Parameter must be annotated.
         nonlinear_activation=None,
+        # pyre-fixme[2]: Parameter must be annotated.
         nonlinear_activation_params={},
         interpolate_mode: str = "nearest",
         freq_axis_kernel_size: int = 1,
@@ -115,6 +127,8 @@ class UpsampleNetwork(torch.nn.Module):
                 )
                 self.up_layers += [nonlinear]
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, c):
         """Calculate forward propagation.
 
@@ -139,8 +153,11 @@ class ConvInUpsampleNetwork(torch.nn.Module):
 
     def __init__(
         self,
+        # pyre-fixme[2]: Parameter must be annotated.
         upsample_scales,
+        # pyre-fixme[2]: Parameter must be annotated.
         nonlinear_activation=None,
+        # pyre-fixme[2]: Parameter must be annotated.
         nonlinear_activation_params={},
         interpolate_mode: str = "nearest",
         freq_axis_kernel_size: int = 1,
@@ -163,6 +180,7 @@ class ConvInUpsampleNetwork(torch.nn.Module):
         """
         super(ConvInUpsampleNetwork, self).__init__()
         self.aux_context_window = aux_context_window
+        # pyre-fixme[4]: Attribute must be annotated.
         self.use_causal_conv = use_causal_conv and aux_context_window > 0
         # To capture wide-context information in conditional features
         kernel_size = (
@@ -181,6 +199,8 @@ class ConvInUpsampleNetwork(torch.nn.Module):
             use_causal_conv=use_causal_conv,
         )
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, c):
         """Calculate forward propagation.
 

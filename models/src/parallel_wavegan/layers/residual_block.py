@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -19,6 +22,7 @@ from torch._tensor import Tensor
 class Conv1d(torch.nn.Conv1d):
     """Conv1d module with customized initialization."""
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, *args, **kwargs) -> None:
         """Initialize Conv1d module."""
         super(Conv1d, self).__init__(*args, **kwargs)
@@ -33,6 +37,7 @@ class Conv1d(torch.nn.Conv1d):
 class Conv1d1x1(Conv1d):
     """1x1 Conv1d with customized initialization."""
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, in_channels, out_channels, bias) -> None:
         """Initialize 1x1 Conv1d module."""
         super(Conv1d1x1, self).__init__(
@@ -90,6 +95,7 @@ class ResidualBlock(torch.nn.Module):
 
         # local conditioning
         if aux_channels > 0:
+            # pyre-fixme[4]: Attribute must be annotated.
             self.conv1x1_aux = Conv1d1x1(aux_channels, gate_channels, bias=False)
         else:
             self.conv1x1_aux = None
@@ -99,6 +105,8 @@ class ResidualBlock(torch.nn.Module):
         self.conv1x1_out = Conv1d1x1(gate_out_channels, residual_channels, bias=bias)
         self.conv1x1_skip = Conv1d1x1(gate_out_channels, skip_channels, bias=bias)
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x: Tensor, c):
         """Calculate forward propagation.
 

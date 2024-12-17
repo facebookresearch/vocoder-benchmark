@@ -4,6 +4,9 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 7.
 # pyre-ignore-all-errors
 
 
@@ -46,6 +49,7 @@ class WaveGradNN(BaseModule):
     Current implementation follows described architecture in the paper.
     """
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, config) -> None:
         super(WaveGradNN, self).__init__()
         # Building upsampling branch (mels -> signal)
@@ -129,6 +133,8 @@ class WaveGradNN(BaseModule):
             ]
         )
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, mels, yn, noise_level):
         """
         Computes forward pass of neural network.

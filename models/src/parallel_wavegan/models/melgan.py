@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -38,12 +41,14 @@ class MelGANGenerator(torch.nn.Module):
         kernel_size: int = 7,
         channels: int = 512,
         bias: bool = True,
+        # pyre-fixme[2]: Parameter must be annotated.
         upsample_scales=[8, 8, 2, 2],
         stack_kernel_size: int = 3,
         stacks: int = 3,
         nonlinear_activation: str = "LeakyReLU",
         nonlinear_activation_params: Dict[str, float] = {"negative_slope": 0.2},
         pad: str = "ReflectionPad1d",
+        # pyre-fixme[2]: Parameter must be annotated.
         pad_params={},
         use_final_nonlinear_activation: bool = True,
         use_weight_norm: bool = True,
@@ -149,12 +154,17 @@ class MelGANGenerator(torch.nn.Module):
             layers += [
                 getattr(torch.nn, pad)((kernel_size - 1) // 2, **pad_params),
                 torch.nn.Conv1d(
-                    channels // (2 ** (i + 1)), out_channels, kernel_size, bias=bias
+                    # pyre-fixme[61]: `i` is undefined, or not always defined.
+                    channels // (2 ** (i + 1)),
+                    out_channels,
+                    kernel_size,
+                    bias=bias,
                 ),
             ]
         else:
             layers += [
                 CausalConv1d(
+                    # pyre-fixme[61]: `i` is undefined, or not always defined.
                     channels // (2 ** (i + 1)),
                     out_channels,
                     kernel_size,
@@ -177,8 +187,11 @@ class MelGANGenerator(torch.nn.Module):
         self.reset_parameters()
 
         # initialize pqmf for inference
+        # pyre-fixme[4]: Attribute must be annotated.
         self.pqmf = None
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, c):
         """Calculate forward propagation.
 
@@ -194,6 +207,8 @@ class MelGANGenerator(torch.nn.Module):
     def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def _remove_weight_norm(m):
             try:
                 logging.debug(f"Weight norm is removed from {m}.")
@@ -206,6 +221,8 @@ class MelGANGenerator(torch.nn.Module):
     def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def _apply_weight_norm(m):
             if isinstance(m, torch.nn.Conv1d) or isinstance(
                 m, torch.nn.ConvTranspose1d
@@ -223,6 +240,8 @@ class MelGANGenerator(torch.nn.Module):
 
         """
 
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def _reset_parameters(m):
             if isinstance(m, torch.nn.Conv1d) or isinstance(
                 m, torch.nn.ConvTranspose1d
@@ -232,6 +251,8 @@ class MelGANGenerator(torch.nn.Module):
 
         self.apply(_reset_parameters)
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def inference(self, c):
         """Perform inference.
 
@@ -257,6 +278,7 @@ class MelGANDiscriminator(torch.nn.Module):
         self,
         in_channels: int = 1,
         out_channels: int = 1,
+        # pyre-fixme[2]: Parameter must be annotated.
         kernel_sizes=[5, 3],
         channels: int = 16,
         max_downsample_channels: int = 1024,
@@ -265,6 +287,7 @@ class MelGANDiscriminator(torch.nn.Module):
         nonlinear_activation: str = "LeakyReLU",
         nonlinear_activation_params: Dict[str, float] = {"negative_slope": 0.2},
         pad: str = "ReflectionPad1d",
+        # pyre-fixme[2]: Parameter must be annotated.
         pad_params={},
     ) -> None:
         """Initilize MelGAN discriminator module.
@@ -351,6 +374,8 @@ class MelGANDiscriminator(torch.nn.Module):
             ),
         ]
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x):
         """Calculate forward propagation.
 
@@ -393,6 +418,7 @@ class MelGANMultiScaleDiscriminator(torch.nn.Module):
         nonlinear_activation: str = "LeakyReLU",
         nonlinear_activation_params: Dict[str, float] = {"negative_slope": 0.2},
         pad: str = "ReflectionPad1d",
+        # pyre-fixme[2]: Parameter must be annotated.
         pad_params={},
         use_weight_norm: bool = True,
     ) -> None:
@@ -436,6 +462,7 @@ class MelGANMultiScaleDiscriminator(torch.nn.Module):
                     pad_params=pad_params,
                 )
             ]
+        # pyre-fixme[4]: Attribute must be annotated.
         self.pooling = getattr(torch.nn, downsample_pooling)(
             **downsample_pooling_params
         )
@@ -447,6 +474,8 @@ class MelGANMultiScaleDiscriminator(torch.nn.Module):
         # reset parameters
         self.reset_parameters()
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x):
         """Calculate forward propagation.
 
@@ -467,6 +496,8 @@ class MelGANMultiScaleDiscriminator(torch.nn.Module):
     def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def _remove_weight_norm(m):
             try:
                 logging.debug(f"Weight norm is removed from {m}.")
@@ -479,6 +510,8 @@ class MelGANMultiScaleDiscriminator(torch.nn.Module):
     def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def _apply_weight_norm(m):
             if isinstance(m, torch.nn.Conv1d) or isinstance(
                 m, torch.nn.ConvTranspose1d
@@ -496,6 +529,8 @@ class MelGANMultiScaleDiscriminator(torch.nn.Module):
 
         """
 
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def _reset_parameters(m):
             if isinstance(m, torch.nn.Conv1d) or isinstance(
                 m, torch.nn.ConvTranspose1d

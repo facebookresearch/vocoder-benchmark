@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -17,10 +20,13 @@ LINEAR_SCALE = 5000
 
 
 class PositionalEncoding(BaseModule):
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, n_channels) -> None:
         super(PositionalEncoding, self).__init__()
+        # pyre-fixme[4]: Attribute must be annotated.
         self.n_channels = n_channels
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, noise_level) -> Tensor:
         if len(noise_level.shape) > 1:
             noise_level = noise_level.squeeze(-1)
@@ -30,10 +36,13 @@ class PositionalEncoding(BaseModule):
         )
         exponents = 1e-4**exponents
         exponents = LINEAR_SCALE * noise_level.unsqueeze(1) * exponents.unsqueeze(0)
+        # pyre-fixme[16]: `int` has no attribute `sin`.
+        # pyre-fixme[16]: `int` has no attribute `cos`.
         return torch.cat([exponents.sin(), exponents.cos()], dim=-1)
 
 
 class FeatureWiseLinearModulation(BaseModule):
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, in_channels, out_channels, input_dscaled_by) -> None:
         super(FeatureWiseLinearModulation, self).__init__()
         self.signal_conv = torch.nn.Sequential(
@@ -64,6 +73,8 @@ class FeatureWiseLinearModulation(BaseModule):
             padding=1,
         )
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x, noise_level):
         outputs = self.signal_conv(x)
         outputs = outputs + self.positional_encoding(noise_level).unsqueeze(-1)
@@ -75,6 +86,8 @@ class FeatureWiseAffine(BaseModule):
     def __init__(self) -> None:
         super(FeatureWiseAffine, self).__init__()
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x, scale, shift):
         outputs = scale * x + shift
         return outputs

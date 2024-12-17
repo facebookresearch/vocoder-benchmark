@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -18,15 +21,21 @@ import numpy as np
 import torch.nn as nn
 
 
+# pyre-fixme[3]: Return type must be annotated.
 def get_model_complexity_info(
+    # pyre-fixme[2]: Parameter must be annotated.
     model,
+    # pyre-fixme[2]: Parameter must be annotated.
     input,
     print_per_layer_stat: bool = False,
     as_strings: bool = False,
+    # pyre-fixme[2]: Parameter must be annotated.
     input_constructor=None,
     ost: TextIO = sys.stdout,
     verbose: bool = False,
+    # pyre-fixme[2]: Parameter must be annotated.
     ignore_modules=[],
+    # pyre-fixme[2]: Parameter must be annotated.
     custom_modules_hooks={},
 ):
     assert len(input) >= 1
@@ -49,6 +58,8 @@ def get_model_complexity_info(
     return flops_count, params_count
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def flops_to_string(flops, units: str = "GMac", precision: int = 2):
     if units is None:
         if flops // 10**9 > 0:
@@ -70,6 +81,8 @@ def flops_to_string(flops, units: str = "GMac", precision: int = 2):
             return str(flops) + " Mac"
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def params_to_string(params_num, units=None, precision: int = 2):
     if units is None:
         if params_num // 10**6 > 0:
@@ -87,6 +100,8 @@ def params_to_string(params_num, units=None, precision: int = 2):
             return str(params_num)
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def accumulate_flops(self):
     if is_supported_instance(self):
         return self.__flops__
@@ -98,8 +113,10 @@ def accumulate_flops(self):
 
 
 def print_model_with_flops(
+    # pyre-fixme[2]: Parameter must be annotated.
     model,
     total_flops: int,
+    # pyre-fixme[2]: Parameter must be annotated.
     total_params,
     units: str = "GMac",
     precision: int = 3,
@@ -108,6 +125,8 @@ def print_model_with_flops(
     if total_flops < 1:
         total_flops = 1
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def accumulate_params(self):
         if is_supported_instance(self):
             return self.__params__
@@ -117,6 +136,10 @@ def print_model_with_flops(
                 sum += m.accumulate_params()
             return sum
 
+    # pyre-fixme[53]: Captured variable `model` is not annotated.
+    # pyre-fixme[53]: Captured variable `total_params` is not annotated.
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def flops_repr(self):
         accumulated_params_num = self.accumulate_params()
         accumulated_flops_cost = self.accumulate_flops() / model.__batch_counter__
@@ -134,6 +157,8 @@ def print_model_with_flops(
             ]
         )
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def add_extra_repr(m):
         m.accumulate_flops = accumulate_flops.__get__(m)
         m.accumulate_params = accumulate_params.__get__(m)
@@ -143,6 +168,8 @@ def print_model_with_flops(
             m.extra_repr = flops_extra_repr
             assert m.extra_repr != m.original_extra_repr
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def del_extra_repr(m):
         if hasattr(m, "original_extra_repr"):
             m.extra_repr = m.original_extra_repr
@@ -155,11 +182,14 @@ def print_model_with_flops(
     model.apply(del_extra_repr)
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def get_model_parameters_number(model) -> int:
     params_num = sum(p.numel() for p in model.parameters() if p.requires_grad)
     return params_num
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def add_flops_counting_methods(net_main_module):
     # adding additional methods to the existing module object,
     # this is done this way so that each function has access to self object
@@ -175,6 +205,8 @@ def add_flops_counting_methods(net_main_module):
     return net_main_module
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def compute_average_flops_cost(self):
     """
     A method that will be available after add_flops_counting_methods() is called
@@ -195,6 +227,7 @@ def compute_average_flops_cost(self):
     return flops_sum / self.__batch_counter__, params_sum
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def start_flops_count(self, **kwargs) -> None:
     """
     A method that will be available after add_flops_counting_methods() is called
@@ -206,6 +239,9 @@ def start_flops_count(self, **kwargs) -> None:
 
     seen_types = set()
 
+    # pyre-fixme[53]: Captured variable `seen_types` is not annotated.
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def add_flops_counter_hook_function(module, ost, verbose, ignore_list):
         if type(module) in ignore_list:
             seen_types.add(type(module))
@@ -239,6 +275,7 @@ def start_flops_count(self, **kwargs) -> None:
     self.apply(partial(add_flops_counter_hook_function, **kwargs))
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def stop_flops_count(self) -> None:
     """
     A method that will be available after add_flops_counting_methods() is called
@@ -250,6 +287,7 @@ def stop_flops_count(self) -> None:
     self.apply(remove_flops_counter_hook_function)
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def reset_flops_count(self) -> None:
     """
     A method that will be available after add_flops_counting_methods() is called
@@ -261,10 +299,12 @@ def reset_flops_count(self) -> None:
 
 
 # ---- Internal functions
+# pyre-fixme[2]: Parameter must be annotated.
 def empty_flops_counter_hook(module, input, output) -> None:
     module.__flops__ += 0
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def upsample_flops_counter_hook(module, input, output) -> None:
     output_size = output[0]
     batch_size = output_size.shape[0]
@@ -274,11 +314,13 @@ def upsample_flops_counter_hook(module, input, output) -> None:
     module.__flops__ += int(output_elements_count)
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def relu_flops_counter_hook(module, input, output) -> None:
     active_elements_count = output.numel()
     module.__flops__ += int(active_elements_count)
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def linear_flops_counter_hook(module, input, output) -> None:
     input = input[0]
     # pytorch checks dimensions, so here we don't care much
@@ -287,11 +329,13 @@ def linear_flops_counter_hook(module, input, output) -> None:
     module.__flops__ += int(np.prod(input.shape) * output_last_dim + bias_flops)
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def pool_flops_counter_hook(module, input, output) -> None:
     input = input[0]
     module.__flops__ += int(np.prod(input.shape))
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def bn_flops_counter_hook(module, input, output) -> None:
     input = input[0]
 
@@ -301,6 +345,7 @@ def bn_flops_counter_hook(module, input, output) -> None:
     module.__flops__ += int(batch_flops)
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def conv_flops_counter_hook(conv_module, input, output) -> None:
     # Can have multiple inputs, getting the first one
     input = input[0]
@@ -332,6 +377,7 @@ def conv_flops_counter_hook(conv_module, input, output) -> None:
     conv_module.__flops__ += int(overall_flops)
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def batch_counter_hook(module, input, output) -> None:
     batch_size = 1
     if len(input) > 0:
@@ -347,6 +393,7 @@ def batch_counter_hook(module, input, output) -> None:
     module.__batch_counter__ += batch_size
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def rnn_flops(flops: int, rnn_module, w_ih, w_hh, input_size) -> int:
     # matrix matrix mult ih state and internal state
     flops += w_ih.shape[0] * w_ih.shape[1]
@@ -376,6 +423,7 @@ def rnn_flops(flops: int, rnn_module, w_ih, w_hh, input_size) -> int:
     return flops
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def rnn_flops_counter_hook(rnn_module, input, output) -> None:
     """
     Takes into account batch goes at first position, contrary
@@ -409,6 +457,7 @@ def rnn_flops_counter_hook(rnn_module, input, output) -> None:
     rnn_module.__flops__ += int(flops)
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def rnn_cell_flops_counter_hook(rnn_cell_module, input, output) -> None:
     flops = 0
     inp = input[0]
@@ -426,6 +475,7 @@ def rnn_cell_flops_counter_hook(rnn_cell_module, input, output) -> None:
     rnn_cell_module.__flops__ += int(flops)
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def multihead_attention_counter_hook(multihead_attention_module, input, output) -> None:
     flops = 0
     q, k, v = input
@@ -467,10 +517,12 @@ def multihead_attention_counter_hook(multihead_attention_module, input, output) 
     multihead_attention_module.__flops__ += int(flops)
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def add_batch_counter_variables_or_reset(module) -> None:
     module.__batch_counter__ = 0
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def add_batch_counter_hook_function(module) -> None:
     if hasattr(module, "__batch_counter_handle__"):
         return
@@ -479,20 +531,24 @@ def add_batch_counter_hook_function(module) -> None:
     module.__batch_counter_handle__ = handle
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def remove_batch_counter_hook_function(module) -> None:
     if hasattr(module, "__batch_counter_handle__"):
         module.__batch_counter_handle__.remove()
         del module.__batch_counter_handle__
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def add_flops_counter_variable_or_reset(module) -> None:
     if is_supported_instance(module):
         module.__flops__ = 0
         module.__params__ = get_model_parameters_number(module)
 
 
+# pyre-fixme[5]: Global expression must be annotated.
 CUSTOM_MODULES_MAPPING = {}
 
+# pyre-fixme[5]: Global expression must be annotated.
 MODULES_MAPPING = {
     # convolutions
     nn.Conv1d: conv_flops_counter_hook,
@@ -544,12 +600,14 @@ MODULES_MAPPING = {
 }
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def is_supported_instance(module) -> bool:
     if type(module) in MODULES_MAPPING or type(module) in CUSTOM_MODULES_MAPPING:
         return True
     return False
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def remove_flops_counter_hook_function(module) -> None:
     if is_supported_instance(module):
         if hasattr(module, "__flops_handle__"):

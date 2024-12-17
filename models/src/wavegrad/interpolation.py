@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -10,6 +13,7 @@ from models.src.wavegrad.base import BaseModule # @oss-only
 class InterpolationBlock(BaseModule):
     def __init__(
         self,
+        # pyre-fixme[2]: Parameter must be annotated.
         scale_factor,
         mode: str = "linear",
         align_corners: bool = False,
@@ -17,10 +21,13 @@ class InterpolationBlock(BaseModule):
     ) -> None:
         super(InterpolationBlock, self).__init__()
         self.downsample = downsample
+        # pyre-fixme[4]: Attribute must be annotated.
         self.scale_factor = scale_factor
         self.mode = mode
         self.align_corners = align_corners
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x):
         outputs = torch.nn.functional.interpolate(
             x,

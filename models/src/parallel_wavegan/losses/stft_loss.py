@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -48,6 +51,7 @@ def stft(
     imag = x_stft[..., 1]
 
     # NOTE(kan-bayashi): clamp is needed to avoid nan or inf
+    # pyre-fixme[58]: `**` is not supported for operand types `Tensor` and `int`.
     return torch.sqrt(torch.clamp(real**2 + imag**2, min=1e-7)).transpose(2, 1)
 
 
@@ -58,6 +62,8 @@ class SpectralConvergenceLoss(torch.nn.Module):
         """Initilize spectral convergence loss module."""
         super(SpectralConvergenceLoss, self).__init__()
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x_mag, y_mag):
         """Calculate forward propagation.
 
@@ -113,6 +119,7 @@ class STFTLoss(torch.nn.Module):
         # NOTE(kan-bayashi): Use register_buffer to fix #223
         self.register_buffer("window", getattr(torch, window)(win_length))
 
+    # pyre-fixme[3]: Return type must be annotated.
     def forward(self, x: Tensor, y: Tensor):
         """Calculate forward propagation.
 
@@ -138,8 +145,11 @@ class MultiResolutionSTFTLoss(torch.nn.Module):
 
     def __init__(
         self,
+        # pyre-fixme[2]: Parameter must be annotated.
         fft_sizes=[1024, 2048, 512],
+        # pyre-fixme[2]: Parameter must be annotated.
         hop_sizes=[120, 240, 50],
+        # pyre-fixme[2]: Parameter must be annotated.
         win_lengths=[600, 1200, 240],
         window: str = "hann_window",
     ) -> None:
@@ -158,6 +168,7 @@ class MultiResolutionSTFTLoss(torch.nn.Module):
         for fs, ss, wl in zip(fft_sizes, hop_sizes, win_lengths):
             self.stft_losses += [STFTLoss(fs, ss, wl, window)]
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x, y) -> Tuple[float, float]:
         """Calculate forward propagation.
 

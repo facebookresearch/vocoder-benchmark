@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 # coding: utf-8
@@ -30,6 +33,8 @@ from torch._tensor import Tensor
 from torch.nn import functional as F
 
 
+# pyre-fixme[3]: Return type must be annotated.
+# pyre-fixme[2]: Parameter must be annotated.
 def _expand_global_features(B, T, g, bct: bool = True):
     """Expand global conditioning features to all time steps
 
@@ -53,8 +58,16 @@ def _expand_global_features(B, T, g, bct: bool = True):
         return g_btc.contiguous()
 
 
+# pyre-fixme[3]: Return type must be annotated.
 def receptive_field_size(
-    total_layers, num_cycles, kernel_size, dilation=lambda x: 2**x
+    # pyre-fixme[2]: Parameter must be annotated.
+    total_layers,
+    # pyre-fixme[2]: Parameter must be annotated.
+    num_cycles,
+    # pyre-fixme[2]: Parameter must be annotated.
+    kernel_size,
+    # pyre-fixme[2]: Parameter must be annotated.
+    dilation=lambda x: 2**x,
 ):
     """Compute receptive field size
 
@@ -122,6 +135,7 @@ class WaveNet(nn.Module):
         dropout: float = 1 - 0.95,
         cin_channels: int = -1,
         gin_channels: int = -1,
+        # pyre-fixme[2]: Parameter must be annotated.
         n_speakers=None,
         upsample_conditional_features: bool = False,
         upsample_net: str = "ConvInUpsampleNetwork",
@@ -139,6 +153,7 @@ class WaveNet(nn.Module):
         assert layers % stacks == 0
         layers_per_stack = layers // stacks
         if scalar_input:
+            # pyre-fixme[4]: Attribute must be annotated.
             self.first_conv = Conv1d1x1(1, residual_channels)
         else:
             self.first_conv = Conv1d1x1(out_channels, residual_channels)
@@ -169,6 +184,7 @@ class WaveNet(nn.Module):
 
         if gin_channels > 0 and use_speaker_embedding:
             assert n_speakers is not None
+            # pyre-fixme[4]: Attribute must be annotated.
             self.embed_speakers = Embedding(
                 n_speakers, gin_channels, padding_idx=None, std=0.1
             )
@@ -177,10 +193,12 @@ class WaveNet(nn.Module):
 
         # Upsample conv net
         if upsample_conditional_features:
+            # pyre-fixme[4]: Attribute must be annotated.
             self.upsample_net = getattr(upsample, upsample_net)(**upsample_params)
         else:
             self.upsample_net = None
 
+        # pyre-fixme[4]: Attribute must be annotated.
         self.receptive_field = receptive_field_size(layers, stacks, kernel_size)
 
     def has_speaker_embedding(self) -> bool:
@@ -190,7 +208,14 @@ class WaveNet(nn.Module):
         return self.cin_channels > 0
 
     def forward(
-        self, x: Union[float, Tensor], c=None, g=None, softmax: bool = False
+        # pyre-fixme[2]: Parameter must be annotated.
+        self,
+        x: Union[float, Tensor],
+        # pyre-fixme[2]: Parameter must be annotated.
+        c=None,
+        # pyre-fixme[2]: Parameter must be annotated.
+        g=None,
+        softmax: bool = False,
     ) -> Union[float, Tensor]:
         """Forward step
 
@@ -210,6 +235,7 @@ class WaveNet(nn.Module):
         Returns:
             Tensor: output, shape B x out_channels x T
         """
+        # pyre-fixme[16]: Item `float` of `float | Tensor` has no attribute `size`.
         B, _, T = x.size()
 
         if g is not None:
@@ -224,6 +250,7 @@ class WaveNet(nn.Module):
 
         if c is not None and self.upsample_net is not None:
             c = self.upsample_net(c)
+            # pyre-fixme[16]: Item `float` of `float | Tensor` has no attribute `size`.
             assert c.size(-1) == x.size(-1)
 
         # Feed data to network
@@ -244,11 +271,16 @@ class WaveNet(nn.Module):
 
     def incremental_forward(
         self,
+        # pyre-fixme[2]: Parameter must be annotated.
         initial_input=None,
+        # pyre-fixme[2]: Parameter must be annotated.
         c=None,
+        # pyre-fixme[2]: Parameter must be annotated.
         g=None,
         T: int = 100,
+        # pyre-fixme[2]: Parameter must be annotated.
         test_inputs=None,
+        # pyre-fixme[2]: Parameter must be annotated.
         tqdm=lambda x: x,
         softmax: bool = True,
         quantize: bool = True,
@@ -393,6 +425,8 @@ class WaveNet(nn.Module):
                 pass
 
     def make_generation_fast_(self) -> None:
+        # pyre-fixme[3]: Return type must be annotated.
+        # pyre-fixme[2]: Parameter must be annotated.
         def remove_weight_norm(m):
             try:
                 nn.utils.remove_weight_norm(m)

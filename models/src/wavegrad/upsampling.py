@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -30,6 +33,7 @@ class BasicModulationBlock(BaseModule):
         - 3x1 Conv
     """
 
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, n_channels, dilation) -> None:
         super(BasicModulationBlock, self).__init__()
         self.featurewise_affine = FeatureWiseAffine()
@@ -43,6 +47,8 @@ class BasicModulationBlock(BaseModule):
             dilation=dilation,
         )
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x, scale, shift):
         outputs = self.featurewise_affine(x, scale, shift)
         outputs = self.leaky_relu(outputs)
@@ -51,6 +57,7 @@ class BasicModulationBlock(BaseModule):
 
 
 class UpsamplingBlock(BaseModule):
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, in_channels, out_channels, factor, dilations) -> None:
         super(UpsamplingBlock, self).__init__()
         self.first_block_main_branch = torch.nn.ModuleDict(
@@ -96,6 +103,8 @@ class UpsamplingBlock(BaseModule):
             }
         )
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, x, scale, shift):
         # First upsampling residual block
         outputs = self.first_block_main_branch["upsampling"](x)

@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -12,6 +15,7 @@ from torch import nn
 from torch._tensor import Tensor
 
 
+# pyre-fixme[2]: Parameter must be annotated.
 def sequence_mask(sequence_length, max_len=None) -> Tensor:
     if max_len is None:
         max_len = sequence_length.data.max()
@@ -25,10 +29,14 @@ def sequence_mask(sequence_length, max_len=None) -> Tensor:
 
 
 class DiscretizedMixturelogisticLoss(nn.Module):
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, config) -> None:
+        # pyre-fixme[4]: Attribute must be annotated.
         self.config = config
         super(DiscretizedMixturelogisticLoss, self).__init__()
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, input, target, log_scale_min: float = -7.0):
         losses = discretized_mix_logistic_loss(
             input,
@@ -42,10 +50,14 @@ class DiscretizedMixturelogisticLoss(nn.Module):
 
 
 class MixtureGaussianLoss(nn.Module):
+    # pyre-fixme[2]: Parameter must be annotated.
     def __init__(self, config) -> None:
+        # pyre-fixme[4]: Attribute must be annotated.
         self.config = config
         super(MixtureGaussianLoss, self).__init__()
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, input, target, log_scale_min: float = -7.0):
         losses = mix_gaussian_loss(
             input, target, log_scale_min=log_scale_min, reduce=False

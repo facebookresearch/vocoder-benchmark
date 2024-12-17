@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -15,6 +18,7 @@ import torch.nn.functional as F
 from torch._tensor import Tensor
 
 
+# pyre-fixme[3]: Return type must be annotated.
 def design_prototype_filter(
     taps: float = 62, cutoff_ratio: float = 0.142, beta: float = 9.0
 ):
@@ -48,6 +52,7 @@ def design_prototype_filter(
     h_i[taps // 2] = np.cos(0) * cutoff_ratio  # fix nan due to indeterminate form
 
     # apply kaiser window
+    # pyre-fixme[16]: Module `signal` has no attribute `kaiser`.
     w = scipy.signal.kaiser(taps + 1, beta)
     h = h_i * w
 

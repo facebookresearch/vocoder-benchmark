@@ -1,3 +1,6 @@
+# pyre-strict
+# pyre-fixme[51]: Mode `pyre-ignore-all-errors` is unused. This conflicts with
+#  `pyre-strict` mode set on line 1.
 # pyre-ignore-all-errors
 
 
@@ -30,6 +33,7 @@ class ResidualStack(torch.nn.Module):
         nonlinear_activation: str = "LeakyReLU",
         nonlinear_activation_params: Dict[str, float] = {"negative_slope": 0.2},
         pad: str = "ReflectionPad1d",
+        # pyre-fixme[2]: Parameter must be annotated.
         pad_params={},
         use_causal_conv: bool = False,
     ) -> None:
@@ -52,6 +56,7 @@ class ResidualStack(torch.nn.Module):
         # defile residual stack part
         if not use_causal_conv:
             assert (kernel_size - 1) % 2 == 0, "Not support even number kernel size."
+            # pyre-fixme[4]: Attribute must be annotated.
             self.stack = torch.nn.Sequential(
                 getattr(torch.nn, nonlinear_activation)(**nonlinear_activation_params),
                 getattr(torch.nn, pad)((kernel_size - 1) // 2 * dilation, **pad_params),
@@ -80,6 +85,8 @@ class ResidualStack(torch.nn.Module):
         # defile extra layer for skip connection
         self.skip_layer = torch.nn.Conv1d(channels, channels, 1, bias=bias)
 
+    # pyre-fixme[3]: Return type must be annotated.
+    # pyre-fixme[2]: Parameter must be annotated.
     def forward(self, c):
         """Calculate forward propagation.
 
