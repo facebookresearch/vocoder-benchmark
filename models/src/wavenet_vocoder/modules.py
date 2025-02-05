@@ -12,7 +12,7 @@ import math
 import torch
 
 from models.src.wavenet_vocoder import conv # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder import conv 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavenet_vocoder import conv
 from torch import nn
 from torch._tensor import Tensor
 from torch.nn import functional as F

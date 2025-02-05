@@ -27,7 +27,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from datasets import MEL_NUM_BANDS # @oss-only
-# @fb-only: from langtech.tts.vocoders.datasets import MEL_NUM_BANDS 
+# @fb-only[end= ]: from langtech.tts.vocoders.datasets import MEL_NUM_BANDS
 from torch._tensor import Tensor
 from torch.nn.modules.conv import Conv1d
 

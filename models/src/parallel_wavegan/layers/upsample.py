@@ -17,7 +17,7 @@ import torch
 import torch.nn.functional as F
 
 from models.src.parallel_wavegan.layers.residual_block import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_block import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_block import (
     Conv1d,
 )
 

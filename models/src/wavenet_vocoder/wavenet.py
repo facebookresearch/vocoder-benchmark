@@ -12,10 +12,10 @@ from typing import Dict, List, Union
 import torch
 
 from models.src.wavenet_vocoder import upsample # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder import upsample 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavenet_vocoder import upsample
 
 from models.src.wavenet_vocoder.mixture import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.mixture import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavenet_vocoder.mixture import (
     sample_from_discretized_mix_logistic,
     sample_from_mix_gaussian,
 )
@@ -23,7 +23,7 @@ from models.src.wavenet_vocoder.mixture import ( # @oss-only
 from models.src.wavenet_vocoder.modules import ( # @oss-only
 
 from models.src.wavenet_vocoder.modules import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.modules import (  # @fb-only 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavenet_vocoder.modules import (  # @fb-only
     Conv1d1x1,
     Embedding,
     ResidualConv1dGLU,

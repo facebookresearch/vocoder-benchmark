@@ -16,13 +16,13 @@ import numpy as np
 import torch
 
 from datasets import MEL_HOP_SAMPLES # @oss-only
-# @fb-only: from langtech.tts.vocoders.datasets import MEL_HOP_SAMPLES 
+# @fb-only[end= ]: from langtech.tts.vocoders.datasets import MEL_HOP_SAMPLES
 
 from models.src.wavegrad.base import BaseModule # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule
 
 from models.src.wavegrad.nn import WaveGradNN # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.nn import WaveGradNN 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavegrad.nn import WaveGradNN
 from torch._tensor import Tensor
 
 

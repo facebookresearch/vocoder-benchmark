@@ -16,7 +16,7 @@ from typing import Dict
 import torch
 
 from models.src.parallel_wavegan.layers.causal_conv import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.causal_conv import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.causal_conv import (
     CausalConv1d,
 )
 

@@ -15,17 +15,17 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 import models.src.parallel_wavegan.models as models # @oss-only
-# @fb-only: import langtech.tts.vocoders.models.src.parallel_wavegan.models as models 
+# @fb-only[end= ]: import langtech.tts.vocoders.models.src.parallel_wavegan.models as models
 
 import models.src.parallel_wavegan.optimizers as optimizers # @oss-only
-# @fb-only: import langtech.tts.vocoders.models.src.parallel_wavegan.optimizers as optimizers 
+# @fb-only[end= ]: import langtech.tts.vocoders.models.src.parallel_wavegan.optimizers as optimizers
 import numpy as np
 import torch
 import torchaudio
 import torchaudio.models
 
 from datasets import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.datasets import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.datasets import (
     AUDIO_SAMPLE_RATE,
     DatasetConfig,
     MEL_HOP_SAMPLES,
@@ -33,32 +33,32 @@ from datasets import ( # @oss-only
 )
 
 from models.framework import Vocoder, ConfigProtocol # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.framework import ConfigProtocol, Vocoder 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.framework import ConfigProtocol, Vocoder
 
 from models.src.parallel_wavegan.layers.pqmf import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.pqmf import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.pqmf import (
     PQMF,
 )
 
 from models.src.parallel_wavegan.layers.residual_block import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_block import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.parallel_wavegan.layers.residual_block import (
     Conv1d,
     Conv1d1x1,
 )
 
 from models.src.parallel_wavegan.losses.stft_loss import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.parallel_wavegan.losses.stft_loss import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.parallel_wavegan.losses.stft_loss import (
     MultiResolutionSTFTLoss,
 )
 
 from models.src.ptflops.flops_counter import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.ptflops.flops_counter import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.ptflops.flops_counter import (
     conv_flops_counter_hook,
     get_model_complexity_info,
 )
 
 from utils import remove_none_values_from_dict # @oss-only
-# @fb-only: from langtech.tts.vocoders.utils import remove_none_values_from_dict 
+# @fb-only[end= ]: from langtech.tts.vocoders.utils import remove_none_values_from_dict
 from omegaconf import MISSING, OmegaConf
 from torch import Tensor
 
