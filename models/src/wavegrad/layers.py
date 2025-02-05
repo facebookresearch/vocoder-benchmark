@@ -7,7 +7,7 @@
 import torch
 
 from models.src.wavegrad.base import BaseModule # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule
 
 
 class Conv1dWithInitialization(BaseModule):

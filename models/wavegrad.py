@@ -16,7 +16,7 @@ import torch
 import torchaudio
 
 from datasets import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.datasets import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.datasets import (
     AUDIO_SAMPLE_RATE,
     DatasetConfig,
     MEL_HOP_SAMPLES,
@@ -24,15 +24,15 @@ from datasets import ( # @oss-only
 )
 
 from models.framework import Vocoder, ConfigProtocol # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.framework import ConfigProtocol, Vocoder 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.framework import ConfigProtocol, Vocoder
 
 from models.src.ptflops.flops_counter import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.ptflops.flops_counter import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.ptflops.flops_counter import (
     get_model_complexity_info,
 )
 
 from models.src.wavegrad import diffusion_process # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavegrad import diffusion_process 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavegrad import diffusion_process
 from omegaconf import MISSING
 from torch import Tensor
 

@@ -14,14 +14,14 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 import models.src.wavenet_vocoder.wavenet as wavenet # @oss-only
-# @fb-only: import langtech.tts.vocoders.models.src.wavenet_vocoder.wavenet as wavenet 
+# @fb-only[end= ]: import langtech.tts.vocoders.models.src.wavenet_vocoder.wavenet as wavenet
 import numpy as np
 import torch
 import torchaudio
 import torchaudio.models
 
 from datasets import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.datasets import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.datasets import (
     AUDIO_SAMPLE_RATE,
     DatasetConfig,
     MEL_HOP_SAMPLES,
@@ -29,40 +29,40 @@ from datasets import ( # @oss-only
 )
 
 from models.framework import Vocoder, ConfigProtocol # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.framework import ConfigProtocol, Vocoder 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.framework import ConfigProtocol, Vocoder
 
 from models.src.ptflops.flops_counter import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.ptflops.flops_counter import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.ptflops.flops_counter import (
     conv_flops_counter_hook,
     get_model_complexity_info,
 )
 
 from models.src.wavenet_vocoder import lrschedule # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder import lrschedule 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavenet_vocoder import lrschedule
 
 from models.src.wavenet_vocoder.conv import Conv1d # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.conv import Conv1d 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavenet_vocoder.conv import Conv1d
 
 from models.src.wavenet_vocoder.loss import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.loss import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavenet_vocoder.loss import (
     DiscretizedMixturelogisticLoss,
     MixtureGaussianLoss,
 )
 
 from models.src.wavenet_vocoder.mixture import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.mixture import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavenet_vocoder.mixture import (
     sample_from_discretized_mix_logistic,
     sample_from_mix_gaussian,
 )
 
 from models.src.wavenet_vocoder.util import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.util import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavenet_vocoder.util import (
     is_mulaw_quantize,
     is_scalar_input,
 )
 
 from utils import remove_none_values_from_dict # @oss-only
-# @fb-only: from langtech.tts.vocoders.utils import remove_none_values_from_dict 
+# @fb-only[end= ]: from langtech.tts.vocoders.utils import remove_none_values_from_dict
 from omegaconf import MISSING, OmegaConf
 from torch import Tensor
 from torch.nn import functional as F

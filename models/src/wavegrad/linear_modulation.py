@@ -7,10 +7,10 @@
 import torch
 
 from models.src.wavegrad.base import BaseModule # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavegrad.base import BaseModule
 
 from models.src.wavegrad.layers import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavegrad.layers import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavegrad.layers import (
     Conv1dWithInitialization,
 )
 from torch._tensor import Tensor

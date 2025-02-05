@@ -7,7 +7,7 @@
 import torch
 
 from models.src.wavenet_vocoder.mixture import ( # @oss-only
-# @fb-only: from langtech.tts.vocoders.models.src.wavenet_vocoder.mixture import ( 
+# @fb-only[end= ]: from langtech.tts.vocoders.models.src.wavenet_vocoder.mixture import (
     discretized_mix_logistic_loss,
     mix_gaussian_loss,
 )

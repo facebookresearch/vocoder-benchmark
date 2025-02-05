@@ -21,7 +21,7 @@ import torch
 import torchaudio
 
 from utils import die_if # @oss-only
-# @fb-only: from langtech.tts.vocoders.utils import die_if 
+# @fb-only[end= ]: from langtech.tts.vocoders.utils import die_if
 from omegaconf import MISSING
 
 with warnings.catch_warnings():
