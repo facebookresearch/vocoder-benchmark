@@ -17,6 +17,7 @@ import librosa
 import numpy as np
 import soundfile
 import torch
+from numpy.typing import NDArray
 from omegaconf import OmegaConf
 
 
@@ -48,8 +49,7 @@ def hard_exit(code: int = 1) -> None:
 
 def write_audio(
     filename: str,
-    # pyre-fixme[24]: Generic type `np.ndarray` expects 2 type parameters.
-    data: Union["torch.Tensor", np.ndarray],
+    data: Union["torch.Tensor", NDArray],
     sample_rate: int,
 ) -> None:
     """
@@ -99,8 +99,7 @@ def remove_none_values_from_dict(config_dict):
     return config_dict
 
 
-# pyre-fixme[24]: Generic type `np.ndarray` expects 2 type parameters.
-def read_audio(filename: str, sample_rate: int) -> Tuple[np.ndarray, int]:
+def read_audio(filename: str, sample_rate: int) -> Tuple[NDArray, int]:
     """
     Read audio from disk.
 

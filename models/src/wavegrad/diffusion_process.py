@@ -241,7 +241,6 @@ class WaveGrad(BaseModule):
         return model_mean + eps * (0.5 * model_log_variance).exp()
 
     def sample(
-        # pyre-fixme[2]: Parameter must be annotated.
         self,
         # pyre-fixme[2]: Parameter must be annotated.
         mels,
@@ -298,7 +297,6 @@ class WaveGrad(BaseModule):
         return loss
 
     def forward(
-        # pyre-fixme[2]: Parameter must be annotated.
         self,
         # pyre-fixme[2]: Parameter must be annotated.
         mels,

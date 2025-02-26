@@ -59,7 +59,6 @@ class CausalConvTranspose1d(torch.nn.Module):
     """CausalConvTranspose1d module with customized initialization."""
 
     def __init__(
-        # pyre-fixme[2]: Parameter must be annotated.
         self,
         # pyre-fixme[2]: Parameter must be annotated.
         in_channels,

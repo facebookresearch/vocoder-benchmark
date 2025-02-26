@@ -208,7 +208,6 @@ class WaveNet(nn.Module):
         return self.cin_channels > 0
 
     def forward(
-        # pyre-fixme[2]: Parameter must be annotated.
         self,
         x: Union[float, Tensor],
         # pyre-fixme[2]: Parameter must be annotated.
