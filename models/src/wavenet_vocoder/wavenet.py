@@ -424,9 +424,8 @@ class WaveNet(nn.Module):
                 pass
 
     def make_generation_fast_(self) -> None:
-        # pyre-fixme[3]: Return type must be annotated.
         # pyre-fixme[2]: Parameter must be annotated.
-        def remove_weight_norm(m):
+        def remove_weight_norm(m) -> None:
             try:
                 nn.utils.remove_weight_norm(m)
             except ValueError:  # this module didn't have weight norm

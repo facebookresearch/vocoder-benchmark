@@ -717,9 +717,8 @@ class HParams:
 
         return default
 
-    # pyre-fixme[3]: Return type must be annotated.
     # pyre-fixme[2]: Parameter must be annotated.
-    def __contains__(self, key):
+    def __contains__(self, key) -> bool:
         return key in self._hparam_types
 
     def __str__(self) -> str:
