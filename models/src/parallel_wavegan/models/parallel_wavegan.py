@@ -217,9 +217,8 @@ class ParallelWaveGANGenerator(torch.nn.Module):
     def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
-        # pyre-fixme[3]: Return type must be annotated.
         # pyre-fixme[2]: Parameter must be annotated.
-        def _remove_weight_norm(m):
+        def _remove_weight_norm(m) -> None:
             try:
                 logging.debug(f"Weight norm is removed from {m}.")
                 torch.nn.utils.remove_weight_norm(m)
@@ -231,9 +230,8 @@ class ParallelWaveGANGenerator(torch.nn.Module):
     def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
-        # pyre-fixme[3]: Return type must be annotated.
         # pyre-fixme[2]: Parameter must be annotated.
-        def _apply_weight_norm(m):
+        def _apply_weight_norm(m) -> None:
             if isinstance(m, torch.nn.Conv1d) or isinstance(m, torch.nn.Conv2d):
                 torch.nn.utils.weight_norm(m)
                 logging.debug(f"Weight norm is applied to {m}.")
@@ -385,9 +383,8 @@ class ParallelWaveGANDiscriminator(torch.nn.Module):
     def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
-        # pyre-fixme[3]: Return type must be annotated.
         # pyre-fixme[2]: Parameter must be annotated.
-        def _apply_weight_norm(m):
+        def _apply_weight_norm(m) -> None:
             if isinstance(m, torch.nn.Conv1d) or isinstance(m, torch.nn.Conv2d):
                 torch.nn.utils.weight_norm(m)
                 logging.debug(f"Weight norm is applied to {m}.")
@@ -397,9 +394,8 @@ class ParallelWaveGANDiscriminator(torch.nn.Module):
     def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
-        # pyre-fixme[3]: Return type must be annotated.
         # pyre-fixme[2]: Parameter must be annotated.
-        def _remove_weight_norm(m):
+        def _remove_weight_norm(m) -> None:
             try:
                 logging.debug(f"Weight norm is removed from {m}.")
                 torch.nn.utils.remove_weight_norm(m)
@@ -531,9 +527,8 @@ class ResidualParallelWaveGANDiscriminator(torch.nn.Module):
     def apply_weight_norm(self) -> None:
         """Apply weight normalization module from all of the layers."""
 
-        # pyre-fixme[3]: Return type must be annotated.
         # pyre-fixme[2]: Parameter must be annotated.
-        def _apply_weight_norm(m):
+        def _apply_weight_norm(m) -> None:
             if isinstance(m, torch.nn.Conv1d) or isinstance(m, torch.nn.Conv2d):
                 torch.nn.utils.weight_norm(m)
                 logging.debug(f"Weight norm is applied to {m}.")
@@ -543,9 +538,8 @@ class ResidualParallelWaveGANDiscriminator(torch.nn.Module):
     def remove_weight_norm(self) -> None:
         """Remove weight normalization module from all of the layers."""
 
-        # pyre-fixme[3]: Return type must be annotated.
         # pyre-fixme[2]: Parameter must be annotated.
-        def _remove_weight_norm(m):
+        def _remove_weight_norm(m) -> None:
             try:
                 logging.debug(f"Weight norm is removed from {m}.")
                 torch.nn.utils.remove_weight_norm(m)

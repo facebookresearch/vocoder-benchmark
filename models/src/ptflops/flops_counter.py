@@ -157,9 +157,8 @@ def print_model_with_flops(
             ]
         )
 
-    # pyre-fixme[3]: Return type must be annotated.
     # pyre-fixme[2]: Parameter must be annotated.
-    def add_extra_repr(m):
+    def add_extra_repr(m) -> None:
         m.accumulate_flops = accumulate_flops.__get__(m)
         m.accumulate_params = accumulate_params.__get__(m)
         flops_extra_repr = flops_repr.__get__(m)
@@ -168,9 +167,8 @@ def print_model_with_flops(
             m.extra_repr = flops_extra_repr
             assert m.extra_repr != m.original_extra_repr
 
-    # pyre-fixme[3]: Return type must be annotated.
     # pyre-fixme[2]: Parameter must be annotated.
-    def del_extra_repr(m):
+    def del_extra_repr(m) -> None:
         if hasattr(m, "original_extra_repr"):
             m.extra_repr = m.original_extra_repr
             del m.original_extra_repr
@@ -240,9 +238,8 @@ def start_flops_count(self, **kwargs) -> None:
     seen_types = set()
 
     # pyre-fixme[53]: Captured variable `seen_types` is not annotated.
-    # pyre-fixme[3]: Return type must be annotated.
     # pyre-fixme[2]: Parameter must be annotated.
-    def add_flops_counter_hook_function(module, ost, verbose, ignore_list):
+    def add_flops_counter_hook_function(module, ost, verbose, ignore_list) -> None:
         if type(module) in ignore_list:
             seen_types.add(type(module))
             if is_supported_instance(module):
