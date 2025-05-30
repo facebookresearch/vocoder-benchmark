@@ -377,12 +377,14 @@ class WaveNet(nn.Module):
             x = self.first_conv.incremental_forward(x)
             skips = 0
             for f in self.conv_layers:
+                # pyre-fixme[29]: Call error: `Union[Tensor, nn.modules.module.Module]` is not a ...
                 x, h = f.incremental_forward(x, ct, gt)
                 skips += h
             skips *= math.sqrt(1.0 / len(self.conv_layers))
             x = skips
             for f in self.last_conv_layers:
                 try:
+                    # pyre-fixme[29]: Call error: `Union[Tensor, nn.modules.module.Module]` is no...
                     x = f.incremental_forward(x)
                 except AttributeError:
                     x = f(x)
@@ -416,9 +418,11 @@ class WaveNet(nn.Module):
     def clear_buffer(self) -> None:
         self.first_conv.clear_buffer()
         for f in self.conv_layers:
+            # pyre-fixme[29]: Call error: `Union[Tensor, nn.modules.module.Module]` is not a func...
             f.clear_buffer()
         for f in self.last_conv_layers:
             try:
+                # pyre-fixme[29]: Call error: `Union[Tensor, nn.modules.module.Module]` is not a ...
                 f.clear_buffer()
             except AttributeError:
                 pass

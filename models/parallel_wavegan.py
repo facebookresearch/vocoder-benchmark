@@ -277,10 +277,12 @@ class ParallelWaveGAN(Vocoder):
 
         self.optimizer: Dict[str, torch.optim.Optimizer] = {
             "generator": generator_optimizer_class(
+                # pyre-fixme[16]: Undefined attribute: Item `torch._tensor.Tensor` of `typing.Uni...
                 self.model["generator"].module.parameters(),
                 **self.config.model.generator_optimizer,
             ),
             "discriminator": discriminator_optimizer_class(
+                # pyre-fixme[16]: Undefined attribute: Item `torch._tensor.Tensor` of `typing.Uni...
                 self.model["discriminator"].module.parameters(),
                 **self.config.model.discriminator_optimizer,
             ),
@@ -674,6 +676,7 @@ class ParallelWaveGAN(Vocoder):
 
         with torch.no_grad():
             spectrograms = spectrograms[0].transpose(0, 1)  # (T', C)
+            # pyre-fixme[16]: Undefined attribute: Item `torch._tensor.Tensor` of `typing.Union[t...
             output = self.model["generator"].module.inference(spectrograms).flatten()
         self.model["generator"].train()
         return output
@@ -716,24 +719,29 @@ class ParallelWaveGAN(Vocoder):
             # ParallelWaveGAN
             stats += np.array(
                 get_model_complexity_info(
+                    # pyre-fixme[16]: Undefined attribute: Item `torch._tensor.Tensor` of `typing...
                     model.upsample_net,
                     ([spectrograms]),
                     custom_modules_hooks=custom_modules_hooks,
                 )
             )
+            # pyre-fixme[16]: Undefined attribute: Item `torch._tensor.Tensor` of `typing.Union[t...
             spectrograms = model.upsample_net(spectrograms)
             assert spectrograms.size(-1) == waveforms.size(-1)
 
             # encode to hidden representation
             stats += np.array(
                 get_model_complexity_info(
+                    # pyre-fixme[16]: Undefined attribute: Item `torch._tensor.Tensor` of `typing...
                     model.first_conv,
                     ([waveforms]),
                     custom_modules_hooks=custom_modules_hooks,
                 )
             )
+            # pyre-fixme[16]: Undefined attribute: Item `torch._tensor.Tensor` of `typing.Union[t...
             waveforms = model.first_conv(waveforms)
             skips = 0
+            # pyre-fixme[16]: Undefined attribute: Item `torch._tensor.Tensor` of `typing.Union[t...
             for f in model.conv_layers:
                 stats += np.array(
                     get_model_complexity_info(
@@ -745,10 +753,12 @@ class ParallelWaveGAN(Vocoder):
                 waveforms, h = f(waveforms, spectrograms)
                 skips += h
 
+            # pyre-fixme[16]: Undefined attribute: Item `torch._tensor.Tensor` of `typing.Union[t...
             skips *= math.sqrt(1.0 / len(model.conv_layers))
 
             # apply final layers
             waveforms = skips
+            # pyre-fixme[16]: Undefined attribute: Item `torch._tensor.Tensor` of `typing.Union[t...
             for f in model.last_conv_layers:
                 stats += np.array(
                     get_model_complexity_info(
